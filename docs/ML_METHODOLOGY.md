@@ -8,7 +8,10 @@ Every number below comes from `apps/api/app/risk_models/operational-v1/metadata.
 PYTHONPATH=apps/api:ml apps/api/.venv/bin/python -m sentinel_ml.train_operational
 ```
 
-CI re-trains the model and checks that the result matches the committed artifact (`ml/tests/test_pipeline.py::test_committed_artifact_is_reproducible`).
+CI re-trains the model and checks it against the committed artifact (`ml/tests/test_pipeline.py::test_committed_artifact_is_reproducible`):
+- **Exact match required:** the dataset hash, the chosen model and the booster digest.
+- **Small tolerance allowed:** the Platt parameters and the thresholds derived from them. Platt fitting uses an iterative optimiser whose last digits depend on the CPU and BLAS build. One CI machine produced a high threshold of 0.1052 instead of 0.1036.
+- **What production serves:** always the committed artifact, never a fresh re-fit.
 
 ## Track B: operational engine (synthetic-trained)
 

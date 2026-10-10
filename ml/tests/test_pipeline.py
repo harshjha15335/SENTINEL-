@@ -95,9 +95,21 @@ def test_xgboost_contributions_equal_shap_tree_explainer() -> None:
 def test_committed_artifact_is_reproducible(tmp_path: Path) -> None:
     meta = train(2026, tmp_path)
     committed = json.loads((ARTIFACT_ROOT / MODEL_VERSION / "metadata.json").read_text())
+    # Deterministic: data, model choice and the trained booster itself.
+    assert meta["dataset"]["sha256"] == committed["dataset"]["sha256"]
     assert meta["chosen_model"] == committed["chosen_model"]
-    assert meta["thresholds"] == committed["thresholds"]
-    assert meta["test_metrics"]["pr_auc"] == pytest.approx(committed["test_metrics"]["pr_auc"])
     assert meta["artifact"]["booster_sha256"] == committed["artifact"]["booster_sha256"]
+    # Platt calibration is fitted with an iterative optimiser whose last digits vary by CPU
+    # and BLAS build, so calibrated quantities are compared with a tolerance. CI on a
+    # different machine moved the high threshold from 0.1036 to 0.1052; the committed
+    # artifact stays the single source of truth for serving.
+    cal, ref = meta["calibration_params"], committed["calibration_params"]
+    assert cal["a"] == pytest.approx(ref["a"], rel=1e-2)
+    assert cal["b"] == pytest.approx(ref["b"], rel=1e-2)
+    for band in ("high", "medium"):
+        assert meta["thresholds"][band] == pytest.approx(committed["thresholds"][band], abs=5e-3)
+    assert meta["test_metrics"]["pr_auc"] == pytest.approx(
+        committed["test_metrics"]["pr_auc"], abs=1e-3
+    )
     # Thresholds come from validation: the test split never influences them.
     assert meta["threshold_selection"].endswith("on validation within review capacity")
