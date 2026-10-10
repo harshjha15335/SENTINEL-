@@ -1,0 +1,8 @@
+/* AG Grid Community theme mapped onto SENTINEL tokens (Theming API params are set in code). */
+.sentinel-grid .ag-row {
+  cursor: pointer;
+}
+.sentinel-grid .ag-cell:focus-visible,
+.sentinel-grid .ag-header-cell:focus-visible {
+  outline: 2px solid var(--color-accent);
+}

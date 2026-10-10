@@ -1,0 +1,89 @@
+/*
+ * SENTINEL design tokens. One source for colour, type, space, radius, elevation and motion.
+ * Tailwind utilities are generated from the @theme block (bg-surface, text-fg-muted, ...).
+ * Contrast pairs used in the UI are checked in docs/testing/ACCESSIBILITY.md.
+ */
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", monospace;
+
+  /* Surfaces (ink) */
+  --color-canvas: #0a0f14;
+  --color-surface: #0f161e;
+  --color-raised: #141d27;
+  --color-sunken: #0b1117;
+  --color-line: #1f2a37;
+  --color-line-strong: #2c3a4b;
+
+  /* Foreground */
+  --color-fg: #e6ebf1;
+  --color-fg-muted: #a7b2bf;
+  --color-fg-subtle: #8593a3;
+
+  /* Accent: controlled blue */
+  --color-accent: #5b9bf0;
+  --color-accent-strong: #2b67c6;
+  --color-accent-soft: #15253a;
+
+  /* Status: used only for their meaning */
+  --color-positive: #3fb884;
+  --color-positive-soft: #0f2a20;
+  --color-warning: #e2a33b;
+  --color-warning-soft: #2e2311;
+  --color-critical: #ec6a60;
+  --color-critical-soft: #331615;
+
+  /* Provenance */
+  --color-origin-sandbox: #5b9bf0;
+  --color-origin-simulated: #e2a33b;
+  --color-origin-synthetic: #4fb3bf;
+  --color-origin-merchant: #a7b2bf;
+
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 10px;
+
+  --shadow-raised: 0 1px 0 0 rgb(255 255 255 / 0.03) inset, 0 8px 24px -12px rgb(0 0 0 / 0.6);
+  --shadow-overlay: 0 24px 64px -16px rgb(0 0 0 / 0.75);
+
+  --ease-standard: cubic-bezier(0.2, 0, 0, 1);
+  --duration-fast: 120ms;
+  --duration-base: 200ms;
+}
+
+@layer base {
+  html {
+    background: var(--color-canvas);
+    color: var(--color-fg);
+    font-family: var(--font-sans);
+    font-size: 15px;
+    -webkit-font-smoothing: antialiased;
+  }
+  body {
+    min-height: 100dvh;
+  }
+  :focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+    border-radius: 2px;
+  }
+  ::selection {
+    background: var(--color-accent-soft);
+  }
+}
+
+@utility tabular {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

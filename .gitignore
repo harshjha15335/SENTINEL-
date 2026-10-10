@@ -1,0 +1,21 @@
+# Python
+__pycache__/
+*.pyc
+.venv/
+.mypy_cache/
+.ruff_cache/
+.pytest_cache/
+# Node
+node_modules/
+dist/
+playwright-report/
+test-results/
+*.tsbuildinfo
+# Env and data
+.env
+.env.*
+!.env.example
+ml/data/raw/
+ml/artifacts/*.joblib
+*.sqlite
+.pgdata/
