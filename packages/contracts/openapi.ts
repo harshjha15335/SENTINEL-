@@ -55,6 +55,92 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/cases": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List */
+        get: operations["list__api_v1_cases_get"];
+        put?: never;
+        /** Open */
+        post: operations["open__api_v1_cases_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/cases/{case_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Detail */
+        get: operations["detail_api_v1_cases__case_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/cases/{case_id}/claim": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Claim */
+        post: operations["claim_api_v1_cases__case_id__claim_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/cases/{case_id}/notes": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Note */
+        post: operations["note_api_v1_cases__case_id__notes_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/cases/{case_id}/resolve": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Resolve */
+        post: operations["resolve_api_v1_cases__case_id__resolve_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/dashboard/summary": {
         parameters: {
             query?: never;
@@ -191,6 +277,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/risk/model": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Model Card
+         * @description The serving model's card. Every metric is read from the training run's metadata.
+         */
+        get: operations["model_card_api_v1_risk_model_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/transactions": {
         parameters: {
             query?: never;
@@ -219,6 +325,24 @@ export interface paths {
         get: operations["detail_api_v1_transactions__transaction_id__get"];
         put?: never;
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/transactions/{transaction_id}/risk": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Latest */
+        get: operations["latest_api_v1_transactions__transaction_id__risk_get"];
+        put?: never;
+        /** Rescore */
+        post: operations["rescore_api_v1_transactions__transaction_id__risk_post"];
         delete?: never;
         options?: never;
         head?: never;
@@ -275,6 +399,138 @@ export interface components {
                 [key: string]: unknown;
             };
         };
+        /** CaseDetailOut */
+        CaseDetailOut: {
+            assessment: components["schemas"]["RiskAssessmentOut"] | null;
+            assignee: components["schemas"]["UserRefOut"] | null;
+            /** Audit */
+            audit: components["schemas"]["AuditOut"][];
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            data_origin: components["schemas"]["DataOrigin"];
+            /**
+             * Due At
+             * Format: date-time
+             */
+            due_at: string;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Notes */
+            notes: components["schemas"]["CaseNoteOut"][];
+            priority: components["schemas"]["CasePriority"];
+            resolution: components["schemas"]["CaseResolution"] | null;
+            /** Resolution Note */
+            resolution_note: string | null;
+            /** Resolved At */
+            resolved_at: string | null;
+            /** Risk Assessment Id */
+            risk_assessment_id: string | null;
+            source: components["schemas"]["CaseSource"];
+            status: components["schemas"]["CaseStatus"];
+            /** Title */
+            title: string;
+            transaction: components["schemas"]["TransactionOut"];
+            /**
+             * Transaction Id
+             * Format: uuid
+             */
+            transaction_id: string;
+            /**
+             * Updated At
+             * Format: date-time
+             */
+            updated_at: string;
+        };
+        /** CaseNoteOut */
+        CaseNoteOut: {
+            author: components["schemas"]["UserRefOut"] | null;
+            /** Body */
+            body: string;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+        };
+        /** CaseNoteRequest */
+        CaseNoteRequest: {
+            /** Body */
+            body: string;
+        };
+        /** CaseOut */
+        CaseOut: {
+            assignee: components["schemas"]["UserRefOut"] | null;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            data_origin: components["schemas"]["DataOrigin"];
+            /**
+             * Due At
+             * Format: date-time
+             */
+            due_at: string;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            priority: components["schemas"]["CasePriority"];
+            resolution: components["schemas"]["CaseResolution"] | null;
+            /** Resolution Note */
+            resolution_note: string | null;
+            /** Resolved At */
+            resolved_at: string | null;
+            /** Risk Assessment Id */
+            risk_assessment_id: string | null;
+            source: components["schemas"]["CaseSource"];
+            status: components["schemas"]["CaseStatus"];
+            /** Title */
+            title: string;
+            transaction: components["schemas"]["TransactionOut"];
+            /**
+             * Transaction Id
+             * Format: uuid
+             */
+            transaction_id: string;
+            /**
+             * Updated At
+             * Format: date-time
+             */
+            updated_at: string;
+        };
+        /**
+         * CasePriority
+         * @enum {string}
+         */
+        CasePriority: "LOW" | "MEDIUM" | "HIGH";
+        /**
+         * CaseResolution
+         * @enum {string}
+         */
+        CaseResolution: "CONFIRMED_ADVERSE" | "LEGITIMATE" | "INCONCLUSIVE";
+        /**
+         * CaseSource
+         * @enum {string}
+         */
+        CaseSource: "RISK_MODEL" | "MANUAL";
+        /**
+         * CaseStatus
+         * @enum {string}
+         */
+        CaseStatus: "OPEN" | "IN_REVIEW" | "RESOLVED";
         /** CreateOrderRequest */
         CreateOrderRequest: {
             /**
@@ -296,8 +552,12 @@ export interface components {
             };
             /** Captured By Origin */
             captured_by_origin: components["schemas"]["OriginTotals"][];
+            /** Open Cases By Origin */
+            open_cases_by_origin: components["schemas"]["OriginCount"][];
             /** Recent */
             recent: components["schemas"]["TransactionOut"][];
+            /** Risk Bands By Origin */
+            risk_bands_by_origin: components["schemas"]["OriginCount"][];
             /** Transactions Total */
             transactions_total: number;
             /** Webhook Events */
@@ -360,6 +620,92 @@ export interface components {
             /** Name */
             name: string;
         };
+        /** ModelCardOut */
+        ModelCardOut: {
+            /** Calibration */
+            calibration: string;
+            /** Chosen Model */
+            chosen_model: string;
+            /** Cost Assumptions */
+            cost_assumptions: {
+                [key: string]: number;
+            };
+            /** Feature Version */
+            feature_version: string;
+            /** Features */
+            features: {
+                [key: string]: string;
+            }[];
+            /** Limitations */
+            limitations: string[];
+            /** Model Version */
+            model_version: string;
+            /** Split */
+            split: {
+                [key: string]: unknown;
+            };
+            test_metrics: components["schemas"]["ModelMetricsOut"];
+            test_metrics_rules_baseline: components["schemas"]["ModelMetricsOut"];
+            /** Threshold Selection */
+            threshold_selection: string;
+            /** Thresholds */
+            thresholds: {
+                [key: string]: number;
+            };
+            /** Track */
+            track: string;
+            /** Trained At */
+            trained_at: string;
+            /** Training Data */
+            training_data: string;
+            /** Validation Comparison */
+            validation_comparison: {
+                [key: string]: {
+                    [key: string]: number;
+                };
+            };
+        };
+        /** ModelMetricsOut */
+        ModelMetricsOut: {
+            /** Brier */
+            brier: number;
+            /** Expected Cost */
+            expected_cost: number;
+            /** Expected Cost No Review */
+            expected_cost_no_review: number;
+            /** F1 */
+            f1: number;
+            /** False Positive Rate */
+            false_positive_rate: number;
+            /** Flag Rate */
+            flag_rate: number;
+            /** Positives */
+            positives: number;
+            /** Pr Auc */
+            pr_auc: number;
+            /** Precision */
+            precision: number;
+            /** Prevalence */
+            prevalence: number;
+            /** Recall */
+            recall: number;
+            /** Roc Auc */
+            roc_auc: number;
+            /** Rows */
+            rows: number;
+            /** Threshold */
+            threshold: number;
+        };
+        /** OpenCaseRequest */
+        OpenCaseRequest: {
+            /** Reason */
+            reason: string;
+            /**
+             * Transaction Id
+             * Format: uuid
+             */
+            transaction_id: string;
+        };
         /** OrderCreatedOut */
         OrderCreatedOut: {
             data_origin: components["schemas"]["DataOrigin"];
@@ -371,6 +717,14 @@ export interface components {
              * Format: uuid
              */
             transaction_id: string;
+        };
+        /** OriginCount */
+        OriginCount: {
+            /** Count */
+            count: number;
+            data_origin: components["schemas"]["DataOrigin"];
+            /** Key */
+            key: string;
         };
         /** OriginTotals */
         OriginTotals: {
@@ -386,6 +740,17 @@ export interface components {
         Page_AuditOut_: {
             /** Items */
             items: components["schemas"]["AuditOut"][];
+            /** Limit */
+            limit: number;
+            /** Offset */
+            offset: number;
+            /** Total */
+            total: number;
+        };
+        /** Page[CaseOut] */
+        Page_CaseOut_: {
+            /** Items */
+            items: components["schemas"]["CaseOut"][];
             /** Limit */
             limit: number;
             /** Offset */
@@ -452,6 +817,12 @@ export interface components {
             received_at: string;
             verification_status: components["schemas"]["EventVerification"];
         };
+        /**
+         * PolicyDecision
+         * @description What the policy would do. Recorded in shadow mode: SENTINEL never blocks a payment.
+         * @enum {string}
+         */
+        PolicyDecision: "ALLOW" | "REVIEW" | "ESCALATE";
         /** ProductOut */
         ProductOut: {
             /** Currency */
@@ -469,6 +840,89 @@ export interface components {
             price_minor: number;
             /** Sku */
             sku: string;
+        };
+        /** ResolveCaseRequest */
+        ResolveCaseRequest: {
+            /** Note */
+            note: string;
+            resolution: components["schemas"]["CaseResolution"];
+        };
+        /** RiskAssessmentOut */
+        RiskAssessmentOut: {
+            /**
+             * Assessment Type
+             * @default MODEL_GENERATED
+             * @constant
+             */
+            assessment_type: "MODEL_GENERATED";
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            data_origin: components["schemas"]["DataOrigin"];
+            explanation: components["schemas"]["RiskExplanationOut"];
+            /** Feature Snapshot */
+            feature_snapshot: {
+                [key: string]: number;
+            };
+            /** Feature Version */
+            feature_version: string;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Limitations */
+            limitations: string[];
+            /** Model Version */
+            model_version: string;
+            policy_decision: components["schemas"]["PolicyDecision"];
+            /** Policy Mode */
+            policy_mode: string;
+            risk_band: components["schemas"]["RiskBand"];
+            /** Risk Score */
+            risk_score: number;
+            /** Thresholds */
+            thresholds: {
+                [key: string]: number;
+            };
+            /**
+             * Transaction Id
+             * Format: uuid
+             */
+            transaction_id: string;
+            /** Trigger */
+            trigger: string;
+        };
+        /**
+         * RiskBand
+         * @enum {string}
+         */
+        RiskBand: "LOW" | "MEDIUM" | "HIGH";
+        /** RiskContributionOut */
+        RiskContributionOut: {
+            /** Contribution */
+            contribution: number;
+            /** Feature */
+            feature: string;
+            /** Label */
+            label: string;
+            /** Value */
+            value: number;
+        };
+        /** RiskExplanationOut */
+        RiskExplanationOut: {
+            /** Base Value */
+            base_value: number;
+            /** Contributions */
+            contributions: components["schemas"]["RiskContributionOut"][];
+            /** Method */
+            method: string;
+            /** Raw Probability */
+            raw_probability: number;
+            /** Space */
+            space: string;
         };
         /**
          * Role
@@ -527,6 +981,9 @@ export interface components {
             };
             /** Quantity */
             quantity: number;
+            risk_band?: components["schemas"]["RiskBand"] | null;
+            /** Risk Score */
+            risk_score?: number | null;
             status: components["schemas"]["TransactionStatus"];
             /**
              * Updated At
@@ -567,6 +1024,9 @@ export interface components {
             provider_status: string | null;
             /** Quantity */
             quantity: number;
+            risk_band?: components["schemas"]["RiskBand"] | null;
+            /** Risk Score */
+            risk_score?: number | null;
             status: components["schemas"]["TransactionStatus"];
             /**
              * Updated At
@@ -579,6 +1039,16 @@ export interface components {
          * @enum {string}
          */
         TransactionStatus: "ORDER_CREATED" | "CAPTURE_PENDING" | "CAPTURED" | "CAPTURE_DECLINED" | "CAPTURE_FAILED" | "REFUNDED" | "PARTIALLY_REFUNDED";
+        /** UserRefOut */
+        UserRefOut: {
+            /** Email */
+            email: string;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+        };
         /** ValidationError */
         ValidationError: {
             /** Context */
@@ -681,6 +1151,207 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+        };
+    };
+    list__api_v1_cases_get: {
+        parameters: {
+            query?: {
+                limit?: number;
+                offset?: number;
+                status?: components["schemas"]["CaseStatus"] | null;
+                priority?: components["schemas"]["CasePriority"] | null;
+                data_origin?: components["schemas"]["DataOrigin"] | null;
+                mine?: boolean;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Page_CaseOut_"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    open__api_v1_cases_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["OpenCaseRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CaseDetailOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    detail_api_v1_cases__case_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                case_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CaseDetailOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    claim_api_v1_cases__case_id__claim_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                case_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CaseDetailOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    note_api_v1_cases__case_id__notes_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                case_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CaseNoteRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CaseNoteOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    resolve_api_v1_cases__case_id__resolve_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                case_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ResolveCaseRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CaseDetailOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
             };
         };
     };
@@ -872,6 +1543,26 @@ export interface operations {
             };
         };
     };
+    model_card_api_v1_risk_model_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ModelCardOut"];
+                };
+            };
+        };
+    };
     list__api_v1_transactions_get: {
         parameters: {
             query?: {
@@ -925,6 +1616,68 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["TransactionDetailOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    latest_api_v1_transactions__transaction_id__risk_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                transaction_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RiskAssessmentOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    rescore_api_v1_transactions__transaction_id__risk_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                transaction_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RiskAssessmentOut"];
                 };
             };
             /** @description Validation Error */

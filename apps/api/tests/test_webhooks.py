@@ -212,6 +212,7 @@ def test_out_of_order_events_do_not_regress(db, tenant: Tenant) -> None:
     process_event(db, e2.id)
     db.refresh(txn)
     assert txn.status is TransactionStatus.REFUNDED
+    assert txn.refunded_at is not None  # feeds the payer's prior-refund feature
 
 
 def test_partial_refund(db, tenant: Tenant) -> None:

@@ -301,6 +301,9 @@ def _apply(db: Session, event: PaymentEvent, payload: dict[str, Any]) -> EventPr
             txn.paypal_capture_id = capture_id
         if target is TransactionStatus.REFUNDED and etype == "PAYMENT.CAPTURE.REFUNDED":
             target = _refund_status(resource, txn)
+        if target in (TransactionStatus.REFUNDED, TransactionStatus.PARTIALLY_REFUNDED):
+            # First refund time feeds the payer's prior-refund risk feature.
+            txn.refunded_at = txn.refunded_at or event.occurred_at or datetime.now(UTC)
         if _RANK[target] >= _RANK[txn.status] and txn.status is not target:
             previous = txn.status
             txn.status = target

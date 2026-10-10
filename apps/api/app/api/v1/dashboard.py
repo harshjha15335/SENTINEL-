@@ -1,13 +1,14 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy import func, select
+from sqlalchemy.dialects.postgresql import distinct_on
 from sqlalchemy.orm import Session
 
 from app.auth.deps import Principal, any_member
 from app.db.session import get_db
-from app.models import PaymentEvent, Transaction
-from app.models.enums import TransactionStatus
-from app.schemas.api import DashboardSummaryOut, OriginTotals
-from app.services.transactions import list_transactions, to_out
+from app.models import Case, PaymentEvent, RiskAssessment, Transaction
+from app.models.enums import CaseStatus, TransactionStatus
+from app.schemas.api import DashboardSummaryOut, OriginCount, OriginTotals
+from app.services.transactions import list_transactions, to_out_many
 
 router = APIRouter(prefix="/dashboard", tags=["dashboard"])
 
@@ -42,6 +43,28 @@ def summary(
             .group_by(PaymentEvent.processing_status)
         ).all()
     )
+    open_cases = db.execute(
+        select(Case.data_origin, Case.priority, func.count())
+        .where(Case.merchant_id == mid, Case.status != CaseStatus.RESOLVED)
+        .group_by(Case.data_origin, Case.priority)
+    ).all()
+    # Latest assessment per transaction, counted by band within each origin.
+    latest = (
+        select(RiskAssessment.transaction_id, RiskAssessment.data_origin, RiskAssessment.risk_band)
+        .where(RiskAssessment.merchant_id == mid)
+        .order_by(
+            RiskAssessment.transaction_id,
+            RiskAssessment.created_at.desc(),
+            RiskAssessment.id.desc(),
+        )
+        .ext(distinct_on(RiskAssessment.transaction_id))
+        .subquery()
+    )
+    bands = db.execute(
+        select(latest.c.data_origin, latest.c.risk_band, func.count()).group_by(
+            latest.c.data_origin, latest.c.risk_band
+        )
+    ).all()
     recent, total = list_transactions(
         db, mid, limit=8, offset=0, status=None, data_origin=None, q=None
     )
@@ -53,5 +76,11 @@ def summary(
             for o, c, n, s in captured
         ],
         webhook_events={k.value: v for k, v in events.items()},
-        recent=[to_out(r) for r in recent],
+        recent=to_out_many(db, mid, recent),
+        open_cases_by_origin=[
+            OriginCount(data_origin=o, key=p.value, count=n) for o, p, n in open_cases
+        ],
+        risk_bands_by_origin=[
+            OriginCount(data_origin=o, key=b.value, count=n) for o, b, n in bands
+        ],
     )

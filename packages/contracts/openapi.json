@@ -79,6 +79,366 @@
         "title": "AuditOut",
         "type": "object"
       },
+      "CaseDetailOut": {
+        "properties": {
+          "assessment": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RiskAssessmentOut"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "assignee": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/UserRefOut"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "audit": {
+            "items": {
+              "$ref": "#/components/schemas/AuditOut"
+            },
+            "title": "Audit",
+            "type": "array"
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "data_origin": {
+            "$ref": "#/components/schemas/DataOrigin"
+          },
+          "due_at": {
+            "format": "date-time",
+            "title": "Due At",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "notes": {
+            "items": {
+              "$ref": "#/components/schemas/CaseNoteOut"
+            },
+            "title": "Notes",
+            "type": "array"
+          },
+          "priority": {
+            "$ref": "#/components/schemas/CasePriority"
+          },
+          "resolution": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/CaseResolution"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "resolution_note": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Resolution Note"
+          },
+          "resolved_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Resolved At"
+          },
+          "risk_assessment_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Risk Assessment Id"
+          },
+          "source": {
+            "$ref": "#/components/schemas/CaseSource"
+          },
+          "status": {
+            "$ref": "#/components/schemas/CaseStatus"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          },
+          "transaction": {
+            "$ref": "#/components/schemas/TransactionOut"
+          },
+          "transaction_id": {
+            "format": "uuid",
+            "title": "Transaction Id",
+            "type": "string"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "title": "Updated At",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "transaction_id",
+          "risk_assessment_id",
+          "source",
+          "status",
+          "priority",
+          "title",
+          "assignee",
+          "due_at",
+          "resolution",
+          "resolution_note",
+          "resolved_at",
+          "data_origin",
+          "created_at",
+          "updated_at",
+          "transaction",
+          "notes",
+          "assessment",
+          "audit"
+        ],
+        "title": "CaseDetailOut",
+        "type": "object"
+      },
+      "CaseNoteOut": {
+        "properties": {
+          "author": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/UserRefOut"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "body": {
+            "title": "Body",
+            "type": "string"
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "author",
+          "body",
+          "created_at"
+        ],
+        "title": "CaseNoteOut",
+        "type": "object"
+      },
+      "CaseNoteRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "body": {
+            "maxLength": 4000,
+            "minLength": 1,
+            "title": "Body",
+            "type": "string"
+          }
+        },
+        "required": [
+          "body"
+        ],
+        "title": "CaseNoteRequest",
+        "type": "object"
+      },
+      "CaseOut": {
+        "properties": {
+          "assignee": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/UserRefOut"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "data_origin": {
+            "$ref": "#/components/schemas/DataOrigin"
+          },
+          "due_at": {
+            "format": "date-time",
+            "title": "Due At",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "priority": {
+            "$ref": "#/components/schemas/CasePriority"
+          },
+          "resolution": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/CaseResolution"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "resolution_note": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Resolution Note"
+          },
+          "resolved_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Resolved At"
+          },
+          "risk_assessment_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Risk Assessment Id"
+          },
+          "source": {
+            "$ref": "#/components/schemas/CaseSource"
+          },
+          "status": {
+            "$ref": "#/components/schemas/CaseStatus"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          },
+          "transaction": {
+            "$ref": "#/components/schemas/TransactionOut"
+          },
+          "transaction_id": {
+            "format": "uuid",
+            "title": "Transaction Id",
+            "type": "string"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "title": "Updated At",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "transaction_id",
+          "risk_assessment_id",
+          "source",
+          "status",
+          "priority",
+          "title",
+          "assignee",
+          "due_at",
+          "resolution",
+          "resolution_note",
+          "resolved_at",
+          "data_origin",
+          "created_at",
+          "updated_at",
+          "transaction"
+        ],
+        "title": "CaseOut",
+        "type": "object"
+      },
+      "CasePriority": {
+        "enum": [
+          "LOW",
+          "MEDIUM",
+          "HIGH"
+        ],
+        "title": "CasePriority",
+        "type": "string"
+      },
+      "CaseResolution": {
+        "enum": [
+          "CONFIRMED_ADVERSE",
+          "LEGITIMATE",
+          "INCONCLUSIVE"
+        ],
+        "title": "CaseResolution",
+        "type": "string"
+      },
+      "CaseSource": {
+        "enum": [
+          "RISK_MODEL",
+          "MANUAL"
+        ],
+        "title": "CaseSource",
+        "type": "string"
+      },
+      "CaseStatus": {
+        "enum": [
+          "OPEN",
+          "IN_REVIEW",
+          "RESOLVED"
+        ],
+        "title": "CaseStatus",
+        "type": "string"
+      },
       "CreateOrderRequest": {
         "additionalProperties": false,
         "properties": {
@@ -117,11 +477,25 @@
             "title": "Captured By Origin",
             "type": "array"
           },
+          "open_cases_by_origin": {
+            "items": {
+              "$ref": "#/components/schemas/OriginCount"
+            },
+            "title": "Open Cases By Origin",
+            "type": "array"
+          },
           "recent": {
             "items": {
               "$ref": "#/components/schemas/TransactionOut"
             },
             "title": "Recent",
+            "type": "array"
+          },
+          "risk_bands_by_origin": {
+            "items": {
+              "$ref": "#/components/schemas/OriginCount"
+            },
+            "title": "Risk Bands By Origin",
             "type": "array"
           },
           "transactions_total": {
@@ -141,7 +515,9 @@
           "by_status",
           "captured_by_origin",
           "webhook_events",
-          "recent"
+          "recent",
+          "open_cases_by_origin",
+          "risk_bands_by_origin"
         ],
         "title": "DashboardSummaryOut",
         "type": "object"
@@ -262,6 +638,214 @@
         "title": "MerchantOut",
         "type": "object"
       },
+      "ModelCardOut": {
+        "properties": {
+          "calibration": {
+            "title": "Calibration",
+            "type": "string"
+          },
+          "chosen_model": {
+            "title": "Chosen Model",
+            "type": "string"
+          },
+          "cost_assumptions": {
+            "additionalProperties": {
+              "type": "number"
+            },
+            "title": "Cost Assumptions",
+            "type": "object"
+          },
+          "feature_version": {
+            "title": "Feature Version",
+            "type": "string"
+          },
+          "features": {
+            "items": {
+              "additionalProperties": {
+                "type": "string"
+              },
+              "type": "object"
+            },
+            "title": "Features",
+            "type": "array"
+          },
+          "limitations": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Limitations",
+            "type": "array"
+          },
+          "model_version": {
+            "title": "Model Version",
+            "type": "string"
+          },
+          "split": {
+            "additionalProperties": true,
+            "title": "Split",
+            "type": "object"
+          },
+          "test_metrics": {
+            "$ref": "#/components/schemas/ModelMetricsOut"
+          },
+          "test_metrics_rules_baseline": {
+            "$ref": "#/components/schemas/ModelMetricsOut"
+          },
+          "threshold_selection": {
+            "title": "Threshold Selection",
+            "type": "string"
+          },
+          "thresholds": {
+            "additionalProperties": {
+              "type": "number"
+            },
+            "title": "Thresholds",
+            "type": "object"
+          },
+          "track": {
+            "title": "Track",
+            "type": "string"
+          },
+          "trained_at": {
+            "title": "Trained At",
+            "type": "string"
+          },
+          "training_data": {
+            "title": "Training Data",
+            "type": "string"
+          },
+          "validation_comparison": {
+            "additionalProperties": {
+              "additionalProperties": {
+                "type": "number"
+              },
+              "type": "object"
+            },
+            "title": "Validation Comparison",
+            "type": "object"
+          }
+        },
+        "required": [
+          "model_version",
+          "feature_version",
+          "track",
+          "chosen_model",
+          "trained_at",
+          "training_data",
+          "split",
+          "calibration",
+          "thresholds",
+          "threshold_selection",
+          "cost_assumptions",
+          "validation_comparison",
+          "test_metrics",
+          "test_metrics_rules_baseline",
+          "features",
+          "limitations"
+        ],
+        "title": "ModelCardOut",
+        "type": "object"
+      },
+      "ModelMetricsOut": {
+        "properties": {
+          "brier": {
+            "title": "Brier",
+            "type": "number"
+          },
+          "expected_cost": {
+            "title": "Expected Cost",
+            "type": "number"
+          },
+          "expected_cost_no_review": {
+            "title": "Expected Cost No Review",
+            "type": "number"
+          },
+          "f1": {
+            "title": "F1",
+            "type": "number"
+          },
+          "false_positive_rate": {
+            "title": "False Positive Rate",
+            "type": "number"
+          },
+          "flag_rate": {
+            "title": "Flag Rate",
+            "type": "number"
+          },
+          "positives": {
+            "title": "Positives",
+            "type": "integer"
+          },
+          "pr_auc": {
+            "title": "Pr Auc",
+            "type": "number"
+          },
+          "precision": {
+            "title": "Precision",
+            "type": "number"
+          },
+          "prevalence": {
+            "title": "Prevalence",
+            "type": "number"
+          },
+          "recall": {
+            "title": "Recall",
+            "type": "number"
+          },
+          "roc_auc": {
+            "title": "Roc Auc",
+            "type": "number"
+          },
+          "rows": {
+            "title": "Rows",
+            "type": "integer"
+          },
+          "threshold": {
+            "title": "Threshold",
+            "type": "number"
+          }
+        },
+        "required": [
+          "rows",
+          "positives",
+          "prevalence",
+          "threshold",
+          "precision",
+          "recall",
+          "f1",
+          "false_positive_rate",
+          "flag_rate",
+          "pr_auc",
+          "roc_auc",
+          "brier",
+          "expected_cost",
+          "expected_cost_no_review"
+        ],
+        "title": "ModelMetricsOut",
+        "type": "object"
+      },
+      "OpenCaseRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "reason": {
+            "maxLength": 2000,
+            "minLength": 3,
+            "title": "Reason",
+            "type": "string"
+          },
+          "transaction_id": {
+            "format": "uuid",
+            "title": "Transaction Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "transaction_id",
+          "reason"
+        ],
+        "title": "OpenCaseRequest",
+        "type": "object"
+      },
       "OrderCreatedOut": {
         "properties": {
           "data_origin": {
@@ -287,6 +871,28 @@
           "data_origin"
         ],
         "title": "OrderCreatedOut",
+        "type": "object"
+      },
+      "OriginCount": {
+        "properties": {
+          "count": {
+            "title": "Count",
+            "type": "integer"
+          },
+          "data_origin": {
+            "$ref": "#/components/schemas/DataOrigin"
+          },
+          "key": {
+            "title": "Key",
+            "type": "string"
+          }
+        },
+        "required": [
+          "data_origin",
+          "key",
+          "count"
+        ],
+        "title": "OriginCount",
         "type": "object"
       },
       "OriginTotals": {
@@ -345,6 +951,37 @@
           "offset"
         ],
         "title": "Page[AuditOut]",
+        "type": "object"
+      },
+      "Page_CaseOut_": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/CaseOut"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "limit": {
+            "title": "Limit",
+            "type": "integer"
+          },
+          "offset": {
+            "title": "Offset",
+            "type": "integer"
+          },
+          "total": {
+            "title": "Total",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "items",
+          "total",
+          "limit",
+          "offset"
+        ],
+        "title": "Page[CaseOut]",
         "type": "object"
       },
       "Page_TransactionOut_": {
@@ -515,6 +1152,16 @@
         "title": "PaymentEventOut",
         "type": "object"
       },
+      "PolicyDecision": {
+        "description": "What the policy would do. Recorded in shadow mode: SENTINEL never blocks a payment.",
+        "enum": [
+          "ALLOW",
+          "REVIEW",
+          "ESCALATE"
+        ],
+        "title": "PolicyDecision",
+        "type": "string"
+      },
       "ProductOut": {
         "properties": {
           "currency": {
@@ -552,6 +1199,196 @@
           "currency"
         ],
         "title": "ProductOut",
+        "type": "object"
+      },
+      "ResolveCaseRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "note": {
+            "maxLength": 4000,
+            "minLength": 3,
+            "title": "Note",
+            "type": "string"
+          },
+          "resolution": {
+            "$ref": "#/components/schemas/CaseResolution"
+          }
+        },
+        "required": [
+          "resolution",
+          "note"
+        ],
+        "title": "ResolveCaseRequest",
+        "type": "object"
+      },
+      "RiskAssessmentOut": {
+        "properties": {
+          "assessment_type": {
+            "const": "MODEL_GENERATED",
+            "default": "MODEL_GENERATED",
+            "title": "Assessment Type",
+            "type": "string"
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "data_origin": {
+            "$ref": "#/components/schemas/DataOrigin"
+          },
+          "explanation": {
+            "$ref": "#/components/schemas/RiskExplanationOut"
+          },
+          "feature_snapshot": {
+            "additionalProperties": {
+              "type": "number"
+            },
+            "title": "Feature Snapshot",
+            "type": "object"
+          },
+          "feature_version": {
+            "title": "Feature Version",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "limitations": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Limitations",
+            "type": "array"
+          },
+          "model_version": {
+            "title": "Model Version",
+            "type": "string"
+          },
+          "policy_decision": {
+            "$ref": "#/components/schemas/PolicyDecision"
+          },
+          "policy_mode": {
+            "title": "Policy Mode",
+            "type": "string"
+          },
+          "risk_band": {
+            "$ref": "#/components/schemas/RiskBand"
+          },
+          "risk_score": {
+            "title": "Risk Score",
+            "type": "number"
+          },
+          "thresholds": {
+            "additionalProperties": {
+              "type": "number"
+            },
+            "title": "Thresholds",
+            "type": "object"
+          },
+          "transaction_id": {
+            "format": "uuid",
+            "title": "Transaction Id",
+            "type": "string"
+          },
+          "trigger": {
+            "title": "Trigger",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "transaction_id",
+          "model_version",
+          "feature_version",
+          "risk_score",
+          "risk_band",
+          "policy_decision",
+          "policy_mode",
+          "thresholds",
+          "feature_snapshot",
+          "explanation",
+          "limitations",
+          "data_origin",
+          "trigger",
+          "created_at"
+        ],
+        "title": "RiskAssessmentOut",
+        "type": "object"
+      },
+      "RiskBand": {
+        "enum": [
+          "LOW",
+          "MEDIUM",
+          "HIGH"
+        ],
+        "title": "RiskBand",
+        "type": "string"
+      },
+      "RiskContributionOut": {
+        "properties": {
+          "contribution": {
+            "title": "Contribution",
+            "type": "number"
+          },
+          "feature": {
+            "title": "Feature",
+            "type": "string"
+          },
+          "label": {
+            "title": "Label",
+            "type": "string"
+          },
+          "value": {
+            "title": "Value",
+            "type": "number"
+          }
+        },
+        "required": [
+          "feature",
+          "label",
+          "value",
+          "contribution"
+        ],
+        "title": "RiskContributionOut",
+        "type": "object"
+      },
+      "RiskExplanationOut": {
+        "properties": {
+          "base_value": {
+            "title": "Base Value",
+            "type": "number"
+          },
+          "contributions": {
+            "items": {
+              "$ref": "#/components/schemas/RiskContributionOut"
+            },
+            "title": "Contributions",
+            "type": "array"
+          },
+          "method": {
+            "title": "Method",
+            "type": "string"
+          },
+          "raw_probability": {
+            "title": "Raw Probability",
+            "type": "number"
+          },
+          "space": {
+            "title": "Space",
+            "type": "string"
+          }
+        },
+        "required": [
+          "method",
+          "space",
+          "base_value",
+          "raw_probability",
+          "contributions"
+        ],
+        "title": "RiskExplanationOut",
         "type": "object"
       },
       "Role": {
@@ -710,6 +1547,27 @@
             "title": "Quantity",
             "type": "integer"
           },
+          "risk_band": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RiskBand"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "risk_score": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Risk Score"
+          },
           "status": {
             "$ref": "#/components/schemas/TransactionStatus"
           },
@@ -846,6 +1704,27 @@
             "title": "Quantity",
             "type": "integer"
           },
+          "risk_band": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RiskBand"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "risk_score": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Risk Score"
+          },
           "status": {
             "$ref": "#/components/schemas/TransactionStatus"
           },
@@ -886,6 +1765,25 @@
         ],
         "title": "TransactionStatus",
         "type": "string"
+      },
+      "UserRefOut": {
+        "properties": {
+          "email": {
+            "title": "Email",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "email"
+        ],
+        "title": "UserRefOut",
+        "type": "object"
       },
       "ValidationError": {
         "properties": {
@@ -1044,6 +1942,351 @@
         "summary": "Logout",
         "tags": [
           "auth"
+        ]
+      }
+    },
+    "/api/v1/cases": {
+      "get": {
+        "operationId": "list__api_v1_cases_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "maximum": 200,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "offset",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "minimum": 0,
+              "title": "Offset",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/CaseStatus"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Status"
+            }
+          },
+          {
+            "in": "query",
+            "name": "priority",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/CasePriority"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Priority"
+            }
+          },
+          {
+            "in": "query",
+            "name": "data_origin",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/DataOrigin"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Data Origin"
+            }
+          },
+          {
+            "in": "query",
+            "name": "mine",
+            "required": false,
+            "schema": {
+              "default": false,
+              "title": "Mine",
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Page_CaseOut_"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "List ",
+        "tags": [
+          "cases"
+        ]
+      },
+      "post": {
+        "operationId": "open__api_v1_cases_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OpenCaseRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CaseDetailOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Open ",
+        "tags": [
+          "cases"
+        ]
+      }
+    },
+    "/api/v1/cases/{case_id}": {
+      "get": {
+        "operationId": "detail_api_v1_cases__case_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "case_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Case Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CaseDetailOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Detail",
+        "tags": [
+          "cases"
+        ]
+      }
+    },
+    "/api/v1/cases/{case_id}/claim": {
+      "post": {
+        "operationId": "claim_api_v1_cases__case_id__claim_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "case_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Case Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CaseDetailOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Claim",
+        "tags": [
+          "cases"
+        ]
+      }
+    },
+    "/api/v1/cases/{case_id}/notes": {
+      "post": {
+        "operationId": "note_api_v1_cases__case_id__notes_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "case_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Case Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CaseNoteRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CaseNoteOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Note",
+        "tags": [
+          "cases"
+        ]
+      }
+    },
+    "/api/v1/cases/{case_id}/resolve": {
+      "post": {
+        "operationId": "resolve_api_v1_cases__case_id__resolve_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "case_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Case Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ResolveCaseRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CaseDetailOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Resolve",
+        "tags": [
+          "cases"
         ]
       }
     },
@@ -1273,6 +2516,28 @@
         ]
       }
     },
+    "/api/v1/risk/model": {
+      "get": {
+        "description": "The serving model's card. Every metric is read from the training run's metadata.",
+        "operationId": "model_card_api_v1_risk_model_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ModelCardOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Model Card",
+        "tags": [
+          "risk"
+        ]
+      }
+    },
     "/api/v1/transactions": {
       "get": {
         "operationId": "list__api_v1_transactions_get",
@@ -1418,6 +2683,90 @@
         "summary": "Detail",
         "tags": [
           "transactions"
+        ]
+      }
+    },
+    "/api/v1/transactions/{transaction_id}/risk": {
+      "get": {
+        "operationId": "latest_api_v1_transactions__transaction_id__risk_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "transaction_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Transaction Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RiskAssessmentOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Latest",
+        "tags": [
+          "risk"
+        ]
+      },
+      "post": {
+        "operationId": "rescore_api_v1_transactions__transaction_id__risk_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "transaction_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Transaction Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RiskAssessmentOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Rescore",
+        "tags": [
+          "risk"
         ]
       }
     },

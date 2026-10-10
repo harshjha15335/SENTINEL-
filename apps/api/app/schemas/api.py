@@ -4,7 +4,19 @@ from typing import Any, Literal
 
 from pydantic import EmailStr, Field
 
-from app.models.enums import DataOrigin, EventProcessing, EventVerification, Role, TransactionStatus
+from app.models.enums import (
+    CasePriority,
+    CaseResolution,
+    CaseSource,
+    CaseStatus,
+    DataOrigin,
+    EventProcessing,
+    EventVerification,
+    PolicyDecision,
+    RiskBand,
+    Role,
+    TransactionStatus,
+)
 from app.schemas.common import ApiModel, RequestModel
 
 
@@ -62,6 +74,8 @@ class TransactionOut(ApiModel):
     occurred_at: datetime | None
     created_at: datetime
     updated_at: datetime
+    risk_score: float | None = None
+    risk_band: RiskBand | None = None
 
 
 class PaymentEventOut(ApiModel):
@@ -119,9 +133,138 @@ class OriginTotals(ApiModel):
     currency: str
 
 
+class OriginCount(ApiModel):
+    data_origin: DataOrigin
+    key: str
+    count: int
+
+
 class DashboardSummaryOut(ApiModel):
     transactions_total: int
     by_status: dict[str, int]
     captured_by_origin: list[OriginTotals]
     webhook_events: dict[str, int]
     recent: list[TransactionOut]
+    open_cases_by_origin: list[OriginCount]
+    risk_bands_by_origin: list[OriginCount]
+
+
+class RiskContributionOut(ApiModel):
+    feature: str
+    label: str
+    value: float
+    contribution: float
+
+
+class RiskExplanationOut(ApiModel):
+    method: str
+    space: str
+    base_value: float
+    raw_probability: float
+    contributions: list[RiskContributionOut]
+
+
+class RiskAssessmentOut(ApiModel):
+    id: uuid.UUID
+    transaction_id: uuid.UUID
+    model_version: str
+    feature_version: str
+    risk_score: float
+    risk_band: RiskBand
+    policy_decision: PolicyDecision
+    policy_mode: str
+    thresholds: dict[str, float]
+    feature_snapshot: dict[str, float]
+    explanation: RiskExplanationOut
+    limitations: list[str]
+    data_origin: DataOrigin
+    trigger: str
+    created_at: datetime
+    assessment_type: Literal["MODEL_GENERATED"] = "MODEL_GENERATED"
+
+
+class ModelMetricsOut(ApiModel):
+    rows: int
+    positives: int
+    prevalence: float
+    threshold: float
+    precision: float
+    recall: float
+    f1: float
+    false_positive_rate: float
+    flag_rate: float
+    pr_auc: float
+    roc_auc: float
+    brier: float
+    expected_cost: float
+    expected_cost_no_review: float
+
+
+class ModelCardOut(ApiModel):
+    model_version: str
+    feature_version: str
+    track: str
+    chosen_model: str
+    trained_at: str
+    training_data: str
+    split: dict[str, Any]
+    calibration: str
+    thresholds: dict[str, float]
+    threshold_selection: str
+    cost_assumptions: dict[str, float]
+    validation_comparison: dict[str, dict[str, float]]
+    test_metrics: ModelMetricsOut
+    test_metrics_rules_baseline: ModelMetricsOut
+    features: list[dict[str, str]]
+    limitations: list[str]
+
+
+class UserRefOut(ApiModel):
+    id: uuid.UUID
+    email: str
+
+
+class CaseOut(ApiModel):
+    id: uuid.UUID
+    transaction_id: uuid.UUID
+    risk_assessment_id: uuid.UUID | None
+    source: CaseSource
+    status: CaseStatus
+    priority: CasePriority
+    title: str
+    assignee: UserRefOut | None
+    due_at: datetime
+    resolution: CaseResolution | None
+    resolution_note: str | None
+    resolved_at: datetime | None
+    data_origin: DataOrigin
+    created_at: datetime
+    updated_at: datetime
+    transaction: TransactionOut
+
+
+class CaseNoteOut(ApiModel):
+    id: uuid.UUID
+    author: UserRefOut | None
+    body: str
+    created_at: datetime
+
+
+class CaseDetailOut(CaseOut):
+    notes: list[CaseNoteOut]
+    assessment: RiskAssessmentOut | None
+    audit: list[AuditOut]
+
+
+class OpenCaseRequest(RequestModel):
+    transaction_id: uuid.UUID
+    reason: str = Field(min_length=3, max_length=2000)
+
+
+class CaseNoteRequest(RequestModel):
+    body: str = Field(min_length=1, max_length=4000)
+
+
+class ResolveCaseRequest(RequestModel):
+    resolution: CaseResolution
+    note: str = Field(min_length=3, max_length=4000)

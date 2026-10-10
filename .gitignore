@@ -16,6 +16,8 @@ test-results/
 .env.*
 !.env.example
 ml/data/raw/
-ml/artifacts/*.joblib
+ml/artifacts/
+*.joblib
+*.pkl
 *.sqlite
 .pgdata/

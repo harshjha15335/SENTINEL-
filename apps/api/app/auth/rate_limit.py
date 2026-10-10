@@ -31,3 +31,7 @@ class SlidingWindowLimiter:
     def reset(self, key: str) -> None:
         with self._lock:
             self._hits.pop(key, None)
+
+    def clear(self) -> None:
+        with self._lock:
+            self._hits.clear()

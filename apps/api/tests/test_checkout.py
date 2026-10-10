@@ -36,7 +36,9 @@ def test_fixture_order_create_and_capture(app_client: TestClient, tenant: Tenant
     assert [a["action"] for a in detail["audit"]] == [
         "paypal.order.created",
         "paypal.order.captured",
+        "risk.assessment.created",
     ]
+    assert detail["risk_band"] in ("LOW", "MEDIUM", "HIGH")
     listing = app_client.get("/api/v1/transactions").json()
     assert listing["total"] == 1
 

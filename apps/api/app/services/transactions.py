@@ -5,15 +5,27 @@ from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from app.core.errors import NotFoundError
-from app.models import AuditEvent, PaymentEvent, Transaction
+from app.models import AuditEvent, PaymentEvent, RiskAssessment, Transaction
 from app.models.enums import DataOrigin, TransactionStatus
 from app.schemas.api import AuditOut, PaymentEventOut, TransactionDetailOut, TransactionOut
 
 
-def to_out(txn: Transaction) -> TransactionOut:
+def to_out(txn: Transaction, assessment: RiskAssessment | None = None) -> TransactionOut:
     out = TransactionOut.model_validate(txn)
     out.product_name = txn.product.name if txn.product else None
+    if assessment is not None:
+        out.risk_score = assessment.risk_score
+        out.risk_band = assessment.risk_band
     return out
+
+
+def to_out_many(
+    db: Session, merchant_id: uuid.UUID, rows: list[Transaction]
+) -> list[TransactionOut]:
+    from app.services.risk.scoring import latest_map
+
+    latest = latest_map(db, merchant_id, [r.id for r in rows])
+    return [to_out(r, latest.get(r.id)) for r in rows]
 
 
 def list_transactions(
@@ -61,7 +73,9 @@ def get_detail(db: Session, merchant_id: uuid.UUID, txn_id: uuid.UUID) -> Transa
         )
         .order_by(AuditEvent.created_at)
     )
-    base: dict[str, Any] = to_out(txn).model_dump()
+    from app.services.risk.scoring import latest_for
+
+    base: dict[str, Any] = to_out(txn, latest_for(db, merchant_id, txn.id)).model_dump()
     return TransactionDetailOut(
         **base,
         provider_summary=txn.provider_summary,

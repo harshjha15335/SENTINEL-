@@ -1,0 +1,87 @@
+[
+  {
+    "features": {
+      "amount_log": 2.995732273553991,
+      "amount_vs_merchant_median": 0.5,
+      "merchant_history_insufficient": 0.0,
+      "merchant_txn_count_1h": 5.0,
+      "is_new_customer": 0.0,
+      "cust_prior_txn_count_90d": 1.0,
+      "cust_txn_count_1h": 0.0,
+      "cust_txn_count_24h": 0.0,
+      "cust_amount_24h_log": 0.0,
+      "hours_since_cust_prev": 720.0,
+      "cust_prior_refund_count_90d": 0.0,
+      "cust_prior_dispute_count_90d": 0.0
+    },
+    "probability": 0.0055305454564280225
+  },
+  {
+    "features": {
+      "amount_log": 5.521460917862246,
+      "amount_vs_merchant_median": 6.552632,
+      "merchant_history_insufficient": 0.0,
+      "merchant_txn_count_1h": 5.0,
+      "is_new_customer": 0.0,
+      "cust_prior_txn_count_90d": 3.0,
+      "cust_txn_count_1h": 0.0,
+      "cust_txn_count_24h": 3.0,
+      "cust_amount_24h_log": 4.343805421853684,
+      "hours_since_cust_prev": 2.2175,
+      "cust_prior_refund_count_90d": 0.0,
+      "cust_prior_dispute_count_90d": 0.0
+    },
+    "probability": 0.007272597686546186
+  },
+  {
+    "features": {
+      "amount_log": 4.505349850705881,
+      "amount_vs_merchant_median": 2.355263,
+      "merchant_history_insufficient": 0.0,
+      "merchant_txn_count_1h": 6.0,
+      "is_new_customer": 0.0,
+      "cust_prior_txn_count_90d": 1.0,
+      "cust_txn_count_1h": 0.0,
+      "cust_txn_count_24h": 0.0,
+      "cust_amount_24h_log": 0.0,
+      "hours_since_cust_prev": 156.7375,
+      "cust_prior_refund_count_90d": 0.0,
+      "cust_prior_dispute_count_90d": 0.0
+    },
+    "probability": 0.012070114256387501
+  },
+  {
+    "features": {
+      "amount_log": 3.6635616461296463,
+      "amount_vs_merchant_median": 1.0,
+      "merchant_history_insufficient": 0.0,
+      "merchant_txn_count_1h": 7.0,
+      "is_new_customer": 1.0,
+      "cust_prior_txn_count_90d": 0.0,
+      "cust_txn_count_1h": 0.0,
+      "cust_txn_count_24h": 0.0,
+      "cust_amount_24h_log": 0.0,
+      "hours_since_cust_prev": 720.0,
+      "cust_prior_refund_count_90d": 0.0,
+      "cust_prior_dispute_count_90d": 0.0
+    },
+    "probability": 0.05109658225818395
+  },
+  {
+    "features": {
+      "amount_log": 2.995732273553991,
+      "amount_vs_merchant_median": 0.5,
+      "merchant_history_insufficient": 0.0,
+      "merchant_txn_count_1h": 4.0,
+      "is_new_customer": 1.0,
+      "cust_prior_txn_count_90d": 0.0,
+      "cust_txn_count_1h": 0.0,
+      "cust_txn_count_24h": 0.0,
+      "cust_amount_24h_log": 0.0,
+      "hours_since_cust_prev": 720.0,
+      "cust_prior_refund_count_90d": 0.0,
+      "cust_prior_dispute_count_90d": 0.0
+    },
+    "probability": 0.01609644296142888
+  }
+]

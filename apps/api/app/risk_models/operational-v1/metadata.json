@@ -1,0 +1,151 @@
+{
+  "model_version": "operational-v1",
+  "trained_at": "2026-10-10T20:44:28.854021+00:00",
+  "track": "B (operational, synthetic-trained)",
+  "chosen_model": "xgboost(depth=2,n=150,lr=0.1)",
+  "features": [
+    "amount_log",
+    "amount_vs_merchant_median",
+    "merchant_history_insufficient",
+    "merchant_txn_count_1h",
+    "is_new_customer",
+    "cust_prior_txn_count_90d",
+    "cust_txn_count_1h",
+    "cust_txn_count_24h",
+    "cust_amount_24h_log",
+    "hours_since_cust_prev",
+    "cust_prior_refund_count_90d",
+    "cust_prior_dispute_count_90d"
+  ],
+  "dataset": {
+    "scenario_version": "demo-scenario-v1",
+    "feature_version": "op-features-v1",
+    "seed": 2026,
+    "rows": 9051,
+    "positives": 409,
+    "prevalence": 0.0451883769749199,
+    "sha256": "ed2222969f54007cdc375510617b1cead4ade3a6cea4e67b06818e14d820d031",
+    "features": [
+      "amount_log",
+      "amount_vs_merchant_median",
+      "merchant_history_insufficient",
+      "merchant_txn_count_1h",
+      "is_new_customer",
+      "cust_prior_txn_count_90d",
+      "cust_txn_count_1h",
+      "cust_txn_count_24h",
+      "cust_amount_24h_log",
+      "hours_since_cust_prev",
+      "cust_prior_refund_count_90d",
+      "cust_prior_dispute_count_90d"
+    ]
+  },
+  "split": {
+    "method": "chronological 60/20/20 by occurred_at",
+    "train_rows": 5430,
+    "valid_rows": 1810,
+    "test_rows": 1811,
+    "train_end": "2026-08-06T09:24:11+00:00",
+    "test_start": "2026-08-31T19:01:00+00:00"
+  },
+  "calibration": "sigmoid (Platt) fitted on validation split",
+  "calibration_params": {
+    "method": "platt",
+    "formula": "1 / (1 + exp(a * p_raw + b))",
+    "a": -5.6291132338586065,
+    "b": 5.553413244278069
+  },
+  "artifact": {
+    "format": "XGBoost native JSON booster + Platt parameters (no pickle)",
+    "booster_file": "booster.json",
+    "booster_sha256": "fb2e1e2cbb12be9f738a1c28f584c48033198d9827377340967cbb851c2d71fa"
+  },
+  "thresholds": {
+    "high": 0.1036,
+    "medium": 0.05577772211458976
+  },
+  "threshold_selection": "minimum expected cost on validation within review capacity",
+  "cost_assumptions": {
+    "review_cost_usd": 4.0,
+    "chargeback_fee_usd": 20.0,
+    "review_capacity_share": 0.08,
+    "review_prevents_share": 0.7
+  },
+  "validation_comparison": {
+    "rules_baseline": {
+      "valid_pr_auc": 0.08460772264477172,
+      "valid_roc_auc": 0.7080738572674056
+    },
+    "logistic_regression": {
+      "valid_pr_auc": 0.3051697167538827,
+      "valid_roc_auc": 0.8509232158425707
+    },
+    "xgboost(depth=2,n=150,lr=0.1)": {
+      "valid_pr_auc": 0.3784291013067555,
+      "valid_roc_auc": 0.8468170070992651
+    }
+  },
+  "validation_cost_at_threshold": 14327.35,
+  "test_metrics": {
+    "rows": 1811,
+    "positives": 78,
+    "prevalence": 0.04307012700165654,
+    "threshold": 0.1036,
+    "precision": 0.2823529411764706,
+    "recall": 0.6153846153846154,
+    "f1": 0.3870967741935484,
+    "false_positive_rate": 0.07039815349105598,
+    "flag_rate": 0.09387078961899503,
+    "pr_auc": 0.3484705679773503,
+    "roc_auc": 0.841300841877876,
+    "brier": 0.03255947676935193,
+    "confusion_matrix": {
+      "tn": 1611,
+      "fp": 122,
+      "fn": 30,
+      "tp": 48
+    },
+    "precision_at_capacity": 0.3125,
+    "recall_at_capacity": 0.5769230769230769,
+    "expected_cost": 14252.95,
+    "expected_cost_no_review": 32453.0,
+    "latency_ms_per_row_batch": 0.0018342241855761644
+  },
+  "test_metrics_rules_baseline": {
+    "rows": 1811,
+    "positives": 78,
+    "prevalence": 0.04307012700165654,
+    "threshold": 0.5,
+    "precision": 0.22388059701492538,
+    "recall": 0.38461538461538464,
+    "f1": 0.2830188679245283,
+    "false_positive_rate": 0.06001154068090017,
+    "flag_rate": 0.07399226946438432,
+    "pr_auc": 0.13631490700486512,
+    "roc_auc": 0.7577233787562698,
+    "brier": 0.04969630038652678,
+    "confusion_matrix": {
+      "tn": 1629,
+      "fp": 104,
+      "fn": 48,
+      "tp": 30
+    },
+    "precision_at_capacity": 0.20833333333333334,
+    "recall_at_capacity": 0.38461538461538464,
+    "expected_cost": 16974.4,
+    "expected_cost_no_review": 32453.0
+  },
+  "limitations": [
+    "Trained and evaluated only on SENTINEL's synthetic demo scenario; not validated on real PayPal payments.",
+    "Labels are generated ground truth with deliberate noise; scores are not fraud probabilities for live traffic.",
+    "Features cover payment amount, payer velocity and prior refunds/disputes only; no device, card, IP or PayPal-internal signals.",
+    "Calibration and thresholds use the validation split; test metrics come from one evaluation."
+  ],
+  "versions": {
+    "python": "3.13.16",
+    "scikit_learn": "1.9.1",
+    "xgboost": "3.4.1",
+    "numpy": "2.5.4",
+    "pandas": "3.0.6"
+  }
+}

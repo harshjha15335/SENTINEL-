@@ -15,6 +15,7 @@ from app.models.enums import TransactionStatus
 from app.services import audit
 from app.services.paypal.gateway import PayPalGateway
 from app.services.paypal.types import CreateOrderInput, LineItem, Money, PayPalError
+from app.services.risk.scoring import score_after_capture
 
 log = logging.getLogger("sentinel.checkout")
 
@@ -198,6 +199,9 @@ def capture_order(
         },
     )
     db.commit()
+    if txn.status in (TransactionStatus.CAPTURED, TransactionStatus.CAPTURE_PENDING):
+        # Decision support only: the capture has already happened and is never undone here.
+        score_after_capture(db, txn.id)
     return txn
 
 

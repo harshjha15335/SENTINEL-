@@ -8,7 +8,7 @@ from app.db.session import get_db
 from app.models.enums import DataOrigin, TransactionStatus
 from app.schemas.api import TransactionDetailOut, TransactionOut
 from app.schemas.common import Page
-from app.services.transactions import get_detail, list_transactions, to_out
+from app.services.transactions import get_detail, list_transactions, to_out_many
 
 router = APIRouter(prefix="/transactions", tags=["transactions"])
 
@@ -32,7 +32,9 @@ def list_(
         data_origin=data_origin,
         q=q,
     )
-    return Page(items=[to_out(r) for r in rows], total=total, limit=limit, offset=offset)
+    return Page(
+        items=to_out_many(db, principal.merchant_id, rows), total=total, limit=limit, offset=offset
+    )
 
 
 @router.get("/{transaction_id}", response_model=TransactionDetailOut)

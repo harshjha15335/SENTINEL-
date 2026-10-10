@@ -41,12 +41,16 @@ def _migrated_database() -> Iterator[None]:
 
 @pytest.fixture(autouse=True)
 def _clean_tables() -> Iterator[None]:
+    from app.api.v1.auth import _limiter
+
+    _limiter.clear()
     yield
     with get_engine().begin() as conn:
         conn.execute(
             text(
-                "TRUNCATE audit_events, payment_events, raw_payloads, transactions, products, "
-                "user_sessions, users, merchants RESTART IDENTITY CASCADE"
+                "TRUNCATE case_notes, cases, risk_assessments, audit_events, payment_events, "
+                "raw_payloads, transactions, products, user_sessions, users, merchants "
+                "RESTART IDENTITY CASCADE"
             )
         )
 

@@ -44,3 +44,40 @@ class EventProcessing(StrEnum):
     PROCESSED = "PROCESSED"
     IGNORED = "IGNORED"
     FAILED = "FAILED"
+
+
+class RiskBand(StrEnum):
+    LOW = "LOW"
+    MEDIUM = "MEDIUM"
+    HIGH = "HIGH"
+
+
+class PolicyDecision(StrEnum):
+    """What the policy would do. Recorded in shadow mode: SENTINEL never blocks a payment."""
+
+    ALLOW = "ALLOW"
+    REVIEW = "REVIEW"
+    ESCALATE = "ESCALATE"
+
+
+class CaseStatus(StrEnum):
+    OPEN = "OPEN"
+    IN_REVIEW = "IN_REVIEW"
+    RESOLVED = "RESOLVED"
+
+
+class CaseResolution(StrEnum):
+    CONFIRMED_ADVERSE = "CONFIRMED_ADVERSE"
+    LEGITIMATE = "LEGITIMATE"
+    INCONCLUSIVE = "INCONCLUSIVE"
+
+
+class CasePriority(StrEnum):
+    LOW = "LOW"
+    MEDIUM = "MEDIUM"
+    HIGH = "HIGH"
+
+
+class CaseSource(StrEnum):
+    RISK_MODEL = "RISK_MODEL"
+    MANUAL = "MANUAL"

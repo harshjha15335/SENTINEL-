@@ -37,6 +37,21 @@ jobs:
         env:
           SENTINEL_DATABASE_URL: postgresql+psycopg://sentinel:sentinel@127.0.0.1:5432/sentinel_test
 
+  ml:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -e "apps/api[dev,ml]"
+      - run: ruff format --check . && ruff check .
+        working-directory: ml
+      - name: Leakage, parity and reproducibility tests
+        run: pytest -q ml/tests
+        env:
+          PYTHONPATH: apps/api:ml
+
   contracts:
     runs-on: ubuntu-latest
     steps:

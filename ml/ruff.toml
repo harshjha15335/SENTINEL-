@@ -1,0 +1,7 @@
+extend = "../apps/api/pyproject.toml"
+
+[lint.isort]
+known-first-party = ["app", "sentinel_ml"]
+
+[lint.per-file-ignores]
+"sentinel_ml/train_operational.py" = ["T201"]

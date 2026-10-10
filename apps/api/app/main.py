@@ -1,7 +1,18 @@
 from fastapi import APIRouter, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.api.v1 import audit, auth, catalog, dashboard, health, paypal, transactions, webhooks
+from app.api.v1 import (
+    audit,
+    auth,
+    cases,
+    catalog,
+    dashboard,
+    health,
+    paypal,
+    risk,
+    transactions,
+    webhooks,
+)
 from app.core.config import get_settings
 from app.core.errors import install_error_handlers
 from app.core.logging import configure_logging
@@ -32,7 +43,18 @@ def create_app() -> FastAPI:
     install_error_handlers(app)
 
     v1 = APIRouter(prefix="/api/v1")
-    for module in (health, auth, catalog, paypal, transactions, dashboard, audit, webhooks):
+    for module in (
+        health,
+        auth,
+        catalog,
+        paypal,
+        transactions,
+        risk,
+        cases,
+        dashboard,
+        audit,
+        webhooks,
+    ):
         v1.include_router(module.router)
     app.include_router(v1)
     return app
