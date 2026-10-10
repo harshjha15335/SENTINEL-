@@ -14,6 +14,21 @@ export type OrderCreated = Schemas["OrderCreatedOut"];
 export type DataOrigin = Transaction["data_origin"];
 export type TransactionStatus = Transaction["status"];
 export type Role = Me["role"];
+export type RiskAssessment = Schemas["RiskAssessmentOut"];
+export type RiskBand = RiskAssessment["risk_band"];
+export type PolicyDecision = RiskAssessment["policy_decision"];
+export type ModelCard = Schemas["ModelCardOut"];
+export type ModelMetrics = Schemas["ModelMetricsOut"];
+export type Case = Schemas["CaseOut"];
+export type CaseDetail = Schemas["CaseDetailOut"];
+export type CasePage = Schemas["Page_CaseOut_"];
+export type CaseStatus = Case["status"];
+export type CasePriority = Case["priority"];
+export type CaseResolution = NonNullable<Case["resolution"]>;
+
+export function isOperator(role: Role | undefined): boolean {
+  return role === "ADMIN" || role === "ANALYST";
+}
 
 export class ApiError extends Error {
   readonly status: number;

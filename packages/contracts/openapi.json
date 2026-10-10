@@ -2029,6 +2029,23 @@
               "title": "Mine",
               "type": "boolean"
             }
+          },
+          {
+            "in": "query",
+            "name": "transaction_id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Transaction Id"
+            }
           }
         ],
         "responses": {

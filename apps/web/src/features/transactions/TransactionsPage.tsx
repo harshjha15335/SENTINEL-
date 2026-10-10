@@ -8,6 +8,7 @@ import { PageHeader } from "@/components/layout/PageHeader";
 import { sentinelGridTheme } from "@/components/transactions/grid-theme";
 import { Button } from "@/components/ui/Button";
 import { OriginBadge } from "@/components/ui/OriginBadge";
+import { RiskBadge } from "@/components/ui/RiskBadge";
 import { EmptyState, ErrorState } from "@/components/ui/States";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import type { DataOrigin, Transaction, TransactionStatus } from "@/lib/api";
@@ -53,10 +54,26 @@ export function TransactionsPage() {
       },
       { headerName: "Currency", field: "currency", minWidth: 100, maxWidth: 110 },
       { headerName: "Status", field: "status", minWidth: 150, cellRenderer: (p: ICellRendererParams<Transaction>) => (p.data ? <StatusBadge status={p.data.status} /> : null) },
-      { headerName: "Risk", colId: "risk", minWidth: 110, sortable: false, valueGetter: () => "Not scored", cellClass: "text-fg-subtle", headerTooltip: "Risk scoring arrives in Phase 3; no score is shown until a real model produces one." },
+      {
+        headerName: "Risk",
+        colId: "risk",
+        minWidth: 150,
+        sortable: false,
+        headerTooltip: "Latest model-generated assessment. Unscored payments show no number.",
+        cellRenderer: (p: ICellRendererParams<Transaction>) =>
+          p.data?.risk_band ? <RiskBadge band={p.data.risk_band} score={p.data.risk_score} /> : <span className="text-fg-subtle">Not scored</span>,
+      },
       { headerName: "Origin", field: "data_origin", minWidth: 160, cellRenderer: (p: ICellRendererParams<Transaction>) => (p.data ? <OriginBadge origin={p.data.data_origin} /> : null) },
       { headerName: "Payment source", colId: "source", minWidth: 130, valueGetter: () => "PayPal" },
-      { headerName: "Created", field: "created_at", minWidth: 150, sort: "desc", cellClass: "tabular", valueFormatter: (p) => formatDateTime(p.value) },
+      {
+        headerName: "Occurred",
+        colId: "when",
+        minWidth: 150,
+        cellClass: "tabular",
+        headerTooltip: "Capture time, or order creation time when there is no capture yet.",
+        valueGetter: (p) => p.data?.occurred_at ?? p.data?.created_at,
+        valueFormatter: (p) => formatDateTime(p.value as string | undefined),
+      },
     ],
     [],
   );

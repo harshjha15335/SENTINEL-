@@ -29,6 +29,7 @@ cp ../../.env.example .env          # fill in values; see below
 .venv/bin/alembic upgrade head
 SENTINEL_SEED_ADMIN_PASSWORD=... SENTINEL_SEED_ANALYST_PASSWORD=... SENTINEL_SEED_VIEWER_PASSWORD=... \
   .venv/bin/python -m app.cli seed
+  .venv/bin/python -m app.cli demo-load   # optional: SYNTHETIC_DEMO history, scores and review cases
 .venv/bin/uvicorn app.main:app --reload --port 8000
 .venv/bin/python -m app.workers.events   # optional: webhook retry worker
 

@@ -64,6 +64,7 @@ def list_(
     priority: CasePriority | None = None,
     data_origin: DataOrigin | None = None,
     mine: bool = False,
+    transaction_id: uuid.UUID | None = None,
     principal: Principal = Depends(any_member),
     db: Session = Depends(get_db),
 ) -> Page[CaseOut]:
@@ -74,6 +75,7 @@ def list_(
         priority=priority,
         data_origin=data_origin,
         assignee_id=principal.user.id if mine else None,
+        transaction_id=transaction_id,
         limit=limit,
         offset=offset,
     )

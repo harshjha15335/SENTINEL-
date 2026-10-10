@@ -44,8 +44,20 @@ Python: code targets 3.12+ (`requires-python >=3.12`, ruff/mypy target 3.12). Th
 | openapi-typescript | 7.13.0 | MIT | Generates `packages/contracts/openapi.ts` |
 | eslint, typescript-eslint, eslint-plugin-react-hooks | 10.12.0, 8.71.1, 7.1.1 | MIT | Lint |
 
+## Risk engine (Phase 3, installed)
+| Package | Version | Licence | Where | Why |
+|---|---|---|---|---|
+| xgboost-cpu | 3.4.1 | Apache-2.0 | API runtime | Serves the booster and computes exact TreeSHAP (`pred_contribs`). The CPU-only wheel is ~6 MB; the default `xgboost` wheel pulls a ~200 MB NCCL GPU library the API never uses. |
+| numpy | 2.5.4 | BSD-3-Clause | API runtime | Feature matrix for XGBoost |
+| scikit-learn | 1.9.1 | BSD-3-Clause | `ml` extra only | Logistic regression, Platt calibration (`FrozenEstimator`), metrics |
+| pandas | 3.0.6 | BSD-3-Clause | `ml` extra only | Training frames |
+| scipy | 1.18.1 | BSD-3-Clause | `ml` extra only | Required by scikit-learn and xgboost |
+| shap | 0.53.0 | MIT | `ml` extra only | Independent check that XGBoost's contributions equal `TreeExplainer`. Not needed at runtime. |
+
+**Model artifact format.** XGBoost JSON plus Platt parameters in `metadata.json`, checked by SHA-256 at load. Pickle and joblib were rejected because unpickling runs arbitrary code, and a plain format is easier to review.
+
 ## Committed for upcoming phases (not installed yet)
-scikit-learn, XGBoost, SHAP (Phase 3) · PydanticAI, pypdf, ReportLab, Radix AlertDialog for approvals (Phase 4) · NetworkX, Recharts (Phase 5).
+PydanticAI, pypdf, ReportLab, Radix AlertDialog for approvals (Phase 4) · NetworkX, Recharts (Phase 5).
 
 ## Rejected alternatives (short form)
 - `paypal-server-sdk`: no Disputes or webhook verification; custom licence. Direct REST instead (decision 0002).

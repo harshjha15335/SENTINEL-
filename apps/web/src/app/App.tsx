@@ -18,6 +18,9 @@ const TransactionsPage = lazy(() => import("@/features/transactions/Transactions
 const TransactionDetailPage = lazy(() =>
   import("@/features/transactions/TransactionDetailPage").then((m) => ({ default: m.TransactionDetailPage })),
 );
+const CasesPage = lazy(() => import("@/features/cases/CasesPage").then((m) => ({ default: m.CasesPage })));
+const CaseDetailPage = lazy(() => import("@/features/cases/CaseDetailPage").then((m) => ({ default: m.CaseDetailPage })));
+const ModelPage = lazy(() => import("@/features/risk/ModelPage").then((m) => ({ default: m.ModelPage })));
 const CheckoutPage = lazy(() => import("@/features/checkout/CheckoutPage").then((m) => ({ default: m.CheckoutPage })));
 
 const fallback = <Skeleton className="h-64" />;
@@ -63,6 +66,9 @@ export function AppRoutes() {
         <Route index element={<DashboardPage />} />
         <Route path="transactions" element={<Suspense fallback={fallback}><TransactionsPage /></Suspense>} />
         <Route path="transactions/:id" element={<Suspense fallback={fallback}><TransactionDetailPage /></Suspense>} />
+        <Route path="cases" element={<Suspense fallback={fallback}><CasesPage /></Suspense>} />
+        <Route path="cases/:id" element={<Suspense fallback={fallback}><CaseDetailPage /></Suspense>} />
+        <Route path="model" element={<Suspense fallback={fallback}><ModelPage /></Suspense>} />
         <Route path="checkout" element={<Suspense fallback={fallback}><CheckoutPage /></Suspense>} />
         <Route path="settings" element={<SettingsPage />} />
         <Route path="*" element={<NotFoundPage />} />

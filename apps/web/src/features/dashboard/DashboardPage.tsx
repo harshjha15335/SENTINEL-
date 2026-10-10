@@ -7,7 +7,7 @@ import { OriginBadge } from "@/components/ui/OriginBadge";
 import { Panel } from "@/components/ui/Panel";
 import { EmptyState, ErrorState, Skeleton } from "@/components/ui/States";
 import { StatusBadge } from "@/components/ui/StatusBadge";
-import { api, type DashboardSummary } from "@/lib/api";
+import { api, type DashboardSummary, type DataOrigin } from "@/lib/api";
 import { formatDateTime, formatMoney, humanize, shortId } from "@/lib/format";
 
 export function DashboardPage() {
@@ -74,6 +74,7 @@ function DashboardBody({ data }: { data: DashboardSummary }) {
           )}
         </p>
       </Panel>
+      <RiskOverview data={data} />
       <Panel
         title="Recent payments"
         className="lg:col-span-3"
@@ -120,6 +121,59 @@ function DashboardBody({ data }: { data: DashboardSummary }) {
         )}
       </Panel>
     </div>
+  );
+}
+
+const BANDS = ["HIGH", "MEDIUM", "LOW"] as const;
+const BAND_COLOR: Record<(typeof BANDS)[number], string> = { HIGH: "bg-critical", MEDIUM: "bg-warning", LOW: "bg-positive" };
+
+function RiskOverview({ data }: { data: DashboardSummary }) {
+  const origins = [...new Set([...data.risk_bands_by_origin, ...data.open_cases_by_origin].map((r) => r.data_origin))];
+  const openFor = (o: DataOrigin) => data.open_cases_by_origin.filter((r) => r.data_origin === o).reduce((a, r) => a + r.count, 0);
+  return (
+    <Panel
+      title="Risk and review"
+      className="lg:col-span-3"
+      actions={
+        <Link to="/cases" className="inline-flex items-center gap-1 text-sm text-accent hover:underline">
+          Review queue <ArrowRight aria-hidden className="size-3.5" />
+        </Link>
+      }
+    >
+      {origins.length === 0 ? (
+        <EmptyState title="No payments scored yet">Captured payments are scored automatically. Scores are model-generated decision support.</EmptyState>
+      ) : (
+        <ul className="grid gap-4 md:grid-cols-2">
+          {origins.map((o) => {
+            const bands = Object.fromEntries(data.risk_bands_by_origin.filter((r) => r.data_origin === o).map((r) => [r.key, r.count]));
+            const scored = BANDS.reduce((a, b) => a + (bands[b] ?? 0), 0);
+            return (
+              <li key={o} className="rounded-md border border-line p-3">
+                <div className="flex items-center justify-between gap-3">
+                  <OriginBadge origin={o} />
+                  <p className="text-sm">
+                    <span className="tabular text-xl font-semibold">{openFor(o)}</span>
+                    <span className="ml-1.5 text-fg-muted">open case{openFor(o) === 1 ? "" : "s"}</span>
+                  </p>
+                </div>
+                {scored > 0 && (
+                  <>
+                    <div className="mt-3 flex h-2 overflow-hidden rounded-full bg-sunken" aria-hidden>
+                      {BANDS.map((b) => (
+                        <span key={b} className={BAND_COLOR[b]} style={{ width: `${((bands[b] ?? 0) / scored) * 100}%` }} />
+                      ))}
+                    </div>
+                    <p className="tabular mt-2 text-xs text-fg-muted">
+                      {scored} scored: {BANDS.map((b) => `${bands[b] ?? 0} ${b.toLowerCase()}`).join(" · ")}
+                    </p>
+                  </>
+                )}
+              </li>
+            );
+          })}
+        </ul>
+      )}
+    </Panel>
   );
 }
 

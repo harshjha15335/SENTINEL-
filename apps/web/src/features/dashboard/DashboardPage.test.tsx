@@ -20,6 +20,11 @@ describe("DashboardPage", () => {
           ],
           webhook_events: { PROCESSED: 2 },
           recent: [txn()],
+          open_cases_by_origin: [{ data_origin: "SYNTHETIC_DEMO", key: "HIGH", count: 3 }],
+          risk_bands_by_origin: [
+            { data_origin: "SYNTHETIC_DEMO", key: "HIGH", count: 3 },
+            { data_origin: "SYNTHETIC_DEMO", key: "LOW", count: 17 },
+          ],
         },
       },
     ]);
@@ -28,11 +33,12 @@ describe("DashboardPage", () => {
     expect(screen.getByText("$19.00")).toBeInTheDocument();
     expect(screen.getByLabelText(/Data origin: Live sandbox/)).toBeInTheDocument();
     expect(screen.getByText(/2 processed/)).toBeInTheDocument();
+    expect(screen.getByText("20 scored: 3 high · 0 medium · 17 low")).toBeInTheDocument();
   });
 
   it("shows an empty state with a next step", async () => {
     mockApi([
-      { path: "/api/v1/dashboard/summary", body: { transactions_total: 0, by_status: {}, captured_by_origin: [], webhook_events: {}, recent: [] } },
+      { path: "/api/v1/dashboard/summary", body: { transactions_total: 0, by_status: {}, captured_by_origin: [], webhook_events: {}, recent: [], open_cases_by_origin: [], risk_bands_by_origin: [] } },
     ]);
     renderWithProviders(<DashboardPage />);
     expect(await screen.findByText("No captured payments yet")).toBeInTheDocument();

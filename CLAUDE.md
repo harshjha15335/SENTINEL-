@@ -10,6 +10,7 @@ AI payment trust & recovery platform for PayPal merchants (PayPal AI Hackathon 2
 - `docs/` requirements, decisions (`docs/decisions/`), status (`docs/IMPLEMENTATION_STATUS.md`).
 
 ## Commands
+- ML: `PYTHONPATH=apps/api:ml apps/api/.venv/bin/python -m sentinel_ml.train_operational` (retrain), `PYTHONPATH=apps/api:ml apps/api/.venv/bin/pytest ml/tests`; demo data `python -m app.cli demo-load`.
 - API: `cd apps/api && .venv/bin/pytest`, `.venv/bin/ruff check app tests alembic`, `.venv/bin/mypy app`, `.venv/bin/alembic upgrade head`, `.venv/bin/python -m app.cli seed`, `.venv/bin/uvicorn app.main:app --reload`.
 - Web: `cd apps/web && npm run typecheck && npm run lint && npm test && npm run build`; `npx playwright test` with API + Vite running.
 

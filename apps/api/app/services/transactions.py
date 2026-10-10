@@ -49,7 +49,9 @@ def list_transactions(
             Transaction.paypal_order_id.ilike(like) | Transaction.paypal_capture_id.ilike(like)
         )
     total = db.scalar(select(func.count()).select_from(stmt.subquery())) or 0
-    rows = db.scalars(stmt.order_by(Transaction.created_at.desc()).limit(limit).offset(offset))
+    # Newest activity first: when the payment happened, or when the order was created.
+    newest = func.coalesce(Transaction.occurred_at, Transaction.created_at).desc()
+    rows = db.scalars(stmt.order_by(newest, Transaction.id.desc()).limit(limit).offset(offset))
     return list(rows.unique()), total
 
 

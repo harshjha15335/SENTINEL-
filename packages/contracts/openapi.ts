@@ -1163,6 +1163,7 @@ export interface operations {
                 priority?: components["schemas"]["CasePriority"] | null;
                 data_origin?: components["schemas"]["DataOrigin"] | null;
                 mine?: boolean;
+                transaction_id?: string | null;
             };
             header?: never;
             path?: never;

@@ -2,11 +2,12 @@ import { ArrowLeft } from "lucide-react";
 import { Link, useParams } from "react-router-dom";
 
 import { PageHeader } from "@/components/layout/PageHeader";
-import { Badge } from "@/components/ui/Badge";
 import { OriginBadge } from "@/components/ui/OriginBadge";
 import { Panel } from "@/components/ui/Panel";
 import { ErrorState, Skeleton } from "@/components/ui/States";
 import { StatusBadge } from "@/components/ui/StatusBadge";
+import { TransactionCases } from "@/features/cases/TransactionCases";
+import { RiskPanel } from "@/features/risk/RiskPanel";
 import type { TransactionDetail } from "@/lib/api";
 import { formatDateTime, formatMoney, humanize } from "@/lib/format";
 
@@ -32,6 +33,7 @@ const ACTION_LABELS: Record<string, string> = {
   "paypal.order.captured": "Capture response recorded",
   "paypal.order.capture_failed": "Capture failed",
   "paypal.webhook.status_applied": "Status updated from verified webhook",
+  "risk.assessment.created": "Risk assessment recorded (model-generated)",
 };
 
 type TimelineItem = { at: string; label: string; detail?: string; source: "SENTINEL" | "PayPal webhook" };
@@ -79,17 +81,17 @@ function Detail({ t }: { t: TransactionDetail }) {
             <Field label="Capture ID" mono value={t.paypal_capture_id} />
             <Field label="Provider status" value={t.provider_status} />
             <Field label="Payer reference" mono value={t.payer_reference} hint="PayPal payer ID. SENTINEL does not store buyer email or name." />
-            <Field label="Captured at" value={formatDateTime(t.occurred_at)} />
+            <Field label={t.data_origin === "SYNTHETIC_DEMO" ? "Occurred at (synthetic)" : "Captured at"} value={formatDateTime(t.occurred_at)} />
             <Field label="SENTINEL record" mono value={t.id} />
           </dl>
         </Panel>
-        <Panel title="Risk assessment">
-          <Badge>Not scored</Badge>
-          <p className="mt-3 text-sm text-fg-muted">
-            The risk engine is not connected yet. SENTINEL shows no score rather than a placeholder number.
-          </p>
-        </Panel>
-        <Panel title="Event timeline" className="lg:col-span-3">
+        <RiskPanel
+          transactionId={t.id}
+          scorable={t.occurred_at != null}
+          className="lg:row-span-2"
+          caseSlot={<TransactionCases transactionId={t.id} />}
+        />
+        <Panel title="Event timeline" className="lg:col-span-2">
           <ol className="relative ml-1 border-l border-line">
             {timeline(t).map((item, i) => (
               <li key={i} className="relative pb-4 pl-5 last:pb-0">

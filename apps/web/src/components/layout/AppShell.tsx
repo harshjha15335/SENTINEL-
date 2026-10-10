@@ -1,5 +1,5 @@
 import { clsx } from "clsx";
-import { Activity, LayoutDashboard, LogOut, Settings, ShieldCheck, ShoppingBag } from "lucide-react";
+import { Activity, Gauge, LayoutDashboard, ListChecks, LogOut, Settings, ShieldCheck, ShoppingBag } from "lucide-react";
 import { NavLink, Navigate, Outlet, useLocation } from "react-router-dom";
 
 import { Skeleton } from "@/components/ui/States";
@@ -9,6 +9,8 @@ import { usePayPalStatus } from "@/features/settings/usePayPalStatus";
 const NAV = [
   { to: "/", label: "Command Center", icon: LayoutDashboard, end: true },
   { to: "/transactions", label: "Transactions", icon: Activity, end: false },
+  { to: "/cases", label: "Review Queue", icon: ListChecks, end: false },
+  { to: "/model", label: "Risk Model", icon: Gauge, end: false },
   { to: "/checkout", label: "Sandbox Checkout", icon: ShoppingBag, end: false },
   { to: "/settings", label: "Settings", icon: Settings, end: false },
 ];

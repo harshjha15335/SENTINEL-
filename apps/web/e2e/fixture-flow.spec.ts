@@ -61,7 +61,9 @@ test("simulated checkout flows into the transaction workspace", async ({ page },
   await expect(page.getByRole("heading", { name: "$249.00" })).toBeVisible();
   await expect(page.getByText("PayPal order created")).toBeVisible();
   await expect(page.getByText("Capture response recorded")).toBeVisible();
-  await expect(page.getByText("Not scored")).toBeVisible();
+  // Scored on capture: a model-generated assessment with its main factors.
+  await expect(page.getByText("Model-generated", { exact: true })).toBeVisible();
+  await expect(page.getByText(/Shadow policy:/)).toBeVisible();
   await audit(page, "transaction detail");
   await noHorizontalOverflow(page);
   await shot(page, "4-transaction-detail", info.project.name);
@@ -70,6 +72,31 @@ test("simulated checkout flows into the transaction workspace", async ({ page },
   await expect(page.getByText("Offline fixture")).toBeVisible();
   await audit(page, "settings");
   await shot(page, "5-settings", info.project.name);
+});
+
+test("review queue, case and model card", async ({ page }, info) => {
+  await signIn(page);
+  await nav(page).getByRole("link", { name: "Review Queue" }).click();
+  await expect(page.getByRole("heading", { name: "Review queue" })).toBeVisible();
+  const first = page.getByRole("list", { name: "Cases" }).getByRole("link").first();
+  await expect(first).toBeVisible();
+  await audit(page, "review queue");
+  await noHorizontalOverflow(page);
+  await shot(page, "6-review-queue", info.project.name);
+
+  await first.click();
+  await expect(page.getByRole("heading", { name: /risk payment needs review/ })).toBeVisible();
+  await expect(page.getByText("Model-generated", { exact: true })).toBeVisible();
+  await expect(page.getByRole("list", { name: "Main factors behind this score" })).toBeVisible();
+  await audit(page, "case detail");
+  await noHorizontalOverflow(page);
+  await shot(page, "7-case-detail", info.project.name);
+
+  await nav(page).getByRole("link", { name: "Risk Model" }).click();
+  await expect(page.getByText("Trained and tested on synthetic data only.")).toBeVisible();
+  await audit(page, "risk model");
+  await noHorizontalOverflow(page);
+  await shot(page, "8-risk-model", info.project.name);
 });
 
 test("unauthenticated users are sent to sign-in", async ({ page }) => {

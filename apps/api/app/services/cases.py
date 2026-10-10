@@ -133,6 +133,7 @@ def list_cases(
     priority: CasePriority | None,
     data_origin: DataOrigin | None,
     assignee_id: uuid.UUID | None,
+    transaction_id: uuid.UUID | None = None,
     limit: int,
     offset: int,
 ) -> tuple[list[Case], int]:
@@ -145,11 +146,23 @@ def list_cases(
         stmt = stmt.where(Case.data_origin == data_origin)
     if assignee_id:
         stmt = stmt.where(Case.assignee_id == assignee_id)
+    if transaction_id:
+        stmt = stmt.where(Case.transaction_id == transaction_id)
     total = db.scalar(select(func.count()).select_from(stmt.subquery())) or 0
     unresolved_first = sql_case((Case.status == CaseStatus.RESOLVED, 1), else_=0)
+    # Within a priority, the higher model score first; manual cases (no score) after.
+    score = (
+        select(RiskAssessment.risk_score)
+        .where(RiskAssessment.id == Case.risk_assessment_id)
+        .scalar_subquery()
+    )
     rows = db.scalars(
         stmt.order_by(
-            unresolved_first, Case.priority.desc(), Case.due_at.asc(), Case.created_at.desc()
+            unresolved_first,
+            Case.priority.desc(),
+            Case.due_at.asc(),
+            score.desc().nulls_last(),
+            Case.created_at.desc(),
         )
         .limit(limit)
         .offset(offset)
