@@ -21,3 +21,4 @@ ml/artifacts/
 *.pkl
 *.sqlite
 .pgdata/
+.devcontainer/demo-credentials.txt

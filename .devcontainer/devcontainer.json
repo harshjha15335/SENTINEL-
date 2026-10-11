@@ -1,0 +1,22 @@
+{
+  "name": "SENTINEL",
+  "dockerComposeFile": "docker-compose.yml",
+  "service": "app",
+  "workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}",
+  "features": {
+    "ghcr.io/devcontainers/features/node:1": { "version": "24" }
+  },
+  "forwardPorts": [8000],
+  "portsAttributes": {
+    "8000": { "label": "SENTINEL", "onAutoForward": "openBrowser" }
+  },
+  "postCreateCommand": "bash .devcontainer/setup.sh",
+  "postStartCommand": "bash .devcontainer/start.sh",
+  "hostRequirements": { "cpus": 2, "memory": "4gb" },
+  "customizations": {
+    "codespaces": { "openFiles": ["docs/DEPLOYMENT.md"] },
+    "vscode": {
+      "extensions": ["ms-python.python", "charliermarsh.ruff", "dbaeumer.vscode-eslint"]
+    }
+  }
+}

@@ -3,7 +3,7 @@
 from enum import StrEnum
 from functools import lru_cache
 
-from pydantic import Field, SecretStr, model_validator
+from pydantic import Field, SecretStr, field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -35,8 +35,21 @@ class Settings(BaseSettings):
     paypal_webhook_id: str | None = None
     paypal_timeout_seconds: float = 20.0
 
+    # Built web app (apps/web/dist). When set, the API also serves the UI from the same
+    # origin, which is how the single-container deployment runs.
+    web_dist: str | None = None
+
     login_rate_limit_attempts: int = 10
     login_rate_limit_window_seconds: int = 300
+
+    @field_validator("database_url")
+    @classmethod
+    def _psycopg_driver(cls, value: str) -> str:
+        # Hosts such as Render hand out postgres:// or postgresql:// URLs; use psycopg 3.
+        for prefix in ("postgres://", "postgresql://"):
+            if value.startswith(prefix):
+                return "postgresql+psycopg://" + value[len(prefix) :]
+        return value
 
     @model_validator(mode="after")
     def _no_partial_paypal_credentials(self) -> "Settings":

@@ -2,14 +2,29 @@
 
 SENTINEL helps merchants who take payments with PayPal go from a suspicious payment to an
 explainable, evidence-backed decision. It records genuine PayPal sandbox payments and events,
-will score risk with explainable models, investigate with grounded AI tools, and route any
+scores risk with an explainable model, will investigate with grounded AI tools, and routes any
 financial action through human approval.
 
-> **Status (2026-10-10):** Phase 0 and the first Phase 1 slice are built and tested: React → FastAPI →
-> PostgreSQL → PayPal gateway with order creation and capture, verified webhooks, and the
-> transaction workspace. A live sandbox payment has **not** been run yet because sandbox
-> credentials have not been configured. Risk scoring, the investigation agent, evidence, graph,
-> disputes and policy lab are not built yet. See [`docs/IMPLEMENTATION_STATUS.md`](docs/IMPLEMENTATION_STATUS.md).
+> **Status (2026-10-11):** Payments, verified webhooks, the transaction workspace, the risk model
+> with SHAP explanations, and the review queue are built and tested. The risk model is trained on
+> synthetic data only. No live PayPal sandbox payment has run yet because sandbox credentials
+> have not been configured. The investigation agent, evidence, graph, disputes and policy lab
+> are not built yet. See [`docs/IMPLEMENTATION_STATUS.md`](docs/IMPLEMENTATION_STATUS.md).
+
+## Launch from GitHub
+
+| Option | What you get | Needs |
+|---|---|---|
+| [![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/harshjha15335/SENTINEL-) | The full app with its database, in your browser, about 2 minutes after opening | A GitHub account. Codespaces usage counts against your account's quota. |
+| [![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/harshjha15335/SENTINEL-) | A public HTTPS URL that redeploys on every push to `main` | A free Render account |
+| `docker run ghcr.io/harshjha15335/sentinel:main` | The same image CI tests, published from `main` | Docker and a PostgreSQL URL |
+
+Every hosted option runs in **demo mode**:
+- PayPal runs in fixture mode, so every payment it creates is labelled **Simulated**.
+- The **Synthetic demo** scenario is loaded.
+- Sign-in passwords are generated, never committed.
+
+Details, and how to switch a deployment to the PayPal sandbox, are in [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md).
 
 Every record shows where it came from: **Live sandbox**, **Merchant provided**, **Synthetic demo**
 or **Simulated**.

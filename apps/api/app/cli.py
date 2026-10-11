@@ -3,7 +3,7 @@
   python -m app.cli seed        Create the demo merchant, users and catalogue (idempotent).
   python -m app.cli demo-load   Load the synthetic scenario (SYNTHETIC_DEMO) for the demo
                                 merchant and score its held-out window. Replaces earlier
-                                SYNTHETIC_DEMO rows only.
+                                SYNTHETIC_DEMO rows only (--if-empty: skip if loaded).
 
 Passwords come from the environment, never from source:
   SENTINEL_SEED_ADMIN_PASSWORD, SENTINEL_SEED_ANALYST_PASSWORD, SENTINEL_SEED_VIEWER_PASSWORD
@@ -86,13 +86,25 @@ def seed() -> None:
     print(f"Seeded merchant {DEMO_MERCHANT!r}")
 
 
-def demo_load(seed_value: int) -> None:
+def demo_load(seed_value: int, *, if_empty: bool = False) -> None:
+    from app.models import Transaction
+    from app.models.enums import DataOrigin
     from app.services.demo.loader import load_scenario
 
     with get_sessionmaker()() as db:
         merchant = db.scalar(select(Merchant).where(Merchant.name == DEMO_MERCHANT))
         if merchant is None:
             sys.exit("Run `python -m app.cli seed` first")
+        if if_empty and db.scalar(
+            select(Transaction.id)
+            .where(
+                Transaction.merchant_id == merchant.id,
+                Transaction.data_origin == DataOrigin.SYNTHETIC_DEMO,
+            )
+            .limit(1)
+        ):
+            print("SYNTHETIC_DEMO data already loaded; skipping")
+            return
         result = load_scenario(db, merchant.id, seed=seed_value)
     print(
         f"Loaded {result.transactions} SYNTHETIC_DEMO payments; scored {result.scored} "
@@ -104,11 +116,14 @@ def main() -> None:
     parser = argparse.ArgumentParser(prog="sentinel")
     parser.add_argument("command", choices=["seed", "demo-load"])
     parser.add_argument("--seed", type=int, default=2026, help="scenario seed for demo-load")
+    parser.add_argument(
+        "--if-empty", action="store_true", help="demo-load: skip when synthetic data exists"
+    )
     args = parser.parse_args()
     if args.command == "seed":
         seed()
     elif args.command == "demo-load":
-        demo_load(args.seed)
+        demo_load(args.seed, if_empty=args.if_empty)
 
 
 if __name__ == "__main__":
