@@ -1,0 +1,83 @@
+name: Image
+
+# Builds the single-container image (API + web app), proves it boots and serves the demo,
+# then publishes it to GitHub Container Registry from main.
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  build-test-publish:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: sentinel
+          POSTGRES_PASSWORD: sentinel
+          POSTGRES_DB: sentinel
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U sentinel" --health-interval 5s --health-retries 10
+    env:
+      IMAGE: ghcr.io/${{ github.repository_owner }}/sentinel
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build
+        run: docker build -t sentinel:ci .
+
+      - name: Boot in demo mode
+        run: |
+          docker run -d --name sentinel --network host \
+            -e PORT=8000 \
+            -e SENTINEL_DATABASE_URL=postgresql://sentinel:sentinel@127.0.0.1:5432/sentinel \
+            -e SENTINEL_PAYPAL_MODE=fixture \
+            -e SENTINEL_DEMO_AUTOLOAD=true \
+            -e SENTINEL_SEED_ADMIN_PASSWORD=ci-admin-pass \
+            -e SENTINEL_SEED_ANALYST_PASSWORD=ci-analyst-pass \
+            -e SENTINEL_SEED_VIEWER_PASSWORD=ci-viewer-pass \
+            sentinel:ci
+          for i in $(seq 1 60); do
+            curl -sf http://127.0.0.1:8000/api/v1/ready && break
+            sleep 2
+          done
+
+      - name: Smoke test
+        run: |
+          set -euo pipefail
+          base=http://127.0.0.1:8000
+          curl -sf $base/api/v1/ready | grep -q '"status":"ready"'
+          # The web app is served from the same origin, including client-side routes.
+          curl -sf $base/ | grep -q '<div id="root">'
+          curl -sf $base/cases/some-id | grep -q '<div id="root">'
+          curl -sfI $base/ | grep -qi 'content-security-policy'
+          # Unknown API paths stay JSON errors, never the HTML shell.
+          test "$(curl -s -o /dev/null -w '%{http_code}' $base/api/v1/does-not-exist)" = 404
+          # Sign in and read the demo review queue.
+          curl -sf -c jar -H 'Content-Type: application/json' \
+            -d '{"email":"analyst@northwind.example","password":"ci-analyst-pass"}' \
+            $base/api/v1/auth/login > /dev/null
+          total=$(curl -sf -b jar "$base/api/v1/cases?status=OPEN&limit=1" | python3 -c 'import json,sys;print(json.load(sys.stdin)["total"])')
+          echo "open cases: $total"
+          test "$total" = 170
+          curl -sf -b jar $base/api/v1/risk/model | grep -q '"model_version":"operational-v1"'
+
+      - name: Container logs
+        if: always()
+        run: docker logs sentinel 2>&1 | grep -v '"request"' | tail -60
+
+      - name: Publish to GHCR
+        if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+        run: |
+          echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
+          for tag in main "sha-${GITHUB_SHA::7}"; do
+            docker tag sentinel:ci "$IMAGE:$tag"
+            docker push "$IMAGE:$tag"
+          done

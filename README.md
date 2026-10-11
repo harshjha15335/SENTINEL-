@@ -17,6 +17,23 @@ financial action through human approval.
 > deterministic summary that is labelled as such). Graph analytics, disputes, policy lab and
 > refund execution are Phase 5. See [`docs/IMPLEMENTATION_STATUS.md`](docs/IMPLEMENTATION_STATUS.md).
 
+## Launch from GitHub
+
+| Option | What you get | Needs |
+|---|---|---|
+| [![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/harshjha15335/SENTINEL-) | The full app with its database, in your browser, about 2 minutes after opening | A GitHub account. Codespaces usage counts against your account's quota. |
+| [![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/harshjha15335/SENTINEL-) | A public HTTPS URL that redeploys on every push to `main` | A free Render account |
+| `docker run ghcr.io/harshjha15335/sentinel:main` | The same image CI tests, published from `main` | Docker and a PostgreSQL URL |
+
+Every hosted option runs in **demo mode**:
+- PayPal runs in fixture mode, so every payment it creates is labelled **Simulated**.
+- The **Synthetic demo** scenario is loaded.
+- Sign-in passwords are generated, never committed.
+- Investigations produce the labelled deterministic summary unless `SENTINEL_AI_PROVIDER` and
+  `SENTINEL_AI_API_KEY` are set.
+
+Details, and how to switch a deployment to the PayPal sandbox, are in [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md).
+
 Every record shows where it came from: **Live sandbox**, **Merchant provided**, **Synthetic demo**
 or **Simulated**.
 

@@ -89,14 +89,27 @@ Last updated: 2026-10-11 (session 3). Update this file whenever real work lands.
 ### Tests
 | Suite | Result |
 |---|---|
-| Backend | 103 passed, 1 skipped (provider-backed AI test: no credentials) |
+| Backend | 111 passed, 1 skipped (provider-backed AI test: no credentials) |
 | ML | 7 passed |
 | Vitest | 26 passed |
-| Playwright (desktop + mobile) | 8 passed, with axe WCAG 2.2 AA on 9 screens plus the workbench |
+| Playwright (desktop + mobile) | 8 passed, with axe WCAG 2.2 AA on 9 screens plus the workbench, both against Vite and against the built app served by the API with its CSP (no violations) |
+
+### Deployment (session 3)
+- **Single container:** the root `Dockerfile` serves the API and the web app from one origin, with a CSP on HTML responses.
+- **Start-up:** migrate, seed, then load the demo data once.
+- **Locally verified:** the image was built and run. The Playwright suite passed against it (6 tests, no CSP violations) and so did the CI smoke script.
+- **Codespaces:** the `.devcontainer/` setup and start scripts were verified on a clean copy (6 e2e tests passed).
+- **Render:** `render.yaml` Blueprint.
+- **GitHub Actions:** the `Image` workflow builds, smoke-tests and publishes to GHCR.
+- **Evidence storage:** the image sets `SENTINEL_STORAGE_BACKEND=database`, because container disks are ephemeral and the runtime user cannot write to the app directory. The image itself was not rebuilt after this change.
+- See `docs/DEPLOYMENT.md`.
 
 ## Implemented but not tested
 - The `app.workers.events` loop entry point. The processing function it calls is tested.
 - PayPal v6 button rendering, which needs a real sandbox client id.
+- **Hosted deploys:**
+  - The Render deploy needs Harsh's Render account.
+  - A real Codespace has not been created yet. Only its scripts were run here.
 - `refund_capture`, `get_capture` and `get_dispute` happy paths against PayPal.
 
 ## Blocked by credentials / permissions

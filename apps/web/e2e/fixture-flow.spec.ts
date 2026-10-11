@@ -32,6 +32,18 @@ async function shot(page: Page, name: string, project: string) {
 
 test.skip(!ANALYST.password, "SENTINEL_E2E_ANALYST_PASSWORD is required");
 
+// The production container sends a Content-Security-Policy; nothing the app loads may break it.
+const cspViolations: string[] = [];
+test.beforeEach(({ page }) => {
+  cspViolations.length = 0;
+  page.on("console", (msg) => {
+    if (msg.type() === "error" && /Content Security Policy/i.test(msg.text())) cspViolations.push(msg.text());
+  });
+});
+test.afterEach(() => {
+  expect(cspViolations).toEqual([]);
+});
+
 test("simulated checkout flows into the transaction workspace", async ({ page }, info) => {
   await signIn(page);
   await audit(page, "command center");

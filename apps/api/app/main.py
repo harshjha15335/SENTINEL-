@@ -59,6 +59,10 @@ def create_app() -> FastAPI:
     ):
         v1.include_router(module.router)
     app.include_router(v1)
+    if settings.web_dist:
+        from app.web import mount_web
+
+        mount_web(app, settings.web_dist)
     return app
 
 

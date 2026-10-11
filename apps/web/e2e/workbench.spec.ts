@@ -6,8 +6,22 @@ import { expect, test, type Page } from "@playwright/test";
 const ANALYST = { email: "analyst@northwind.example", password: process.env.SENTINEL_E2E_ANALYST_PASSWORD ?? "" };
 const ADMIN = { email: "admin@northwind.example", password: process.env.SENTINEL_E2E_ADMIN_PASSWORD ?? "" };
 const SHOTS = process.env.SENTINEL_SCREENSHOT_DIR;
+// Unique per run, so reruns against the same database find exactly one upload.
+const FILE = `invoice-${Date.now()}.pdf`;
 
 test.skip(!ANALYST.password || !ADMIN.password, "SENTINEL_E2E_ANALYST_PASSWORD and SENTINEL_E2E_ADMIN_PASSWORD are required");
+
+// The production container sends a Content-Security-Policy; nothing the workbench loads may break it.
+const cspViolations: string[] = [];
+test.beforeEach(({ page }) => {
+  cspViolations.length = 0;
+  page.on("console", (msg) => {
+    if (msg.type() === "error" && /Content Security Policy/i.test(msg.text())) cspViolations.push(msg.text());
+  });
+});
+test.afterEach(() => {
+  expect(cspViolations).toEqual([]);
+});
 
 async function signIn(page: Page, who: { email: string; password: string }) {
   await page.goto("/login");
@@ -74,16 +88,19 @@ test("investigate, attach evidence, export a packet and approve refund intent", 
   await expect(findings.getByText(/Verified facts \(\d+\)/)).toBeVisible();
 
   // 6. Evidence upload.
-  await page.getByLabel("Upload evidence").setInputFiles({ name: "invoice-1001.pdf", mimeType: "application/pdf", buffer: pdf(`Invoice 1001 ${info.project.name} ${Date.now()}`) });
+  await page.getByLabel("Upload evidence").setInputFiles({ name: FILE, mimeType: "application/pdf", buffer: pdf(`Invoice 1001 ${info.project.name} ${Date.now()}`) });
   await page.getByLabel("What is it?").selectOption("INVOICE");
   await page.getByRole("button", { name: "Upload", exact: true }).click();
-  await expect(page.getByText("invoice-1001.pdf")).toBeVisible();
-  await expect(page.getByRole("link", { name: "Download invoice-1001.pdf" })).toBeVisible();
+  await expect(page.getByText(FILE)).toBeVisible();
+  await expect(page.getByRole("link", { name: `Download ${FILE}` })).toBeVisible();
 
   // 7. Evidence packet.
+  // Packets are listed newest first; earlier runs against the same database may have made some.
+  const packetLinks = page.getByRole("link", { name: /Download packet generated/ });
+  const before = await packetLinks.count();
   await page.getByRole("button", { name: "Generate packet" }).click();
-  const packetLink = page.getByRole("link", { name: /Download packet generated/ });
-  await expect(packetLink).toBeVisible();
+  await expect(packetLinks).toHaveCount(before + 1);
+  const packetLink = packetLinks.first();
   const href = await packetLink.getAttribute("href");
   const resp = await page.request.get(href ?? "");
   expect(resp.status()).toBe(200);
@@ -104,8 +121,9 @@ test("investigate, attach evidence, export a packet and approve refund intent", 
   await page.goto(caseUrl);
   await page.getByLabel("Decision note").fill("Snapshot and evidence reviewed.");
   await page.getByRole("button", { name: "Approve", exact: true }).click();
-  await expect(page.getByText(/Approved by admin@northwind.example/)).toBeVisible();
-  await expect(page.getByText(/no PayPal request was made/)).toBeVisible();
+  // Requests are listed newest first; earlier runs may have left approved ones.
+  await expect(page.getByText(/Approved by admin@northwind.example/).first()).toBeVisible();
+  await expect(page.getByText(/no PayPal request was made/).first()).toBeVisible();
 
   // 10. Audit trail.
   const activity = page.getByRole("region", { name: "Activity" }).or(page.locator("section", { hasText: "Activity" }).last());
