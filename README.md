@@ -1,15 +1,21 @@
 # SENTINEL · AI Payment Trust & Recovery
 
 SENTINEL helps merchants who take payments with PayPal go from a suspicious payment to an
-explainable, evidence-backed decision. It records genuine PayPal sandbox payments and events,
-scores risk with an explainable model, will investigate with grounded AI tools, and routes any
+explainable, evidence-backed decision. It records PayPal sandbox payments and events, scores risk
+with an explainable model, investigates cases with grounded, read-only AI tools, and routes any
 financial action through human approval.
 
-> **Status (2026-10-11):** Payments, verified webhooks, the transaction workspace, the risk model
-> with SHAP explanations, and the review queue are built and tested. The risk model is trained on
-> synthetic data only. No live PayPal sandbox payment has run yet because sandbox credentials
-> have not been configured. The investigation agent, evidence, graph, disputes and policy lab
-> are not built yet. See [`docs/IMPLEMENTATION_STATUS.md`](docs/IMPLEMENTATION_STATUS.md).
+> **Status (2026-10-11):** Built and tested: React → FastAPI → PostgreSQL → PayPal gateway
+> (order creation, capture, verified webhooks), the transaction workspace, an explainable risk
+> model (XGBoost + TreeSHAP, trained on synthetic data, shadow policy), the review queue, and the
+> Phase 4 Investigation Workbench: read-only investigation agent with cited findings, evidence
+> upload, evidence packet PDFs and a two-person approval workflow that records refund intent
+> without moving money.
+>
+> Not yet verified against real services: no live PayPal sandbox payment (no sandbox
+> credentials) and no real AI provider run (no AI credentials; the app falls back to a
+> deterministic summary that is labelled as such). Graph analytics, disputes, policy lab and
+> refund execution are Phase 5. See [`docs/IMPLEMENTATION_STATUS.md`](docs/IMPLEMENTATION_STATUS.md).
 
 ## Launch from GitHub
 
@@ -23,6 +29,8 @@ Every hosted option runs in **demo mode**:
 - PayPal runs in fixture mode, so every payment it creates is labelled **Simulated**.
 - The **Synthetic demo** scenario is loaded.
 - Sign-in passwords are generated, never committed.
+- Investigations produce the labelled deterministic summary unless `SENTINEL_AI_PROVIDER` and
+  `SENTINEL_AI_API_KEY` are set.
 
 Details, and how to switch a deployment to the PayPal sandbox, are in [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md).
 
@@ -62,6 +70,13 @@ with the passwords you seeded.
   `SENTINEL_PAYPAL_WEBHOOK_ID`. Details: [`docs/PAYPAL_INTEGRATION.md`](docs/PAYPAL_INTEGRATION.md).
 - `SENTINEL_PAYPAL_MODE=fixture` runs fully offline. Orders and captures are created locally and
   every one is labelled **Simulated**; nothing reaches PayPal.
+
+### Investigation agent (optional)
+Set `SENTINEL_AI_PROVIDER=anthropic` (or `openai`), `SENTINEL_AI_API_KEY` and optionally
+`SENTINEL_AI_MODEL`. Without them, "Generate deterministic summary" produces a rule-based summary
+from stored records, labelled "Deterministic summary — AI provider unavailable". Evidence files are
+stored under `apps/api/var/storage` (or in PostgreSQL with `SENTINEL_STORAGE_BACKEND=database`).
+Design: [`docs/AGENT_DESIGN.md`](docs/AGENT_DESIGN.md).
 
 ## Tests
 See [`docs/TESTING.md`](docs/TESTING.md) for commands and the latest recorded results.

@@ -19,6 +19,21 @@ class PayPalMode(StrEnum):
     FIXTURE = "fixture"
 
 
+class AIProvider(StrEnum):
+    """Which LLM provider the investigation agent uses. NONE means deterministic summaries only."""
+
+    NONE = "none"
+    ANTHROPIC = "anthropic"
+    OPENAI = "openai"
+
+
+class StorageBackend(StrEnum):
+    """Where evidence files and generated packets are stored. Never a public static directory."""
+
+    LOCAL = "local"
+    DATABASE = "database"
+
+
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_prefix="SENTINEL_", env_file=".env", extra="ignore")
 
@@ -34,6 +49,22 @@ class Settings(BaseSettings):
     paypal_client_secret: SecretStr | None = None
     paypal_webhook_id: str | None = None
     paypal_timeout_seconds: float = 20.0
+
+    # Investigation agent. Without a provider and key, only deterministic summaries are produced.
+    ai_provider: AIProvider = AIProvider.NONE
+    ai_model: str | None = None
+    ai_api_key: SecretStr | None = None
+    ai_timeout_seconds: float = 90.0
+    ai_request_limit: int = 12
+    ai_tool_calls_limit: int = 24
+    ai_total_tokens_limit: int = 120_000
+    investigation_stale_seconds: int = 600
+
+    # Evidence uploads and generated packets.
+    storage_backend: StorageBackend = StorageBackend.LOCAL
+    storage_dir: str = "var/storage"
+    evidence_max_bytes: int = 10 * 1024 * 1024
+    evidence_max_text_chars: int = 50_000
 
     # Built web app (apps/web/dist). When set, the API also serves the UI from the same
     # origin, which is how the single-container deployment runs.
@@ -62,6 +93,14 @@ class Settings(BaseSettings):
                 "SENTINEL_PAYPAL_CLIENT_ID and SENTINEL_PAYPAL_CLIENT_SECRET must be set together"
             )
         return self
+
+    @property
+    def ai_configured(self) -> bool:
+        return (
+            self.ai_provider is not AIProvider.NONE
+            and self.ai_api_key is not None
+            and bool(self.ai_api_key.get_secret_value())
+        )
 
     @property
     def paypal_credentials_configured(self) -> bool:

@@ -11,6 +11,10 @@ import { ErrorState, Skeleton } from "@/components/ui/States";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { useToast } from "@/components/ui/Toast";
 import { useMe } from "@/features/auth/session";
+import { ApprovalsPanel } from "@/features/investigation/ApprovalsPanel";
+import { ChecklistPanel, EvidencePanel } from "@/features/investigation/EvidencePanel";
+import { InvestigationPanel } from "@/features/investigation/InvestigationPanel";
+import { PacketPanel } from "@/features/investigation/PacketPanel";
 import { RiskPanel } from "@/features/risk/RiskPanel";
 import { isOperator, type CaseDetail, type CaseResolution } from "@/lib/api";
 import { formatDateTime, formatMoney, humanize } from "@/lib/format";
@@ -38,10 +42,23 @@ const ACTION_LABELS: Record<string, string> = {
   "case.claimed": "Claimed for review",
   "case.note_added": "Note added",
   "case.resolved": "Case resolved",
+  "investigation.requested": "Investigation requested",
+  "investigation.completed": "Investigation completed",
+  "investigation.failed": "Investigation failed",
+  "evidence.uploaded": "Evidence uploaded",
+  "evidence.downloaded": "Evidence downloaded",
+  "packet.generated": "Evidence packet generated",
+  "packet.downloaded": "Evidence packet downloaded",
+  "approval.requested": "Approval requested",
+  "approval.approved": "Approval granted",
+  "approval.rejected": "Approval rejected",
+  "action.execution_recorded": "Approved action recorded (no payment executed)",
 };
 
 function Detail({ c }: { c: CaseDetail }) {
   const t = c.transaction;
+  const me = useMe();
+  const operator = isOperator(me.data?.role);
   const overdue = isOverdue(c.due_at, c.status);
   return (
     <>
@@ -52,6 +69,7 @@ function Detail({ c }: { c: CaseDetail }) {
             <Badge tone={STATUS_TONE[c.status]}>{STATUS_LABEL[c.status]}</Badge>
             <Badge tone={PRIORITY_TONE[c.priority]}>{c.priority.toLowerCase()} priority</Badge>
             <OriginBadge origin={c.data_origin} />
+            <span className="text-fg-subtle">Investigation workbench ·</span>
             <span className={overdue ? "text-critical" : undefined}>
               {c.status === "RESOLVED" ? `Resolved ${formatDateTime(c.resolved_at)}` : `${overdue ? "Overdue since" : "Due"} ${formatDateTime(c.due_at)}`}
             </span>
@@ -71,20 +89,29 @@ function Detail({ c }: { c: CaseDetail }) {
               <Field label="Payer reference" value={<span className="font-mono text-[13px]">{t.payer_reference ?? "—"}</span>} />
               <Field label="Occurred" value={formatDateTime(t.occurred_at)} />
               <Field label="Opened by" value={humanize(c.source)} />
+              <Field label="PayPal order" value={<span className="font-mono text-[13px]">{t.paypal_order_id ?? "—"}</span>} />
+              <Field label="PayPal capture" value={<span className="font-mono text-[13px]">{t.paypal_capture_id ?? "—"}</span>} />
+              <Field label="Data origin" value={<OriginBadge origin={t.data_origin} />} />
             </dl>
           </Panel>
           <RiskPanel transactionId={t.id} scorable={t.occurred_at != null} />
+          <InvestigationPanel caseId={c.id} canRun={operator} />
+          <EvidencePanel caseId={c.id} canUpload={operator} />
         </div>
         <div className="space-y-4">
           <Actions c={c} />
+          <ApprovalsPanel caseId={c.id} me={me.data} canRequest={operator} resolved={c.status === "RESOLVED"} />
+          <PacketPanel caseId={c.id} canGenerate={operator} />
+          <ChecklistPanel caseId={c.id} />
           <Notes c={c} />
           <Panel title="Activity">
+            {c.audit.length === 0 && <p className="text-sm text-fg-muted">No activity recorded yet.</p>}
             <ol className="space-y-2">
               {c.audit.map((a) => (
-                <li key={a.id} className="text-sm">
+                <li key={a.id} className="border-l border-line pl-3 text-sm">
                   <p>{ACTION_LABELS[a.action] ?? a.action}</p>
                   <p className="tabular text-xs text-fg-subtle">
-                    {formatDateTime(a.created_at)} · {a.actor_type === "SYSTEM" ? "SENTINEL" : "Analyst"}
+                    {formatDateTime(a.created_at)} · {a.actor_type === "SYSTEM" ? "SENTINEL" : "Team member"}
                   </p>
                 </li>
               ))}

@@ -7,7 +7,7 @@ from sqlalchemy.orm import Session
 from app.auth.deps import Principal, any_member, operator
 from app.core.errors import NotFoundError
 from app.db.session import get_db
-from app.schemas.api import ModelCardOut, RiskAssessmentOut
+from app.schemas.api import ModelCardOut, ReviewCapacityOut, RiskAssessmentOut
 from app.services.risk.features import FEATURE_DESCRIPTIONS, FEATURE_NAMES
 from app.services.risk.model import get_model
 from app.services.risk.scoring import get_transaction, latest_for, score_transaction
@@ -39,6 +39,32 @@ def model_card(principal: Principal = Depends(any_member)) -> ModelCardOut:
         test_metrics_rules_baseline=meta["test_metrics_rules_baseline"],
         features=[{"name": n, "label": FEATURE_DESCRIPTIONS[n]} for n in FEATURE_NAMES],
         limitations=meta["limitations"],
+        review_capacity=review_capacity(meta),
+    )
+
+
+def review_capacity(meta: dict[str, Any]) -> ReviewCapacityOut:
+    """Compare the validation-time capacity assumption with the recorded test flag rate.
+
+    Both numbers come from the training run's metadata. The threshold is not changed: tuning it
+    on the test window would leak the test set, so the policy stays in shadow mode instead.
+    """
+    capacity = float(meta["cost_assumptions"]["review_capacity_share"])
+    flagged = float(meta["test_metrics"]["flag_rate"])
+    exceeded = flagged > capacity
+    return ReviewCapacityOut(
+        capacity_share=capacity,
+        test_flag_rate=flagged,
+        exceeded=exceeded,
+        excess_share=max(0.0, flagged - capacity),
+        message=(
+            f"On the held-out test window the high threshold flagged {flagged:.1%} of payments, "
+            f"above the {capacity:.0%} review capacity assumed on validation. Expect more cases "
+            "than planned. The threshold was not re-tuned on test data; the policy stays in "
+            "shadow mode."
+            if exceeded
+            else f"Test-window flag rate {flagged:.1%} is within the {capacity:.0%} capacity."
+        ),
     )
 
 

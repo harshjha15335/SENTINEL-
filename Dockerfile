@@ -12,7 +12,7 @@ RUN cd apps/web && npm run build
 
 FROM python:3.12-slim
 ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1 PIP_NO_CACHE_DIR=1 \
-    SENTINEL_WEB_DIST=/app/web
+    SENTINEL_WEB_DIST=/app/web SENTINEL_STORAGE_BACKEND=database
 WORKDIR /app
 COPY apps/api/pyproject.toml ./
 COPY apps/api/app ./app

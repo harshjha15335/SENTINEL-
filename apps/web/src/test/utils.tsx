@@ -17,7 +17,7 @@ export function mockApi(routes: Route[]) {
     calls.push({
       method,
       url,
-      body: init?.body ? JSON.parse(String(init.body)) : undefined,
+      body: init?.body instanceof FormData ? init.body : init?.body ? JSON.parse(String(init.body)) : undefined,
       headers: (init?.headers ?? {}) as Record<string, string>,
     });
     const route = routes.find(

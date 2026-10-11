@@ -30,3 +30,30 @@ def record(
     )
     db.add(event)
     return event
+
+
+def record_for_case(
+    db: Session,
+    case: Any,
+    action: str,
+    actor_id: uuid.UUID | None,
+    *,
+    entity_type: str,
+    entity_id: str | uuid.UUID,
+    **meta: object,
+) -> AuditEvent:
+    """Audit an action on a record that belongs to a case, so the case timeline can show it.
+
+    Callers pass identifiers, hashes, sizes and enum values only: never free text written by a
+    user, uploaded content or model output.
+    """
+    return record(
+        db,
+        action=action,
+        entity_type=entity_type,
+        entity_id=entity_id,
+        merchant_id=case.merchant_id,
+        actor_id=actor_id,
+        actor_type="USER" if actor_id else "SYSTEM",
+        metadata={"case_id": str(case.id), "transaction_id": str(case.transaction_id), **meta},
+    )

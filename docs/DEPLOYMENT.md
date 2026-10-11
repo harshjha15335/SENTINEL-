@@ -61,6 +61,8 @@ docker run -p 8000:8000 \
 | `SENTINEL_DEMO_AUTOLOAD` | `true` loads the SYNTHETIC_DEMO scenario once. |
 | `SENTINEL_COOKIE_SECURE` | `true` behind HTTPS. |
 | `SENTINEL_WEB_DIST` | Path of the built web app. The image sets it to `/app/web`. |
+| `SENTINEL_STORAGE_BACKEND` | Where evidence uploads and packets are stored. The image sets `database`, because container disks are ephemeral and the app directory is read-only for the runtime user. |
+| `SENTINEL_AI_PROVIDER`, `SENTINEL_AI_API_KEY`, `SENTINEL_AI_MODEL` | Investigation agent (`anthropic` or `openai`). Without them, investigations produce the labelled deterministic summary. |
 | `PORT` | Listen port, default 8000. |
 
 ## Switching a deployment to the PayPal sandbox

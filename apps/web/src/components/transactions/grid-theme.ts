@@ -1,7 +1,23 @@
-import { AllCommunityModule, ModuleRegistry, colorSchemeDark, themeQuartz } from "ag-grid-community";
+import {
+  CellStyleModule,
+  ClientSideRowModelModule,
+  ModuleRegistry,
+  TooltipModule,
+  ValidationModule,
+  colorSchemeDark,
+  themeQuartz,
+} from "ag-grid-community";
 
-// Community modules only: SENTINEL must not depend on AG Grid Enterprise features.
-ModuleRegistry.registerModules([AllCommunityModule]);
+// Community modules only, and only the ones the transactions grid uses (client-side rows with
+// sorting and resizing, cellClass, header tooltips). Registering AllCommunityModule pulled every
+// filter, editor and export into the bundle. ValidationModule names a missing module in the
+// console during development and is dropped from production builds.
+ModuleRegistry.registerModules([
+  ClientSideRowModelModule,
+  CellStyleModule,
+  TooltipModule,
+  ...(import.meta.env.DEV ? [ValidationModule] : []),
+]);
 
 export const sentinelGridTheme = themeQuartz.withPart(colorSchemeDark).withParams({
   backgroundColor: "#0f161e",

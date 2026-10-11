@@ -6,6 +6,7 @@ import { ErrorState, Skeleton } from "@/components/ui/States";
 import type { ModelCard, ModelMetrics } from "@/lib/api";
 import { formatDateTime, humanize } from "@/lib/format";
 
+import { CapacityWarning } from "./CapacityWarning";
 import { useModelCard } from "./useRisk";
 
 export function ModelPage() {
@@ -56,6 +57,9 @@ function Card({ m }: { m: ModelCard }) {
           {m.training_data}. These results show the method works on that scenario; they are not evidence of performance on
           real PayPal traffic.
         </p>
+      </div>
+      <div className="lg:col-span-3">
+        <CapacityWarning card={m} />
       </div>
 
       <Panel title="Held-out test results" className="lg:col-span-2" bodyClassName="p-0">

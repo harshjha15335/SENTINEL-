@@ -1,7 +1,7 @@
 import uuid
 
 from fastapi import APIRouter, Depends, Query
-from sqlalchemy import select
+from sqlalchemy import and_, or_, select
 from sqlalchemy.orm import Session
 
 from app.auth.deps import Principal, any_member, operator
@@ -43,8 +43,11 @@ def _detail(db: Session, case: Case) -> CaseDetailOut:
         select(AuditEvent)
         .where(
             AuditEvent.merchant_id == case.merchant_id,
-            AuditEvent.entity_type == "case",
-            AuditEvent.entity_id == str(case.id),
+            or_(
+                and_(AuditEvent.entity_type == "case", AuditEvent.entity_id == str(case.id)),
+                # Investigations, evidence, packets and approvals carry their case id.
+                AuditEvent.metadata_["case_id"].astext == str(case.id),
+            ),
         )
         .order_by(AuditEvent.created_at)
     )
