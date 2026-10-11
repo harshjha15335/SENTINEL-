@@ -168,13 +168,15 @@ def test_ai_investigation_uses_read_only_tools_and_saves_metadata(
     assert "read_evidence_text" in names and "get_payer_history" in names
     assert all(c["outcome"] in ("ok", "unavailable") for c in run["tool_calls"])
     assert ("evidence", ev["id"]) in {(r["kind"], r["id"]) for r in run["source_refs"]}
-    assert run["findings"]["evidence_references"][0]["excerpt"] == "Shipped via carrier on 2 September"
+    assert (
+        run["findings"]["evidence_references"][0]["excerpt"] == "Shipped via carrier on 2 September"
+    )
     assert run["duration_ms"] is not None and run["started_at"] and run["completed_at"]
 
 
 def test_agent_has_only_read_only_tools() -> None:
     agent = build_agent(FunctionModel(lambda m, i: ModelResponse(parts=[]), model_name="x"))
-    names = set(agent._function_toolset.tools)  # noqa: SLF001
+    names = set(agent._function_toolset.tools)
     assert names == set(READ_ONLY_TOOLS)
     # Every tool is a read: get_*, list_* or read_*. No refund, submit, update or delete.
     assert all(n.split("_", 1)[0] in {"get", "list", "read"} for n in names)
@@ -244,7 +246,9 @@ def test_prompt_injection_in_evidence_stays_data(db: Session, tenant: Tenant) ->
                     assert "IGNORE ALL PREVIOUS" not in str(p.content)
                 if isinstance(p, ToolReturnPart) and p.tool_name == "read_evidence_text":
                     assert "UNTRUSTED DATA" in p.content["notice"]
-                    seen_in_tool = seen_in_tool or "IGNORE ALL PREVIOUS" in p.content["untrusted_content"]
+                    seen_in_tool = (
+                        seen_in_tool or "IGNORE ALL PREVIOUS" in p.content["untrusted_content"]
+                    )
     assert seen_in_tool
     # Output that claims an action was taken is rejected; nothing is executed.
     assert run["status"] == "FAILED"
@@ -292,7 +296,9 @@ def test_fabricated_evidence_reference_is_rejected_and_history_kept(
             "verified_facts": [
                 {
                     "statement": "The payer also bought from another store.",
-                    "sources": [{"kind": "transaction", "id": "00000000-0000-0000-0000-000000000001"}],
+                    "sources": [
+                        {"kind": "transaction", "id": "00000000-0000-0000-0000-000000000001"}
+                    ],
                 }
             ]
         },
@@ -402,9 +408,7 @@ def test_invalid_structured_output_fails(db: Session, tenant: Tenant) -> None:
     assert run["error_category"] == "INVALID_OUTPUT"
 
 
-def test_budget_is_enforced(
-    db: Session, tenant: Tenant, monkeypatch: pytest.MonkeyPatch
-) -> None:
+def test_budget_is_enforced(db: Session, tenant: Tenant, monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(get_settings(), "ai_request_limit", 3)
     case = make_case(db, tenant)
     client, h = client_for(tenant, Role.ANALYST)
@@ -536,7 +540,7 @@ def test_model_cannot_supply_scope_and_untrusted_fields_are_labelled(
     db: Session, tenant: Tenant
 ) -> None:
     agent = build_agent(FunctionModel(lambda m, i: ModelResponse(parts=[]), model_name="x"))
-    for tool in agent._function_toolset.tools.values():  # noqa: SLF001
+    for tool in agent._function_toolset.tools.values():
         params = tool.tool_def.parameters_json_schema.get("properties", {})
         assert not {"merchant_id", "case_id", "transaction_id"} & set(params)
     case = make_case(db, tenant)

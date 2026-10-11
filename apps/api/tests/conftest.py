@@ -1,4 +1,5 @@
 import os
+import tempfile
 
 os.environ.setdefault(
     "SENTINEL_DATABASE_URL",
@@ -9,10 +10,11 @@ os.environ.pop("SENTINEL_PAYPAL_CLIENT_ID", None)
 os.environ.pop("SENTINEL_PAYPAL_CLIENT_SECRET", None)
 os.environ["SENTINEL_LOGIN_RATE_LIMIT_ATTEMPTS"] = "5"
 # Investigations: never reach a real AI provider from unit tests; store files in a temp dir.
-for _var in ("SENTINEL_AI_PROVIDER", "SENTINEL_AI_API_KEY", "SENTINEL_AI_MODEL"):
-    os.environ.pop(_var, None)
+os.environ.pop("SENTINEL_AI_PROVIDER", None)
+os.environ.pop("SENTINEL_AI_API_KEY", None)
+os.environ.pop("SENTINEL_AI_MODEL", None)
 os.environ["SENTINEL_STORAGE_BACKEND"] = "local"
-os.environ["SENTINEL_STORAGE_DIR"] = __import__("tempfile").mkdtemp(prefix="sentinel-test-")
+os.environ["SENTINEL_STORAGE_DIR"] = tempfile.mkdtemp(prefix="sentinel-test-")
 
 from collections.abc import Iterator
 from dataclasses import dataclass

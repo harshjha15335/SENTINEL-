@@ -4,6 +4,23 @@
  */
 
 export interface paths {
+    "/api/v1/ai/status": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Ai Status */
+        get: operations["ai_status_api_v1_ai_status_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/audit": {
         parameters: {
             query?: never;
@@ -90,6 +107,58 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/cases/{case_id}/approvals": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Approvals */
+        get: operations["list_approvals_api_v1_cases__case_id__approvals_get"];
+        put?: never;
+        /** Create Approval */
+        post: operations["create_approval_api_v1_cases__case_id__approvals_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/cases/{case_id}/approvals/{approval_id}/approve": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Approve */
+        post: operations["approve_api_v1_cases__case_id__approvals__approval_id__approve_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/cases/{case_id}/approvals/{approval_id}/reject": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Reject */
+        post: operations["reject_api_v1_cases__case_id__approvals__approval_id__reject_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/cases/{case_id}/claim": {
         parameters: {
             query?: never;
@@ -107,6 +176,93 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/cases/{case_id}/evidence": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Evidence */
+        get: operations["list_evidence_api_v1_cases__case_id__evidence_get"];
+        put?: never;
+        /** Upload Evidence */
+        post: operations["upload_evidence_api_v1_cases__case_id__evidence_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/cases/{case_id}/evidence/{evidence_id}/download": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Download Evidence */
+        get: operations["download_evidence_api_v1_cases__case_id__evidence__evidence_id__download_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/cases/{case_id}/investigations": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Investigations */
+        get: operations["list_investigations_api_v1_cases__case_id__investigations_get"];
+        put?: never;
+        /** Start Investigation */
+        post: operations["start_investigation_api_v1_cases__case_id__investigations_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/cases/{case_id}/investigations/{run_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Investigation */
+        get: operations["get_investigation_api_v1_cases__case_id__investigations__run_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/cases/{case_id}/investigations/{run_id}/findings": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Findings */
+        get: operations["get_findings_api_v1_cases__case_id__investigations__run_id__findings_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/cases/{case_id}/notes": {
         parameters: {
             query?: never;
@@ -118,6 +274,41 @@ export interface paths {
         put?: never;
         /** Note */
         post: operations["note_api_v1_cases__case_id__notes_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/cases/{case_id}/packets": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Packets */
+        get: operations["list_packets_api_v1_cases__case_id__packets_get"];
+        put?: never;
+        /** Generate Packet */
+        post: operations["generate_packet_api_v1_cases__case_id__packets_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/cases/{case_id}/packets/{packet_id}/download": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Download Packet */
+        get: operations["download_packet_api_v1_cases__case_id__packets__packet_id__download_get"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -370,6 +561,114 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        /** AIStatusOut */
+        AIStatusOut: {
+            /** Configured */
+            configured: boolean;
+            /** Fallback */
+            fallback: "DETERMINISTIC" | null;
+            /** Model Name */
+            model_name: string | null;
+            /** Provider */
+            provider: string;
+        };
+        /** ActionExecutionOut */
+        ActionExecutionOut: {
+            action_type: components["schemas"]["ApprovalActionType"];
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Detail */
+            detail: {
+                [key: string]: unknown;
+            };
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Provider Called */
+            provider_called: boolean;
+            status: components["schemas"]["ExecutionStatus"];
+        };
+        /**
+         * ApprovalActionType
+         * @enum {string}
+         */
+        ApprovalActionType: "MANUAL_REVIEW" | "EVIDENCE_PACKET_INTERNAL" | "PREPARE_REFUND";
+        /** ApprovalDecisionOut */
+        ApprovalDecisionOut: {
+            /** Comment */
+            comment: string;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            decided_by: components["schemas"]["UserRefOut"] | null;
+            decided_by_role: components["schemas"]["Role"];
+            decision: components["schemas"]["ApprovalDecisionValue"];
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+        };
+        /**
+         * ApprovalDecisionValue
+         * @enum {string}
+         */
+        ApprovalDecisionValue: "APPROVED" | "REJECTED";
+        /** ApprovalRequestOut */
+        ApprovalRequestOut: {
+            /** Action Snapshot */
+            action_snapshot: {
+                [key: string]: unknown;
+            };
+            action_type: components["schemas"]["ApprovalActionType"];
+            /**
+             * Case Id
+             * Format: uuid
+             */
+            case_id: string;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            data_origin: components["schemas"]["DataOrigin"];
+            /** Decided At */
+            decided_at: string | null;
+            decision: components["schemas"]["ApprovalDecisionOut"] | null;
+            execution: components["schemas"]["ActionExecutionOut"] | null;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Investigation Run Id */
+            investigation_run_id: string | null;
+            /** Justification */
+            justification: string;
+            requested_by: components["schemas"]["UserRefOut"] | null;
+            /** Required Roles */
+            required_roles: components["schemas"]["Role"][];
+            /** Snapshot Sha256 */
+            snapshot_sha256: string;
+            status: components["schemas"]["ApprovalStatus"];
+            /**
+             * Transaction Id
+             * Format: uuid
+             */
+            transaction_id: string;
+        };
+        /**
+         * ApprovalStatus
+         * @enum {string}
+         */
+        ApprovalStatus: "PENDING" | "APPROVED" | "REJECTED";
         /** AuditOut */
         AuditOut: {
             /** Action */
@@ -398,6 +697,17 @@ export interface components {
             metadata: {
                 [key: string]: unknown;
             };
+        };
+        /** Body_upload_evidence_api_v1_cases__case_id__evidence_post */
+        Body_upload_evidence_api_v1_cases__case_id__evidence_post: {
+            category: components["schemas"]["EvidenceCategory"];
+            /**
+             * Description
+             * @default
+             */
+            description: string;
+            /** File */
+            file: string;
         };
         /** CaseDetailOut */
         CaseDetailOut: {
@@ -531,6 +841,25 @@ export interface components {
          * @enum {string}
          */
         CaseStatus: "OPEN" | "IN_REVIEW" | "RESOLVED";
+        /** ChecklistItemOut */
+        ChecklistItemOut: {
+            /** Evidence Ids */
+            evidence_ids: string[];
+            /** Key */
+            key: string;
+            /** Label */
+            label: string;
+            /** Provided */
+            provided: boolean;
+        };
+        /** CreateApprovalRequest */
+        CreateApprovalRequest: {
+            action_type: components["schemas"]["ApprovalActionType"];
+            /** Justification */
+            justification: string;
+            /** Packet Id */
+            packet_id?: string | null;
+        };
         /** CreateOrderRequest */
         CreateOrderRequest: {
             /**
@@ -571,6 +900,11 @@ export interface components {
          * @enum {string}
          */
         DataOrigin: "LIVE_SANDBOX" | "MERCHANT_PROVIDED" | "SYNTHETIC_DEMO" | "SIMULATED";
+        /** DecideApprovalRequest */
+        DecideApprovalRequest: {
+            /** Comment */
+            comment: string;
+        };
         /**
          * EventProcessing
          * @enum {string}
@@ -581,11 +915,235 @@ export interface components {
          * @enum {string}
          */
         EventVerification: "VERIFIED" | "FAILED" | "FIXTURE";
+        /**
+         * EvidenceCategory
+         * @description What the merchant says a document is. Declared by the uploader, never verified.
+         * @enum {string}
+         */
+        EvidenceCategory: "INVOICE" | "SHIPPING_PROOF" | "DELIVERY_CONFIRMATION" | "CUSTOMER_COMMUNICATION" | "REFUND_POLICY" | "OTHER";
+        /** EvidenceListOut */
+        EvidenceListOut: {
+            /** Accepted Types */
+            accepted_types: string[];
+            /** Checklist */
+            checklist: components["schemas"]["ChecklistItemOut"][];
+            /** Items */
+            items: components["schemas"]["EvidenceOut"][];
+            /** Max Bytes */
+            max_bytes: number;
+        };
+        /** EvidenceOut */
+        EvidenceOut: {
+            /**
+             * Case Id
+             * Format: uuid
+             */
+            case_id: string;
+            category: components["schemas"]["EvidenceCategory"];
+            /** Content Type */
+            content_type: string;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            data_origin: components["schemas"]["DataOrigin"];
+            /** Description */
+            description: string;
+            /** Extraction Note */
+            extraction_note: string | null;
+            extraction_status: components["schemas"]["ExtractionStatus"];
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Original Filename */
+            original_filename: string;
+            /** Page Count */
+            page_count: number | null;
+            /** Sha256 */
+            sha256: string;
+            /** Size Bytes */
+            size_bytes: number;
+            /** Text Preview */
+            text_preview: string | null;
+            uploaded_by: components["schemas"]["UserRefOut"] | null;
+            /**
+             * Verified
+             * @default false
+             * @constant
+             */
+            verified: false;
+        };
+        /** EvidencePacketOut */
+        EvidencePacketOut: {
+            /**
+             * Case Id
+             * Format: uuid
+             */
+            case_id: string;
+            /** Contents */
+            contents: {
+                [key: string]: unknown;
+            };
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            generated_by: components["schemas"]["UserRefOut"] | null;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Investigation Run Id */
+            investigation_run_id: string | null;
+            /** Page Count */
+            page_count: number;
+            /** Sha256 */
+            sha256: string;
+            /** Size Bytes */
+            size_bytes: number;
+            /**
+             * Submitted To Paypal
+             * @default false
+             * @constant
+             */
+            submitted_to_paypal: false;
+        };
+        /** EvidenceReference */
+        EvidenceReference: {
+            /**
+             * Evidence Id
+             * Format: uuid
+             * @description Id of an evidence file attached to this case.
+             */
+            evidence_id: string;
+            /**
+             * Excerpt
+             * @description Optional verbatim quote from the evidence's extracted text.
+             */
+            excerpt?: string | null;
+            /** Relevance */
+            relevance: string;
+        };
+        /**
+         * ExecutionStatus
+         * @description What happened after approval. Financial actions stay NOT_EXECUTED until Phase 5.
+         * @enum {string}
+         */
+        ExecutionStatus: "COMPLETED_INTERNAL" | "NOT_EXECUTED";
+        /**
+         * ExtractionStatus
+         * @enum {string}
+         */
+        ExtractionStatus: "EXTRACTED" | "NO_TEXT" | "NOT_SUPPORTED" | "FAILED";
         /** HTTPValidationError */
         HTTPValidationError: {
             /** Detail */
             detail?: components["schemas"]["ValidationError"][];
         };
+        /** Indicator */
+        Indicator: {
+            /** Description */
+            description: string;
+            /** Sources */
+            sources: components["schemas"]["SourceRef"][];
+        };
+        /**
+         * InvestigationErrorCategory
+         * @enum {string}
+         */
+        InvestigationErrorCategory: "PROVIDER_UNAVAILABLE" | "PROVIDER_TIMEOUT" | "PROVIDER_ERROR" | "INVALID_OUTPUT" | "UNSUPPORTED_ASSERTION" | "BUDGET_EXCEEDED" | "ABANDONED" | "INTERNAL";
+        /** InvestigationFindings */
+        InvestigationFindings: {
+            /** Counter Indicators */
+            counter_indicators: components["schemas"]["Indicator"][];
+            /** Evidence References */
+            evidence_references: components["schemas"]["EvidenceReference"][];
+            /**
+             * Human Approval Required
+             * @description Always true: SENTINEL never acts on a recommendation without a human.
+             * @constant
+             */
+            human_approval_required: true;
+            /** Limitations */
+            limitations: string[];
+            /** Missing Information */
+            missing_information: string[];
+            /** Recommendation Rationale */
+            recommendation_rationale: string;
+            recommended_action: components["schemas"]["RecommendedAction"];
+            /** Risk Indicators */
+            risk_indicators: components["schemas"]["Indicator"][];
+            /** Summary */
+            summary: string;
+            /** Verified Facts */
+            verified_facts: components["schemas"]["VerifiedFact"][];
+        };
+        /**
+         * InvestigationMode
+         * @description How the findings were produced. Only AI_AGENT output is model-generated analysis.
+         * @enum {string}
+         */
+        InvestigationMode: "AI_AGENT" | "DETERMINISTIC";
+        /** InvestigationRunOut */
+        InvestigationRunOut: {
+            /**
+             * Case Id
+             * Format: uuid
+             */
+            case_id: string;
+            /** Completed At */
+            completed_at: string | null;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            data_origin: components["schemas"]["DataOrigin"];
+            /** Duration Ms */
+            duration_ms: number | null;
+            error_category: components["schemas"]["InvestigationErrorCategory"] | null;
+            /** Error Message */
+            error_message: string | null;
+            findings: components["schemas"]["InvestigationFindings"] | null;
+            /** Generated By Ai */
+            generated_by_ai: boolean;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            initiated_by: components["schemas"]["UserRefOut"] | null;
+            /** Label */
+            label: string;
+            mode: components["schemas"]["InvestigationMode"];
+            /** Model Name */
+            model_name: string;
+            /** Prompt Version */
+            prompt_version: string;
+            /** Provider */
+            provider: string;
+            /** Source Refs */
+            source_refs: components["schemas"]["SourceRef"][];
+            /** Started At */
+            started_at: string | null;
+            status: components["schemas"]["InvestigationStatus"];
+            /** Tool Calls */
+            tool_calls: components["schemas"]["ToolCallOut"][];
+            /** Usage */
+            usage: {
+                [key: string]: unknown;
+            };
+        };
+        /**
+         * InvestigationStatus
+         * @enum {string}
+         */
+        InvestigationStatus: "QUEUED" | "RUNNING" | "COMPLETED" | "FAILED";
         /** LoginRequest */
         LoginRequest: {
             /**
@@ -841,6 +1399,11 @@ export interface components {
             /** Sku */
             sku: string;
         };
+        /**
+         * RecommendedAction
+         * @enum {string}
+         */
+        RecommendedAction: "NO_FURTHER_ACTION" | "CONTINUE_MANUAL_REVIEW" | "REQUEST_MORE_EVIDENCE" | "PREPARE_EVIDENCE_PACKET" | "CONSIDER_REFUND" | "ESCALATE";
         /** ResolveCaseRequest */
         ResolveCaseRequest: {
             /** Note */
@@ -939,6 +1502,50 @@ export interface components {
              */
             expires_at: string;
             user: components["schemas"]["MeOut"];
+        };
+        /**
+         * SourceKind
+         * @enum {string}
+         */
+        SourceKind: "case" | "transaction" | "risk_assessment" | "payment_event" | "case_note" | "evidence" | "payer_history";
+        /** SourceRef */
+        SourceRef: {
+            /**
+             * Id
+             * @description The record id exactly as returned by a tool in this investigation.
+             */
+            id: string;
+            /** @description Type of record cited. */
+            kind: components["schemas"]["SourceKind"];
+        };
+        /** StartInvestigationRequest */
+        StartInvestigationRequest: {
+            /**
+             * Mode
+             * @default auto
+             * @enum {string}
+             */
+            mode: "auto" | "deterministic";
+        };
+        /** ToolCallOut */
+        ToolCallOut: {
+            /** Arguments */
+            arguments: {
+                [key: string]: unknown;
+            };
+            /** Duration Ms */
+            duration_ms: number;
+            /** Name */
+            name: string;
+            /** Note */
+            note?: string | null;
+            /**
+             * Outcome
+             * @enum {string}
+             */
+            outcome: "ok" | "denied" | "unavailable" | "error";
+            /** Records */
+            records: components["schemas"]["SourceRef"][];
         };
         /** TransactionDetailOut */
         TransactionDetailOut: {
@@ -1062,6 +1669,16 @@ export interface components {
             /** Error Type */
             type: string;
         };
+        /** VerifiedFact */
+        VerifiedFact: {
+            /** Sources */
+            sources: components["schemas"]["SourceRef"][];
+            /**
+             * Statement
+             * @description A fact stated by the cited records.
+             */
+            statement: string;
+        };
     };
     responses: never;
     parameters: never;
@@ -1071,6 +1688,26 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+    ai_status_api_v1_ai_status_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AIStatusOut"];
+                };
+            };
+        };
+    };
     list_audit_api_v1_audit_get: {
         parameters: {
             query?: {
@@ -1255,6 +1892,144 @@ export interface operations {
             };
         };
     };
+    list_approvals_api_v1_cases__case_id__approvals_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                case_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApprovalRequestOut"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    create_approval_api_v1_cases__case_id__approvals_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                case_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateApprovalRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApprovalRequestOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    approve_api_v1_cases__case_id__approvals__approval_id__approve_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                case_id: string;
+                approval_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DecideApprovalRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApprovalRequestOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    reject_api_v1_cases__case_id__approvals__approval_id__reject_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                case_id: string;
+                approval_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DecideApprovalRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApprovalRequestOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     claim_api_v1_cases__case_id__claim_post: {
         parameters: {
             query?: never;
@@ -1273,6 +2048,234 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["CaseDetailOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_evidence_api_v1_cases__case_id__evidence_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                case_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EvidenceListOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    upload_evidence_api_v1_cases__case_id__evidence_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                case_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "multipart/form-data": components["schemas"]["Body_upload_evidence_api_v1_cases__case_id__evidence_post"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EvidenceOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    download_evidence_api_v1_cases__case_id__evidence__evidence_id__download_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                case_id: string;
+                evidence_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/octet-stream": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_investigations_api_v1_cases__case_id__investigations_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                case_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["InvestigationRunOut"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    start_investigation_api_v1_cases__case_id__investigations_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                case_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["StartInvestigationRequest"] | null;
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["InvestigationRunOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_investigation_api_v1_cases__case_id__investigations__run_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                case_id: string;
+                run_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["InvestigationRunOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_findings_api_v1_cases__case_id__investigations__run_id__findings_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                case_id: string;
+                run_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["InvestigationFindings"];
                 };
             };
             /** @description Validation Error */
@@ -1308,6 +2311,100 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["CaseNoteOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_packets_api_v1_cases__case_id__packets_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                case_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EvidencePacketOut"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    generate_packet_api_v1_cases__case_id__packets_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                case_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EvidencePacketOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    download_packet_api_v1_cases__case_id__packets__packet_id__download_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                case_id: string;
+                packet_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/pdf": unknown;
                 };
             };
             /** @description Validation Error */

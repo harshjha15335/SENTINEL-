@@ -66,7 +66,13 @@ def make_txn(
 
 def make_case(db: Session, tenant: Tenant, **kw: Any) -> Case:
     """A scored payment with an open review case, plus one earlier payment from the same payer."""
-    make_txn(db, tenant, at=T0 - timedelta(days=10), refunded=True, payer=kw.get("payer", "SYN-PAYER-0001"))
+    make_txn(
+        db,
+        tenant,
+        at=T0 - timedelta(days=10),
+        refunded=True,
+        payer=kw.get("payer", "SYN-PAYER-0001"),
+    )
     txn = make_txn(db, tenant, **kw)
     db.commit()
     assessment = score_transaction(db, txn, trigger="test", actor_id=None)
@@ -169,7 +175,9 @@ def scripted(*steps: Step, log: list[list[ModelMessage]] | None = None) -> Provi
         state["n"] += 1
         return step(messages, info)
 
-    return ProviderSpec("test", "function:scripted", lambda: FunctionModel(fn, model_name="scripted"))
+    return ProviderSpec(
+        "test", "function:scripted", lambda: FunctionModel(fn, model_name="scripted")
+    )
 
 
 STANDARD_TOOLS = call(
