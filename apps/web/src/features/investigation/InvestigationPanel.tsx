@@ -123,7 +123,7 @@ function Findings({ run, findings: f }: { run: InvestigationRun; findings: Inves
       <div className={clsx("rounded-md border px-3 py-2 text-sm", ai ? "border-accent/40 bg-accent-soft" : "border-line-strong bg-sunken")}>
         <p className="flex flex-wrap items-center gap-2 font-medium">
           {ai ? <Bot aria-hidden className="size-4 text-accent" /> : <FileText aria-hidden className="size-4 text-fg-muted" />}
-          {run.label}
+          <span>{run.label}</span>
           <Badge tone={ai ? "accent" : "neutral"}>{ai ? "Model-generated" : "Rule-based"}</Badge>
         </p>
         <p className="mt-0.5 text-xs text-fg-muted">

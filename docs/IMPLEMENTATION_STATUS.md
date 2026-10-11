@@ -1,6 +1,6 @@
 # Implementation Status
 
-Last updated: 2026-10-10 (session 2). Update this file whenever real work lands.
+Last updated: 2026-10-11 (session 3). Update this file whenever real work lands.
 
 ## Implemented and tested
 
@@ -54,6 +54,27 @@ Last updated: 2026-10-10 (session 2). Update this file whenever real work lands.
   - resolving never moves money
 - **Queue:** sorted by priority, due date and score.
 
+### Investigation, evidence and approvals (Phase 4)
+- **Investigation runs** (`investigation_runs`): PydanticAI agent with 11 read-only, case-bound
+  tools (3 report "not available until Phase 5"), typed findings, server-side grounding checks,
+  budgets and timeouts, one active run per case, failure categories, full history kept.
+- **Deterministic fallback** labelled "Deterministic summary — AI provider unavailable"; this is
+  what runs in this environment because no AI credentials exist.
+- **Evidence** (`evidence_artifacts`): PDF/PNG/JPEG upload with type, extension, signature, size,
+  active-content and encryption checks, SHA-256, pypdf text extraction, contained local or
+  database storage, authorised downloads, audit events.
+- **Evidence packets** (`evidence_packets`): ReportLab PDF with case, provenance, chronology,
+  risk, evidence inventory, excerpts, labelled findings, missing information and review status.
+- **Approvals** (`approval_requests`, `approval_decisions`, `action_executions`): manual review,
+  internal packet approval and refund intent; immutable snapshots, role and separation-of-duties
+  checks, one decision per request, refund approvals never call PayPal.
+- **Investigation Workbench** on the case page: payment, risk + SHAP, run controls and state,
+  findings with cited sources, tool trace, run history, evidence inventory and upload, checklist,
+  packet export, approvals, full activity timeline.
+- **Review-capacity warning** on the Risk Model page and review queue, from recorded metadata
+  (test flag rate 9.4% vs 8% validation capacity). Threshold not re-tuned; policy stays shadow.
+- **AG Grid** registers only the modules it uses: transactions chunk 1,161.5 kB → 744.0 kB.
+
 ### Demo data, contract and web app
 - `python -m app.cli demo-load` loads 9,051 SYNTHETIC_DEMO payments and scores the 1,811 held-out ones. Its 170 HIGH results match the offline evaluation.
 - Shared contract: OpenAPI → `packages/contracts/openapi.ts`.
@@ -68,10 +89,10 @@ Last updated: 2026-10-10 (session 2). Update this file whenever real work lands.
 ### Tests
 | Suite | Result |
 |---|---|
-| Backend | 52 passed |
+| Backend | 103 passed, 1 skipped (provider-backed AI test: no credentials) |
 | ML | 7 passed |
-| Vitest | 16 passed |
-| Playwright (desktop + mobile) | 6 passed, with axe WCAG 2.2 AA on 9 screens |
+| Vitest | 26 passed |
+| Playwright (desktop + mobile) | 8 passed, with axe WCAG 2.2 AA on 9 screens plus the workbench |
 
 ## Implemented but not tested
 - The `app.workers.events` loop entry point. The processing function it calls is tested.
@@ -79,6 +100,10 @@ Last updated: 2026-10-10 (session 2). Update this file whenever real work lands.
 - `refund_capture`, `get_capture` and `get_dispute` happy paths against PayPal.
 
 ## Blocked by credentials / permissions
+- **Provider-backed AI investigation.** Implemented and tested with scripted models only.
+  Completion criterion 4 ("launch an actual tool-based AI investigation with configured
+  credentials") is **blocked**: needs `SENTINEL_AI_PROVIDER` + `SENTINEL_AI_API_KEY` (and
+  `SENTINEL_IT_AI_*` to run `tests/integration`).
 - **First live sandbox order → approval → capture.** Needs:
   - `SENTINEL_PAYPAL_CLIENT_ID`
   - `SENTINEL_PAYPAL_CLIENT_SECRET`
@@ -95,13 +120,16 @@ Last updated: 2026-10-10 (session 2). Update this file whenever real work lands.
 - **`disputed_at`.** It is set only by the synthetic loader so far. Dispute webhooks will set it in Phase 5.
 
 ## Known gaps
-- **Review capacity.** The test-window flag rate (9.4%) exceeds the 8% capacity the threshold was tuned for on validation. This is documented on the Risk Model page.
-- **Bundle size.** The AG Grid chunk is about 1.1 MB, lazy-loaded. Trimming it to the modules actually used is a follow-up.
+- **Review capacity.** The test-window flag rate (9.4%) exceeds the 8% validation capacity. Now
+  surfaced as a warning on the Risk Model page and review queue; deliberately not re-tuned.
+- **Bundle size.** The transactions chunk is still 744 kB because AG Grid core is most of it.
+- **Investigations** run as in-process background tasks; a restart abandons a running run (the
+  stale-run rule recovers it). No OCR for images or scanned PDFs; no antivirus scanning.
+- **Evidence packets** are internal documents. Submitting evidence to PayPal disputes is Phase 5.
 
 ## Not started
-- **Phase 4:** investigation agent (PydanticAI, read-only tools), evidence upload, evidence packet, approvals.
 - **Phase 5:**
-  - refund approval path
+  - executing approved refunds (approval and intent recording exist)
   - disputes workspace
   - graph analytics and explorer
   - policy lab
