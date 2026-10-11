@@ -2,7 +2,7 @@
 
 SENTINEL ships as **one container**. FastAPI serves the API under `/api` and the built React app on every other path, all from the same origin. Session cookies and CSRF therefore work without any cross-site setup. The image is the root `Dockerfile`.
 
-GitHub Pages is not used: it can host only static files, and SENTINEL needs its API and PostgreSQL. The options below all start from this GitHub repository.
+The full app needs its API and PostgreSQL, so options 1 to 3 run the container. GitHub Pages can host only static files, so option 4 is a read-only snapshot. All four start from this GitHub repository.
 
 ## 1. GitHub Codespaces (no other account)
 1. Open https://codespaces.new/harshjha15335/SENTINEL- and create the codespace.
@@ -49,6 +49,31 @@ docker run -p 8000:8000 \
   -e SENTINEL_SEED_ADMIN_PASSWORD=... -e SENTINEL_SEED_ANALYST_PASSWORD=... \
   ghcr.io/harshjha15335/sentinel:main
 ```
+
+## 4. Static demo on GitHub Pages (read only)
+https://harshjha15335.github.io/SENTINEL-/
+
+The `Pages` workflow (`.github/workflows/pages.yml`) runs on every push to `main`:
+1. Loads the synthetic demo into a throwaway PostgreSQL database in the runner, with one-off passwords.
+2. `apps/api/scripts/export_static_demo.py` signs in as the seeded viewer and saves the real API responses (dashboard, transactions, risk assessments, cases, model card) as JSON.
+3. Builds the web app with `VITE_STATIC_DEMO=true` and the `/SENTINEL-/` base path. In this build `api()` reads the snapshot (`src/lib/staticApi.ts`) and refuses every write.
+4. Copies `index.html` to `404.html` so deep links work, then runs `e2e/static-demo.spec.ts` against a local Pages-like server before deploying.
+
+What a visitor sees:
+- Every screen carries a "Static demo, read only" banner saying the data is SYNTHETIC_DEMO, nothing is saved and no PayPal call is made.
+- They browse as the read-only viewer, so no claim, resolve, re-score or checkout controls appear. There is no sign-in and no session.
+- The audit log stays admin-only, as on the server.
+
+Try it locally:
+```bash
+cd apps/web
+VITE_STATIC_DEMO=true SENTINEL_WEB_BASE=/SENTINEL-/ npx vite build --outDir /tmp/site/SENTINEL-
+# add the exported JSON as /tmp/site/SENTINEL-/demo-data and copy index.html to 404.html, then:
+node scripts/pages-preview.mjs /tmp/site SENTINEL-
+SENTINEL_STATIC_DEMO=true SENTINEL_WEB_URL=http://127.0.0.1:4173/SENTINEL-/ npx playwright test e2e/static-demo.spec.ts
+```
+
+Pages must be set to deploy from GitHub Actions (Settings → Pages → Source).
 
 ## Configuration
 | Variable | Purpose |

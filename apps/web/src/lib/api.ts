@@ -1,5 +1,7 @@
 import type { components } from "@contracts/openapi";
 
+import { STATIC_DEMO } from "./staticDemo";
+
 export type Schemas = components["schemas"];
 export type Transaction = Schemas["TransactionOut"];
 export type TransactionDetail = Schemas["TransactionDetailOut"];
@@ -55,6 +57,11 @@ function csrfToken(): string | undefined {
 type Options = { method?: "GET" | "POST"; body?: unknown; headers?: Record<string, string> };
 
 export async function api<T>(path: string, { method = "GET", body, headers = {} }: Options = {}): Promise<T> {
+  if (STATIC_DEMO) {
+    // GitHub Pages build: no server. Reads come from the bundled snapshot; writes are refused.
+    const { staticApi } = await import("./staticApi");
+    return staticApi<T>(path, method);
+  }
   const h: Record<string, string> = { Accept: "application/json", ...headers };
   if (body !== undefined) h["Content-Type"] = "application/json";
   if (method !== "GET") {

@@ -23,6 +23,9 @@ const CaseDetailPage = lazy(() => import("@/features/cases/CaseDetailPage").then
 const ModelPage = lazy(() => import("@/features/risk/ModelPage").then((m) => ({ default: m.ModelPage })));
 const CheckoutPage = lazy(() => import("@/features/checkout/CheckoutPage").then((m) => ({ default: m.CheckoutPage })));
 
+// "/" in normal builds; "/SENTINEL-/" when built for GitHub Pages (Vite `base`).
+const ROUTER_BASE = import.meta.env.BASE_URL.replace(/\/$/, "") || "/";
+
 const fallback = <Skeleton className="h-64" />;
 
 function makeClient(): QueryClient {
@@ -49,7 +52,7 @@ export function App() {
     <QueryClientProvider client={client}>
       <Tooltip.Provider>
         <ToastProvider>
-          <BrowserRouter>
+          <BrowserRouter basename={ROUTER_BASE}>
             <AppRoutes />
           </BrowserRouter>
         </ToastProvider>

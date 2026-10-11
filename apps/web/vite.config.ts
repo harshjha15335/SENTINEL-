@@ -7,6 +7,8 @@ import { defineConfig } from "vitest/config";
 const apiTarget = process.env.SENTINEL_API_URL ?? "http://127.0.0.1:8000";
 
 export default defineConfig({
+  // GitHub Pages serves the static demo from /<repo>/ (see .github/workflows/pages.yml).
+  base: process.env.SENTINEL_WEB_BASE ?? "/",
   plugins: [react(), tailwindcss()],
   resolve: {
     alias: {

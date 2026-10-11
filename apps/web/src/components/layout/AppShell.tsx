@@ -1,10 +1,15 @@
 import { clsx } from "clsx";
 import { Activity, Gauge, LayoutDashboard, ListChecks, LogOut, Settings, ShieldCheck, ShoppingBag } from "lucide-react";
+import { lazy, Suspense } from "react";
 import { NavLink, Navigate, Outlet, useLocation } from "react-router-dom";
 
 import { Skeleton } from "@/components/ui/States";
 import { useLogout, useMe } from "@/features/auth/session";
 import { usePayPalStatus } from "@/features/settings/usePayPalStatus";
+import { STATIC_DEMO } from "@/lib/staticDemo";
+
+// Only the GitHub Pages build renders this; keeping it lazy keeps the snapshot reader out of the main bundle.
+const StaticDemoBanner = lazy(() => import("@/features/demo/StaticDemoBanner").then((m) => ({ default: m.StaticDemoBanner })));
 
 const NAV = [
   { to: "/", label: "Command Center", icon: LayoutDashboard, end: true },
@@ -58,6 +63,11 @@ export function AppShell() {
         </nav>
       </aside>
       <div className="flex min-w-0 flex-1 flex-col">
+        {STATIC_DEMO && (
+          <Suspense fallback={null}>
+            <StaticDemoBanner />
+          </Suspense>
+        )}
         <TopBar email={me.data.email} role={me.data.role} merchant={me.data.merchant.name} />
         <main id="main" className="mx-auto w-full max-w-[1400px] flex-1 px-4 py-6 md:px-8">
           <Outlet />
@@ -94,13 +104,15 @@ function TopBar({ email, role, merchant }: { email: string; role: string; mercha
           <p className="text-sm leading-tight">{email}</p>
           <p className="text-[11px] tracking-wide text-fg-subtle uppercase">{role}</p>
         </div>
-        <button
-          onClick={() => logout.mutate()}
-          className="inline-flex size-9 items-center justify-center rounded-md text-fg-muted hover:bg-raised hover:text-fg"
-          aria-label="Sign out"
-        >
-          <LogOut className="size-4" />
-        </button>
+        {!STATIC_DEMO && (
+          <button
+            onClick={() => logout.mutate()}
+            className="inline-flex size-9 items-center justify-center rounded-md text-fg-muted hover:bg-raised hover:text-fg"
+            aria-label="Sign out"
+          >
+            <LogOut className="size-4" />
+          </button>
+        )}
       </div>
     </header>
   );

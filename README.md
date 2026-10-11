@@ -17,9 +17,10 @@ financial action through human approval.
 |---|---|---|
 | [![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/harshjha15335/SENTINEL-) | The full app with its database, in your browser, about 2 minutes after opening | A GitHub account. Codespaces usage counts against your account's quota. |
 | [![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/harshjha15335/SENTINEL-) | A public HTTPS URL that redeploys on every push to `main` | A free Render account |
+| [Static demo on GitHub Pages](https://harshjha15335.github.io/SENTINEL-/) | A read-only snapshot of the synthetic demo, browsable without signing in. No server: nothing can be changed and nothing is sent to PayPal. | Nothing |
 | `docker run ghcr.io/harshjha15335/sentinel:main` | The same image CI tests, published from `main` | Docker and a PostgreSQL URL |
 
-Every hosted option runs in **demo mode**:
+Every option that runs the server is in **demo mode**:
 - PayPal runs in fixture mode, so every payment it creates is labelled **Simulated**.
 - The **Synthetic demo** scenario is loaded.
 - Sign-in passwords are generated, never committed.

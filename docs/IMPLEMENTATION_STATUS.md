@@ -80,6 +80,7 @@ Last updated: 2026-10-11 (session 3). Update this file whenever real work lands.
 - **Codespaces:** the `.devcontainer/` setup and start scripts were verified on a clean copy (6 e2e tests passed).
 - **Render:** `render.yaml` Blueprint.
 - **GitHub Actions:** the `Image` workflow builds, smoke-tests and publishes to GHCR.
+- **GitHub Pages (read-only static demo):** the `Pages` workflow exports real API responses from the synthetic demo loader, builds the web app in static mode, runs the static e2e suite and deploys. Locally verified: the export (9,051 transactions, 1,811 assessments, 170 cases) and 6 Playwright tests against a Pages-like server, desktop and mobile, with axe checks.
 - See `docs/DEPLOYMENT.md`.
 
 ## Implemented but not tested

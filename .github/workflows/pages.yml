@@ -1,0 +1,104 @@
+name: Pages
+
+# Publishes the read-only static demo to GitHub Pages. GitHub Pages cannot run the API, so this
+# build reads a JSON snapshot instead: real API responses exported from a throwaway database
+# filled by the synthetic demo loader (SYNTHETIC_DEMO). Nothing here talks to PayPal.
+# The full app (API + database) is the container image; see docs/DEPLOYMENT.md.
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: sentinel
+          POSTGRES_PASSWORD: sentinel
+          POSTGRES_DB: sentinel
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U sentinel" --health-interval 5s --health-retries 10
+    env:
+      SENTINEL_DATABASE_URL: postgresql+psycopg://sentinel:sentinel@127.0.0.1:5432/sentinel
+      SENTINEL_PAYPAL_MODE: fixture
+      SITE: ${{ github.workspace }}/site
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: npm
+          cache-dependency-path: apps/web/package-lock.json
+
+      - name: Load the synthetic demo into a throwaway database
+        working-directory: apps/api
+        run: |
+          pip install -e .
+          # One-off passwords for this job's database only; the snapshot is exported as the viewer.
+          for role in ADMIN ANALYST VIEWER; do
+            pw=$(python -c 'import secrets; print(secrets.token_urlsafe(24))')
+            echo "::add-mask::$pw"
+            echo "SENTINEL_SEED_${role}_PASSWORD=$pw" >> "$GITHUB_ENV"
+          done
+
+      - name: Export the snapshot
+        working-directory: apps/api
+        run: |
+          alembic upgrade head
+          python -m app.cli seed
+          python -m app.cli demo-load
+          python scripts/export_static_demo.py "$RUNNER_TEMP/demo-data"
+
+      - name: Build the static demo
+        working-directory: apps/web
+        env:
+          VITE_STATIC_DEMO: "true"
+          SENTINEL_WEB_BASE: /${{ github.event.repository.name }}/
+        run: |
+          npm ci
+          npx vite build --outDir "$SITE" --emptyOutDir
+          cp -r "$RUNNER_TEMP/demo-data" "$SITE/demo-data"
+          # Pages serves 404.html for unknown paths, which lets client-side routes deep-link.
+          cp "$SITE/index.html" "$SITE/404.html"
+
+      - name: End-to-end test of the static site
+        working-directory: apps/web
+        env:
+          SENTINEL_STATIC_DEMO: "true"
+          SENTINEL_WEB_URL: http://127.0.0.1:4173/${{ github.event.repository.name }}/
+        run: |
+          mkdir -p "$RUNNER_TEMP/serve"
+          ln -s "$SITE" "$RUNNER_TEMP/serve/${{ github.event.repository.name }}"
+          node scripts/pages-preview.mjs "$RUNNER_TEMP/serve" "${{ github.event.repository.name }}" &
+          npx playwright install --with-deps chromium
+          npx playwright test e2e/static-demo.spec.ts
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
