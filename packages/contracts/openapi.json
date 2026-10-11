@@ -1671,6 +1671,9 @@
             "title": "Model Version",
             "type": "string"
           },
+          "review_capacity": {
+            "$ref": "#/components/schemas/ReviewCapacityOut"
+          },
           "split": {
             "additionalProperties": true,
             "title": "Split",
@@ -1732,7 +1735,8 @@
           "test_metrics",
           "test_metrics_rules_baseline",
           "features",
-          "limitations"
+          "limitations",
+          "review_capacity"
         ],
         "title": "ModelCardOut",
         "type": "object"
@@ -2222,6 +2226,46 @@
           "note"
         ],
         "title": "ResolveCaseRequest",
+        "type": "object"
+      },
+      "ReviewCapacityOut": {
+        "description": "Recorded capacity assumption vs the recorded test-window flag rate. Never re-tuned here.",
+        "properties": {
+          "capacity_share": {
+            "title": "Capacity Share",
+            "type": "number"
+          },
+          "exceeded": {
+            "title": "Exceeded",
+            "type": "boolean"
+          },
+          "excess_share": {
+            "title": "Excess Share",
+            "type": "number"
+          },
+          "message": {
+            "title": "Message",
+            "type": "string"
+          },
+          "policy_mode": {
+            "const": "SHADOW",
+            "default": "SHADOW",
+            "title": "Policy Mode",
+            "type": "string"
+          },
+          "test_flag_rate": {
+            "title": "Test Flag Rate",
+            "type": "number"
+          }
+        },
+        "required": [
+          "capacity_share",
+          "test_flag_rate",
+          "exceeded",
+          "excess_share",
+          "message"
+        ],
+        "title": "ReviewCapacityOut",
         "type": "object"
       },
       "RiskAssessmentOut": {

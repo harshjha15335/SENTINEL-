@@ -1198,6 +1198,7 @@ export interface components {
             limitations: string[];
             /** Model Version */
             model_version: string;
+            review_capacity: components["schemas"]["ReviewCapacityOut"];
             /** Split */
             split: {
                 [key: string]: unknown;
@@ -1409,6 +1410,28 @@ export interface components {
             /** Note */
             note: string;
             resolution: components["schemas"]["CaseResolution"];
+        };
+        /**
+         * ReviewCapacityOut
+         * @description Recorded capacity assumption vs the recorded test-window flag rate. Never re-tuned here.
+         */
+        ReviewCapacityOut: {
+            /** Capacity Share */
+            capacity_share: number;
+            /** Exceeded */
+            exceeded: boolean;
+            /** Excess Share */
+            excess_share: number;
+            /** Message */
+            message: string;
+            /**
+             * Policy Mode
+             * @default SHADOW
+             * @constant
+             */
+            policy_mode: "SHADOW";
+            /** Test Flag Rate */
+            test_flag_rate: number;
         };
         /** RiskAssessmentOut */
         RiskAssessmentOut: {

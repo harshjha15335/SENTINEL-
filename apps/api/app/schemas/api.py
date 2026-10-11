@@ -210,6 +210,17 @@ class ModelMetricsOut(ApiModel):
     expected_cost_no_review: float
 
 
+class ReviewCapacityOut(ApiModel):
+    """Recorded capacity assumption vs the recorded test-window flag rate. Never re-tuned here."""
+
+    capacity_share: float
+    test_flag_rate: float
+    exceeded: bool
+    excess_share: float
+    policy_mode: Literal["SHADOW"] = "SHADOW"
+    message: str
+
+
 class ModelCardOut(ApiModel):
     model_version: str
     feature_version: str
@@ -227,6 +238,7 @@ class ModelCardOut(ApiModel):
     test_metrics_rules_baseline: ModelMetricsOut
     features: list[dict[str, str]]
     limitations: list[str]
+    review_capacity: ReviewCapacityOut
 
 
 class UserRefOut(ApiModel):
