@@ -11,16 +11,32 @@ from app.models.core import (
     User,
     UserSession,
 )
+from app.models.workflow import (
+    ActionExecution,
+    ApprovalDecision,
+    ApprovalRequest,
+    EvidenceArtifact,
+    EvidencePacket,
+    InvestigationRun,
+    StoredBlob,
+)
 
 __all__ = [
+    "ActionExecution",
+    "ApprovalDecision",
+    "ApprovalRequest",
     "AuditEvent",
     "Case",
     "CaseNote",
+    "EvidenceArtifact",
+    "EvidencePacket",
+    "InvestigationRun",
     "Merchant",
     "PaymentEvent",
     "Product",
     "RawPayload",
     "RiskAssessment",
+    "StoredBlob",
     "Transaction",
     "User",
     "UserSession",

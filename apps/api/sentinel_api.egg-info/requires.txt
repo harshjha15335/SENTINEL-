@@ -9,8 +9,16 @@ httpx==0.28.1
 argon2-cffi==25.1.0
 cryptography==50.0.2
 email-validator==2.3.0
+numpy==2.5.4
+xgboost-cpu==3.4.1
 
 [dev]
 pytest==9.1.1
 ruff==0.17.0
 mypy==2.4.0
+
+[ml]
+pandas==3.0.6
+scikit-learn==1.9.1
+scipy==1.18.1
+shap==0.53.0

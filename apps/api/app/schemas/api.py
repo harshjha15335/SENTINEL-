@@ -5,6 +5,9 @@ from typing import Any, Literal
 from pydantic import EmailStr, Field
 
 from app.models.enums import (
+    ApprovalActionType,
+    ApprovalDecisionValue,
+    ApprovalStatus,
     CasePriority,
     CaseResolution,
     CaseSource,
@@ -12,12 +15,19 @@ from app.models.enums import (
     DataOrigin,
     EventProcessing,
     EventVerification,
+    EvidenceCategory,
+    ExecutionStatus,
+    ExtractionStatus,
+    InvestigationErrorCategory,
+    InvestigationMode,
+    InvestigationStatus,
     PolicyDecision,
     RiskBand,
     Role,
     TransactionStatus,
 )
 from app.schemas.common import ApiModel, RequestModel
+from app.services.investigation.schemas import InvestigationFindings, SourceRef
 
 
 class LoginRequest(RequestModel):
@@ -268,3 +278,143 @@ class CaseNoteRequest(RequestModel):
 class ResolveCaseRequest(RequestModel):
     resolution: CaseResolution
     note: str = Field(min_length=3, max_length=4000)
+
+
+# --- Phase 4: investigations, evidence, packets, approvals -----------------------------------
+
+
+class AIStatusOut(ApiModel):
+    configured: bool
+    provider: str
+    model_name: str | None
+    fallback: Literal["DETERMINISTIC"] | None
+
+
+class StartInvestigationRequest(RequestModel):
+    mode: Literal["auto", "deterministic"] = "auto"
+
+
+class ToolCallOut(ApiModel):
+    name: str
+    arguments: dict[str, Any]
+    outcome: Literal["ok", "denied", "unavailable", "error"]
+    duration_ms: int
+    records: list[SourceRef]
+    note: str | None = None
+
+
+class InvestigationRunOut(ApiModel):
+    id: uuid.UUID
+    case_id: uuid.UUID
+    status: InvestigationStatus
+    mode: InvestigationMode
+    label: str
+    generated_by_ai: bool
+    provider: str
+    model_name: str
+    prompt_version: str
+    findings: InvestigationFindings | None
+    tool_calls: list[ToolCallOut]
+    source_refs: list[SourceRef]
+    usage: dict[str, Any]
+    error_category: InvestigationErrorCategory | None
+    error_message: str | None
+    data_origin: DataOrigin
+    initiated_by: UserRefOut | None
+    created_at: datetime
+    started_at: datetime | None
+    completed_at: datetime | None
+    duration_ms: int | None
+
+
+class EvidenceOut(ApiModel):
+    id: uuid.UUID
+    case_id: uuid.UUID
+    category: EvidenceCategory
+    description: str
+    original_filename: str
+    content_type: str
+    size_bytes: int
+    sha256: str
+    extraction_status: ExtractionStatus
+    extraction_note: str | None
+    page_count: int | None
+    text_preview: str | None
+    data_origin: DataOrigin
+    uploaded_by: UserRefOut | None
+    created_at: datetime
+    verified: Literal[False] = False
+
+
+class ChecklistItemOut(ApiModel):
+    key: str
+    label: str
+    provided: bool
+    evidence_ids: list[str]
+
+
+class EvidenceListOut(ApiModel):
+    items: list[EvidenceOut]
+    checklist: list[ChecklistItemOut]
+    max_bytes: int
+    accepted_types: list[str]
+
+
+class EvidencePacketOut(ApiModel):
+    id: uuid.UUID
+    case_id: uuid.UUID
+    investigation_run_id: uuid.UUID | None
+    sha256: str
+    size_bytes: int
+    page_count: int
+    contents: dict[str, Any]
+    generated_by: UserRefOut | None
+    created_at: datetime
+    submitted_to_paypal: Literal[False] = False
+
+
+class CreateApprovalRequest(RequestModel):
+    action_type: ApprovalActionType
+    justification: str = Field(min_length=3, max_length=2000)
+    packet_id: uuid.UUID | None = None
+
+
+class DecideApprovalRequest(RequestModel):
+    comment: str = Field(min_length=3, max_length=2000)
+
+
+class ApprovalDecisionOut(ApiModel):
+    id: uuid.UUID
+    decision: ApprovalDecisionValue
+    decided_by: UserRefOut | None
+    decided_by_role: Role
+    comment: str
+    created_at: datetime
+
+
+class ActionExecutionOut(ApiModel):
+    id: uuid.UUID
+    action_type: ApprovalActionType
+    status: ExecutionStatus
+    provider_called: bool
+    detail: dict[str, Any]
+    created_at: datetime
+
+
+class ApprovalRequestOut(ApiModel):
+    id: uuid.UUID
+    case_id: uuid.UUID
+    transaction_id: uuid.UUID
+    action_type: ApprovalActionType
+    action_snapshot: dict[str, Any]
+    snapshot_sha256: str
+    required_roles: list[Role]
+    justification: str
+    status: ApprovalStatus
+    requested_by: UserRefOut | None
+    investigation_run_id: uuid.UUID | None
+    data_origin: DataOrigin
+    created_at: datetime
+    decided_at: datetime | None
+    decision: ApprovalDecisionOut | None
+    execution: ActionExecutionOut | None

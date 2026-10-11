@@ -21,3 +21,5 @@ ml/artifacts/
 *.pkl
 *.sqlite
 .pgdata/
+# Local evidence / packet storage (contained, never served statically)
+apps/api/var/

@@ -18,6 +18,10 @@ dependencies = [
   "email-validator==2.3.0",
   "numpy==2.5.4",
   "xgboost-cpu==3.4.1",
+  "pydantic-ai-slim[anthropic,openai]==2.55.0",
+  "python-multipart==0.0.32",
+  "pypdf==6.20.0",
+  "reportlab==5.0.1",
 ]
 
 [project.optional-dependencies]
@@ -55,3 +59,8 @@ python_version = "3.12"
 strict = true
 plugins = []
 exclude = ["alembic/", "tests/"]
+
+[[tool.mypy.overrides]]
+# ReportLab ships no type information.
+module = ["reportlab", "reportlab.*"]
+ignore_missing_imports = true

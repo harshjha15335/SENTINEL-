@@ -8,6 +8,11 @@ os.environ["SENTINEL_PAYPAL_MODE"] = "fixture"
 os.environ.pop("SENTINEL_PAYPAL_CLIENT_ID", None)
 os.environ.pop("SENTINEL_PAYPAL_CLIENT_SECRET", None)
 os.environ["SENTINEL_LOGIN_RATE_LIMIT_ATTEMPTS"] = "5"
+# Investigations: never reach a real AI provider from unit tests; store files in a temp dir.
+for _var in ("SENTINEL_AI_PROVIDER", "SENTINEL_AI_API_KEY", "SENTINEL_AI_MODEL"):
+    os.environ.pop(_var, None)
+os.environ["SENTINEL_STORAGE_BACKEND"] = "local"
+os.environ["SENTINEL_STORAGE_DIR"] = __import__("tempfile").mkdtemp(prefix="sentinel-test-")
 
 from collections.abc import Iterator
 from dataclasses import dataclass
@@ -48,7 +53,9 @@ def _clean_tables() -> Iterator[None]:
     with get_engine().begin() as conn:
         conn.execute(
             text(
-                "TRUNCATE case_notes, cases, risk_assessments, audit_events, payment_events, "
+                "TRUNCATE stored_blobs, approval_decisions, action_executions, "
+                "approval_requests, evidence_packets, evidence_artifacts, investigation_runs, "
+                "case_notes, cases, risk_assessments, audit_events, payment_events, "
                 "raw_payloads, transactions, products, user_sessions, users, merchants "
                 "RESTART IDENTITY CASCADE"
             )
