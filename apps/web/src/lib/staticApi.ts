@@ -32,6 +32,13 @@ function load<T>(name: string, what = "Resource"): Promise<T> {
   return p as Promise<T>;
 }
 
+async function pick<T>(file: string, id: string, what: string): Promise<T> {
+  const all = await load<Record<string, T>>(file);
+  const hit = all[id];
+  if (hit === undefined) throw notFound(what);
+  return hit;
+}
+
 function page(rows: Row[], q: URLSearchParams): Page {
   const limit = Math.min(200, Math.max(1, Number(q.get("limit") ?? 50) || 50));
   const offset = Math.max(0, Number(q.get("offset") ?? 0) || 0);
@@ -96,9 +103,14 @@ export async function staticApi<T>(path: string, method: string): Promise<T> {
 
   const [kind, id, sub] = parts;
   if (id && ID.test(id) && parts.length <= 3) {
-    if (kind === "transactions" && sub === undefined) return load<T>(`transactions/${id}`, "Transaction");
-    if (kind === "transactions" && sub === "risk") return load<T>(`risk/${id}`, "Risk assessment");
-    if (kind === "cases" && sub === undefined) return load<T>(`cases/${id}`, "Case");
+    if (kind === "transactions" && sub === undefined) {
+      const [rows, extras] = await Promise.all([load<Row[]>("transactions"), load<Record<string, Row>>("transaction-extras")]);
+      const row = rows.find((r) => r["id"] === id);
+      if (!row) throw notFound("Transaction");
+      return { ...row, ...extras[id] } as T;
+    }
+    if (kind === "transactions" && sub === "risk") return pick<T>("risk", id, "Risk assessment");
+    if (kind === "cases" && sub === undefined) return pick<T>("case-details", id, "Case");
   }
   throw notFound("Resource");
 }

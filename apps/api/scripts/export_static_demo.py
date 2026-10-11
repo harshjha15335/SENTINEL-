@@ -26,6 +26,7 @@ def main(out: Path) -> None:
     password = os.environ.get("SENTINEL_SEED_VIEWER_PASSWORD")
     if not password:
         sys.exit("SENTINEL_SEED_VIEWER_PASSWORD is required")
+    out.mkdir(parents=True, exist_ok=True)
     client = TestClient(app, base_url="http://localhost")
     resp = client.post(
         "/api/v1/auth/login", json={"email": "viewer@northwind.example", "password": password}
@@ -39,7 +40,6 @@ def main(out: Path) -> None:
 
     def write(name: str, data: Any) -> None:
         path = out / f"{name}.json"
-        path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text(json.dumps(data, separators=(",", ":")))
 
     def all_pages(path: str) -> list[Any]:
@@ -58,19 +58,24 @@ def main(out: Path) -> None:
     write("paypal-status", get("/paypal/status"))
     write("products", get("/products"))
 
+    # A few large files rather than one per record, so the snapshot also fits hosts with a
+    # file-count limit. Details keep only what the list row lacks; the web app merges them.
     transactions = all_pages("/transactions")
     write("transactions", transactions)
-    scored = 0
+    extras: dict[str, Any] = {}
+    risk: dict[str, Any] = {}
     for t in transactions:
-        write(f"transactions/{t['id']}", get(f"/transactions/{t['id']}"))
+        detail = get(f"/transactions/{t['id']}")
+        extras[t["id"]] = {k: v for k, v in detail.items() if k not in t}
         if t["risk_band"] is not None:
-            write(f"risk/{t['id']}", get(f"/transactions/{t['id']}/risk"))
-            scored += 1
+            risk[t["id"]] = get(f"/transactions/{t['id']}/risk")
+    write("transaction-extras", extras)
+    write("risk", risk)
+    scored = len(risk)
 
     cases = all_pages("/cases")
     write("cases", cases)
-    for c in cases:
-        write(f"cases/{c['id']}", get(f"/cases/{c['id']}"))
+    write("case-details", {c["id"]: get(f"/cases/{c['id']}") for c in cases})
 
     origins = sorted({t["data_origin"] for t in transactions})
     write(

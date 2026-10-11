@@ -1,7 +1,7 @@
 import * as Tooltip from "@radix-ui/react-tooltip";
 import { MutationCache, QueryCache, QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { lazy, Suspense, useState } from "react";
-import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { BrowserRouter, HashRouter, Route, Routes } from "react-router-dom";
 
 import { AppShell } from "@/components/layout/AppShell";
 import { Skeleton } from "@/components/ui/States";
@@ -25,6 +25,8 @@ const CheckoutPage = lazy(() => import("@/features/checkout/CheckoutPage").then(
 
 // "/" in normal builds; "/SENTINEL-/" when built for GitHub Pages (Vite `base`).
 const ROUTER_BASE = import.meta.env.BASE_URL.replace(/\/$/, "") || "/";
+// Hosts that serve one page and cannot rewrite paths (an embedded artifact) keep the route in the hash.
+const HASH_ROUTES = import.meta.env.VITE_ROUTER === "hash";
 
 const fallback = <Skeleton className="h-64" />;
 
@@ -52,9 +54,15 @@ export function App() {
     <QueryClientProvider client={client}>
       <Tooltip.Provider>
         <ToastProvider>
-          <BrowserRouter basename={ROUTER_BASE}>
-            <AppRoutes />
-          </BrowserRouter>
+          {HASH_ROUTES ? (
+            <HashRouter>
+              <AppRoutes />
+            </HashRouter>
+          ) : (
+            <BrowserRouter basename={ROUTER_BASE}>
+              <AppRoutes />
+            </BrowserRouter>
+          )}
         </ToastProvider>
       </Tooltip.Provider>
     </QueryClientProvider>

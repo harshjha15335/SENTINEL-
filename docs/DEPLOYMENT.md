@@ -75,6 +75,8 @@ SENTINEL_STATIC_DEMO=true SENTINEL_WEB_URL=http://127.0.0.1:4173/SENTINEL-/ npx 
 
 Pages must be set to deploy from GitHub Actions (Settings → Pages → Source).
 
+The same build also runs on hosts that serve a single page and cannot handle deep links (for example a Claude artifact). Build it with `VITE_STATIC_DEMO=true VITE_ROUTER=hash SENTINEL_WEB_BASE=./`, which keeps routes in the URL hash and loads assets relative to the page. The snapshot is 11 JSON files, so it also fits hosts that limit the number of files.
+
 ## Configuration
 | Variable | Purpose |
 |---|---|
