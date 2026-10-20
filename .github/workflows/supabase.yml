@@ -1,0 +1,38 @@
+name: Supabase webhook
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  receiver-and-inbox:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: sentinel
+          POSTGRES_PASSWORD: sentinel
+          POSTGRES_DB: sentinel_supabase_check
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U sentinel" --health-interval 5s --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.9.6
+      - run: deno fmt --check supabase/functions && deno lint supabase/functions
+      - run: deno check supabase/functions/paypal-webhook/index.ts
+      - run: deno test supabase/functions/paypal-webhook
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install 'pytest==9.1.1' 'psycopg[binary]==3.3.6'
+      - run: pytest -q supabase/tests
+        env:
+          SENTINEL_SUPABASE_TEST_DATABASE_URL: postgresql://sentinel:sentinel@127.0.0.1:5432/sentinel_supabase_check

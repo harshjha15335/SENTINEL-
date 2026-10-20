@@ -1,0 +1,7 @@
+project_id = "sentinel"
+
+# PayPal sends a signature, not a Supabase JWT. The handler verifies it with PayPal
+# before storing anything; anonymous database access remains disabled by RLS.
+[functions.paypal-webhook]
+verify_jwt = false
+entrypoint = "./functions/paypal-webhook/index.ts"
