@@ -12,9 +12,9 @@ Deployed on 22 October 2026 to the user-created SENTINEL project `cfslzvvdjxstpu
 https://cfslzvvdjxstpupkqbpw.supabase.co/functions/v1/paypal-webhook
 ```
 
-The Management API reports the function ACTIVE, version 1. Public GET returned 200 and an unsigned POST returned 400. The private inbox schema was applied, and a live query confirmed row-level security is enabled. This verifies deployment and unsigned-request rejection, not a real signed PayPal delivery.
+The Management API reports the function ACTIVE, version 4. Public GET returned 200 and an unsigned POST returned 400. The private inbox schema was applied, and a live query confirmed row-level security is enabled. This verifies deployment and unsigned-request rejection, not a real signed PayPal delivery.
 
-PayPal client ID, client secret and webhook ID are still absent from the Edge Function secrets. Register this URL and supply those settings before testing a real signed sandbox delivery. The SENTINEL inbox bridge still requires its own server configuration and a running Python backend.
+All three PayPal Edge secret names are present. The configured local API, inbox bridge and scoring pipeline are healthy. The supplied registered webhook ID is also configured in Python. Compiled deployed receiver modules match the source; the working receiver was not redeployed during lifecycle completion. See [WEBHOOK_OPERATIONS.md](WEBHOOK_OPERATIONS.md) for current configuration, supervision and recovery procedures.
 
 The deployment script is ready to create a project in an accessible organization, install the private inbox, deploy the function and check its public URL. It requires an account-owned `SUPABASE_ACCESS_TOKEN`. Create/sign in to your account at https://supabase.com/dashboard, then create a personal access token at https://supabase.com/dashboard/account/tokens and enter it in secure environment settings. Do not paste it into chat or a shell command.
 
@@ -33,7 +33,7 @@ The script uses `SUPABASE_ACCESS_TOKEN` from the environment. With exactly one o
 
 Private resumable state, including the generated database password, is saved outside Git in a mode-700 directory with a mode-600 state file. Default: `/workspace/sentinel-supabase-private/deployment.json`. `SENTINEL_SUPABASE_STATE_DIR` can select another private directory. If creation times out ambiguously, rerunning checks the account's projects rather than blindly creating a duplicate. If the result remains unknown, inspect the dashboard and resume with `--project-ref <ref>`.
 
-The script applies `supabase/migrations/202610200001_webhook_inbox.sql` through the Management API and uploads only the function's runtime source files using the same multipart format as the official CLI. Docker is not required. Optional `--use-cli` selects the CLI's `--use-api` path for environments with raw credentials; its local token-format check rejects proxy placeholders, so the direct API path is the working default here. The function's Supabase JWT check is disabled because PayPal sends its own signature; handler signature verification is mandatory. The script verifies HTTP 200 on GET and rejection of an unsigned POST with HTTP 400 before printing a public URL.
+The script applies all sorted SQL files in `supabase/migrations` atomically through the Management API and uploads only the function's runtime source files using the same multipart format as the official CLI. Docker is not required. Optional `--use-cli` selects the CLI's `--use-api` path for environments with raw credentials; its local token-format check rejects proxy placeholders, so the direct API path is the working default here. The function's Supabase JWT check is disabled because PayPal sends its own signature; handler signature verification is mandatory. The script verifies HTTP 200 on GET and rejection of an unsigned POST with HTTP 400 before printing a public URL.
 
 The final URL will have this form, using the actual reference returned by Supabase:
 
@@ -75,7 +75,7 @@ cd /workspace/SENTINEL-recovered/apps/api
 .venv/bin/python -m app.workers.supabase_inbox --once
 ```
 
-The worker claims a bounded batch, independently verifies the signature over the original raw body using the existing PayPal certificate verifier, commits the event locally, runs the existing transaction reconciler, then acknowledges the Supabase receipt. It does not trust a database row's claim to be verified. If the local application is offline, the receipt remains in Supabase until a bridge runs. This function alone does not host the Python API, risk engine or investigation workbench.
+The worker claims a leased receipt, renews ownership and forwards its exact body and original PayPal headers over HTTP to `/api/v1/webhooks/paypal`. FastAPI independently verifies the signature and commits its event record. The bridge acknowledges Supabase only after validating a durable receipt matching event ID, payload hash, origin and verification status. Reconciliation and durable risk-scoring jobs then run independently, with retries and automatic HIGH-risk review-case creation. If the API is unavailable, the receipt remains retryable. This function alone does not host the Python API or investigation workbench.
 
 Existing transaction matching and event status precedence remain in effect. Unknown transactions are recorded as ignored by the existing processor; a Supabase receipt is not proof a payment was updated. The bridge does not create merchant payments from unowned events or perform refunds.
 
@@ -85,23 +85,23 @@ Existing transaction matching and event status precedence remain in effect. Unkn
 - A unique provider-event ID deduplicates concurrent deliveries. A repeated ID with different raw bytes returns a conflict rather than replacing the original evidence.
 - The function returns success only after the database commit. Verification/provider/database failures are not acknowledged as successful receipts.
 - Worker claims use `FOR UPDATE SKIP LOCKED`, random lease tokens and a two-minute lease. A stale worker cannot acknowledge a replacement worker's lease.
-- A lost acknowledgement retries safely through SENTINEL's existing unique event IDs and processor locks. A failed delivery becomes available after one minute; a crashed lease becomes available after two minutes.
-- After ten claims a still-unprocessed row stays stored for operator review and is excluded from automatic claiming. Inspect `attempts`, `processed_at`, `available_at` and `last_error` through a privileged server/dashboard session. After fixing the cause, an administrator can reset `attempts=0` and `available_at=now()` for that row; do not edit signed bodies or signature headers.
+- A lost acknowledgement retries safely through SENTINEL's existing unique event IDs and processor locks. Transient failures use bounded exponential backoff capped at five minutes; a crashed lease becomes available after two minutes.
+- Definitive request failures and exhausted ten-attempt receipts enter explicit `DEAD` state for operator review. After fixing the cause, an administrator may reset status to `PENDING`, attempts to zero, availability to now and lease ownership/expiry to NULL. Never edit signed bodies or signature headers.
 - Logs contain error categories, not event bodies, access tokens or provider responses. Raw bodies remain private database records for event processing.
 
 ## Validation performed locally
 
 | Check | Result |
 |---|---|
-| Full existing backend plus initial bridge tests | 114 passed, 1 credential-gated real-AI skip |
-| Final focused bridge tests, including capture reconciliation | 3 passed |
+| Full existing backend plus bridge lifecycle tests | 123 passed, 1 credential-gated real-AI skip |
+| Focused bridge lifecycle tests | 8 passed |
 | Deno receiver tests with mocked external services | 11 passed |
-| PostgreSQL permission/deduplication/lease/concurrency tests | 6 passed |
+| PostgreSQL permission/deduplication/lease/concurrency tests | 8 passed |
 | Project creation/deployment-script tests with mocked account API | 4 passed, including direct API and CLI uploads |
 | Deno check/lint | Passed |
-| Backend Ruff and strict mypy | Passed; 75 source files typed |
+| Backend Ruff and strict mypy | Passed; 81 source files typed |
 
-The PostgreSQL tests used only the separate local `sentinel_supabase_check` database. They did not change the application database or its Alembic schema. Project-creation tests use mocked HTTP requests, not an actual Supabase account.
+SQL tests use disposable local databases. Backend migration head is `22ad61c52593`; upgrade/downgrade/upgrade and metadata checks passed. Durable scoring recovery tests also passed (3 tests). Project-creation tests use mocked HTTP requests, not an actual Supabase account.
 
 Repeat the new checks:
 
@@ -110,4 +110,6 @@ DENO_DIR=/workspace/.cache/deno /workspace/sentinel-tools/node_modules/.bin/deno
 SENTINEL_SUPABASE_TEST_DATABASE_URL=postgresql://sentinel:sentinel@127.0.0.1:5432/sentinel_supabase_check apps/api/.venv/bin/pytest supabase/tests
 ```
 
-The existing API suite includes `tests/test_supabase_inbox.py`. No frontend or ML code changed. Function deployment to the user-created project and public reachability are verified. Automated project creation was not used for the live deployment. Real signed sandbox delivery and end-to-end processing through the deployed inbox remain unverified until PayPal secrets and the bridge are configured.
+The unchanged ML model tests passed (7), frontend tests passed (26), and browser tests passed (8); types, lint and production build passed. Hosted SIMULATED fixtures traversed the actual Supabase inbox, HTTP bridge, isolated FastAPI database, scoring job and HIGH-risk case. API outage, lease expiration, stale ownership, duplicates, out-of-order events and invalid fixture signatures were exercised. Fixture transport and signatures are explicitly labelled; they do not prove real PayPal verification.
+
+No genuine PayPal event has been received; a real payment remains deliberately skipped. Certificate-host egress is blocked in this cloud environment pending activation of the saved network draft. A continuously hosted public Python API has not been provisioned; the current supervised runtime is local to this workspace. The paid hosting proposal in `deploy/render-continuous.yaml` is review-only and has not been applied.

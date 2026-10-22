@@ -206,6 +206,12 @@ class PaymentEvent(Base):
     )
     processed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     error_reason: Mapped[str | None] = mapped_column(Text)
+    signature_headers: Mapped[dict[str, str]] = mapped_column(
+        JSONB, nullable=False, default=dict, server_default=text("'{}'::jsonb")
+    )
+    next_attempt_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now()
+    )
 
 
 class RawPayload(Base):

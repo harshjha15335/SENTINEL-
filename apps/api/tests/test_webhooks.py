@@ -1,8 +1,10 @@
 import base64
+import hashlib
 import json
 import zlib
 from datetime import UTC, datetime, timedelta
 
+import httpx
 import pytest
 from cryptography import x509
 from cryptography.hazmat.primitives import hashes, serialization
@@ -283,8 +285,12 @@ def test_endpoint_persists_then_acknowledges(
     }
     first = app_client.post("/api/v1/webhooks/paypal", content=body, headers=headers)
     second = app_client.post("/api/v1/webhooks/paypal", content=body, headers=headers)
-    assert first.json() == {"received": True, "duplicate": False}
-    assert second.json() == {"received": True, "duplicate": True}
+    assert first.json()["received"] is True and first.json()["duplicate"] is False
+    assert second.json()["received"] is True and second.json()["duplicate"] is True
+    assert first.json()["durable"] is True
+    assert first.json()["payload_sha256"] == hashlib.sha256(body).hexdigest()
+    assert first.json()["verification_status"] == "VERIFIED"
+    assert first.json()["event_id"] == "WH-E2E"
     db.expire_all()
     db.refresh(txn)
     assert txn.status is TransactionStatus.CAPTURED  # processed by the background task
@@ -292,3 +298,38 @@ def test_endpoint_persists_then_acknowledges(
     assert bad.status_code == 400
     missing = app_client.post("/api/v1/webhooks/paypal", content=body)
     assert missing.status_code == 400
+
+
+def test_certificate_network_denial_is_retryable_not_an_invalid_signature(
+    app_client, keypair, monkeypatch, db
+):
+    from app.api.v1.webhooks import get_verifier
+    from app.core.config import get_settings
+    from app.main import app
+
+    monkeypatch.setattr(get_settings(), "paypal_webhook_id", WEBHOOK_ID)
+
+    def denied(url):
+        request = httpx.Request("GET", url)
+        raise httpx.HTTPStatusError(
+            "network policy", request=request, response=httpx.Response(403, request=request)
+        )
+
+    app.dependency_overrides[get_verifier] = lambda: SignatureVerifier(fetch=denied)
+    key, _ = keypair
+    body = event_body("WH-NETWORK-RETRY", "PAYMENT.CAPTURE.COMPLETED", {"id": "CAPTURE"})
+    signed = sign(key, body, WEBHOOK_ID)
+    response = app_client.post(
+        "/api/v1/webhooks/paypal",
+        content=body,
+        headers={
+            "paypal-transmission-id": signed.transmission_id,
+            "paypal-transmission-time": signed.transmission_time,
+            "paypal-cert-url": signed.cert_url,
+            "paypal-auth-algo": signed.auth_algo,
+            "paypal-transmission-sig": signed.transmission_sig,
+        },
+    )
+    assert response.status_code == 503
+    assert response.json()["error"]["code"] == "verification_unavailable"
+    assert db.scalar(select(PaymentEvent)) is None

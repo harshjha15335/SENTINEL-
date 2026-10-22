@@ -1,0 +1,49 @@
+# REVIEW-ONLY proposal. Starter + managed PostgreSQL are billable.
+# Do not apply without hosting access and explicit approval of the provider costs.
+# This branch is local; nothing here deploys, purchases, pushes or enables auto-deploy.
+services:
+  - type: web
+    name: sentinel-api
+    runtime: docker
+    plan: starter
+    branch: feature/supabase-webhook
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    healthCheckPath: /api/v1/ready
+    autoDeploy: false
+    envVars:
+      - key: SENTINEL_DATABASE_URL
+        fromDatabase:
+          name: sentinel-app-db
+          property: connectionString
+      - key: SENTINEL_ENVIRONMENT
+        value: production
+      - key: SENTINEL_STORAGE_BACKEND
+        value: database
+      - key: SENTINEL_COOKIE_SECURE
+        value: "true"
+      - key: SENTINEL_REQUIRE_WORKERS_READY
+        value: "true"
+      - key: SENTINEL_PAYPAL_MODE
+        value: sandbox
+      - key: SENTINEL_PAYPAL_CLIENT_ID
+        sync: false
+      - key: SENTINEL_PAYPAL_CLIENT_SECRET
+        sync: false
+      - key: SENTINEL_PAYPAL_WEBHOOK_ID
+        sync: false
+      - key: SENTINEL_SUPABASE_URL
+        value: https://cfslzvvdjxstpupkqbpw.supabase.co
+      - key: SENTINEL_SUPABASE_SERVICE_ROLE_KEY
+        sync: false
+      - key: SENTINEL_SEED_ADMIN_PASSWORD
+        generateValue: true
+      - key: SENTINEL_SEED_ANALYST_PASSWORD
+        generateValue: true
+      - key: SENTINEL_SEED_VIEWER_PASSWORD
+        generateValue: true
+databases:
+  - name: sentinel-app-db
+    plan: basic-256mb
+    databaseName: sentinel
+    user: sentinel

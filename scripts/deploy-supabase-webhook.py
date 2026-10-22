@@ -167,8 +167,11 @@ def main():
             "Project is still provisioning; rerun later to resume without creating another project"
         )
 
-    migration = ROOT / "supabase/migrations/202610200001_webhook_inbox.sql"
-    request(f"/projects/{ref}/database/query", {"query": migration.read_text()})
+    migrations = sorted((ROOT / "supabase/migrations").glob("*.sql"))
+    request(
+        f"/projects/{ref}/database/query",
+        {"query": "\n".join(path.read_text() for path in migrations)},
+    )
     if not args.use_cli:
         body, content_type = function_upload()
         request(

@@ -60,6 +60,11 @@ class Settings(BaseSettings):
     ai_total_tokens_limit: int = 120_000
     investigation_stale_seconds: int = 600
 
+    # Local-only deterministic webhook ingress. Never enabled in production.
+    allow_webhook_fixtures: bool = False
+    require_workers_ready: bool = False
+    webhook_fixture_key: SecretStr | None = None
+
     # Evidence uploads and generated packets.
     storage_backend: StorageBackend = StorageBackend.LOCAL
     storage_dir: str = "var/storage"
@@ -84,6 +89,10 @@ class Settings(BaseSettings):
 
     @model_validator(mode="after")
     def _no_partial_paypal_credentials(self) -> "Settings":
+        if self.allow_webhook_fixtures and (
+            self.environment == "production" or not self.webhook_fixture_key
+        ):
+            raise ValueError("Webhook fixtures require a key and a non-production environment")
         has_id = bool(self.paypal_client_id)
         has_secret = self.paypal_client_secret is not None and bool(
             self.paypal_client_secret.get_secret_value()

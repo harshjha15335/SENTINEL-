@@ -29,12 +29,10 @@ def migrated():
                     f"create role {role} nologin"
                     + (" bypassrls" if role == "service_role" else "")
                 )
-        db.execute(
-            Path(__file__)
-            .parents[1]
-            .joinpath("migrations/202610200001_webhook_inbox.sql")
-            .read_text()
-        )
+        for migration in sorted(
+            Path(__file__).parents[1].joinpath("migrations").glob("*.sql")
+        ):
+            db.execute(migration.read_text())
     yield
 
 
@@ -78,6 +76,14 @@ def test_clients_cannot_read_or_enqueue(db, role):
         db.execute("select * from public.sentinel_webhook_inbox")
     with pytest.raises(psycopg.errors.InsufficientPrivilege):
         enqueue(db)
+    for query in [
+        "select public.sentinel_webhook_metrics()",
+        "select * from public.sentinel_claim_webhooks(1,'SIMULATED')",
+        "select public.sentinel_renew_webhook(gen_random_uuid(),gen_random_uuid())",
+        "select public.sentinel_enqueue_fixture('FIXTURE-1','X','{}','{}')",
+    ]:
+        with pytest.raises(psycopg.errors.InsufficientPrivilege):
+            db.execute(query)
 
 
 def test_leases_retry_and_stale_acknowledgement(db):
@@ -133,4 +139,49 @@ def test_exhausted_deliveries_remain_stored_for_operator_review(db):
             "select count(*) from public.sentinel_webhook_inbox where processed_at is null"
         ).fetchone()[0]
         == 1
+    )
+    assert (
+        db.execute("select status from public.sentinel_webhook_inbox").fetchone()[0]
+        == "DEAD"
+    )
+
+
+def test_fixture_cannot_reclassify_existing_genuine_receipt(db):
+    enqueue(db, "FIXTURE-BOUND")
+    body = json.dumps(
+        {
+            "id": "FIXTURE-BOUND",
+            "event_type": "PAYMENT.CAPTURE.COMPLETED",
+            "resource": {},
+        }
+    )
+    with pytest.raises(psycopg.errors.CheckViolation):
+        db.execute(
+            "select public.sentinel_enqueue_fixture(%s,%s,%s,%s)",
+            ("FIXTURE-BOUND", "PAYMENT.CAPTURE.COMPLETED", body, "{}"),
+        )
+    assert (
+        db.execute("select data_origin from public.sentinel_webhook_inbox").fetchone()[
+            0
+        ]
+        == "LIVE_SANDBOX"
+    )
+
+
+def test_fixture_sweep_does_not_touch_genuine_claims(db):
+    enqueue(db)
+    db.execute("update public.sentinel_webhook_inbox set status='RUNNING',attempts=10")
+    assert not db.execute(
+        "select * from public.sentinel_claim_webhooks(1,'SIMULATED')"
+    ).fetchall()
+    assert (
+        db.execute("select status from public.sentinel_webhook_inbox").fetchone()[0]
+        == "RUNNING"
+    )
+    assert not db.execute(
+        "select * from public.sentinel_claim_webhooks(1,'LIVE_SANDBOX')"
+    ).fetchall()
+    assert (
+        db.execute("select status from public.sentinel_webhook_inbox").fetchone()[0]
+        == "DEAD"
     )

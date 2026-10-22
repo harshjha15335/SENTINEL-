@@ -12,6 +12,7 @@ import time
 from app.core.config import get_settings
 from app.core.logging import configure_logging
 from app.db.session import get_sessionmaker
+from app.models.enums import EventProcessing
 from app.services.webhooks import pending_event_ids, process_event
 
 log = logging.getLogger("sentinel.worker")
@@ -21,10 +22,14 @@ def run_once() -> int:
     maker = get_sessionmaker()
     with maker() as db:
         ids = pending_event_ids(db)
+    completed = 0
     for event_id in ids:
         with maker() as db:
-            process_event(db, event_id)
-    return len(ids)
+            event = process_event(db, event_id)
+            completed += int(
+                event.processing_status in (EventProcessing.PROCESSED, EventProcessing.IGNORED)
+            )
+    return completed
 
 
 def main() -> None:

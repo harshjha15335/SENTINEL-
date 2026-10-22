@@ -6,21 +6,25 @@ FROM node:24-slim AS web
 WORKDIR /src
 COPY packages/contracts ./packages/contracts
 COPY apps/web/package.json apps/web/package-lock.json ./apps/web/
-RUN cd apps/web && npm ci --no-audit --no-fund
+RUN --mount=type=secret,id=build_ca \
+    cd apps/web && if [ -f /run/secrets/build_ca ]; then export NODE_EXTRA_CA_CERTS=/run/secrets/build_ca; fi && npm ci --no-audit --no-fund
 COPY apps/web ./apps/web
 RUN cd apps/web && npm run build
 
 FROM python:3.12-slim
 ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1 PIP_NO_CACHE_DIR=1 \
-    SENTINEL_WEB_DIST=/app/web SENTINEL_STORAGE_BACKEND=database
+    SENTINEL_WEB_DIST=/app/web SENTINEL_STORAGE_BACKEND=database HOST=0.0.0.0
 WORKDIR /app
 COPY apps/api/pyproject.toml ./
 COPY apps/api/app ./app
-RUN pip install . && useradd --create-home --uid 10001 sentinel
+RUN --mount=type=secret,id=build_ca \
+    if [ -f /run/secrets/build_ca ]; then export PIP_CERT=/run/secrets/build_ca; fi; \
+    pip install . && useradd --create-home --uid 10001 sentinel
 COPY apps/api/alembic ./alembic
 COPY apps/api/alembic.ini ./
 COPY apps/api/scripts/start.sh ./start.sh
 COPY --from=web /src/apps/web/dist ./web
+RUN chmod -R a+rX /app && chmod 755 /app/start.sh
 USER sentinel
 EXPOSE 8000
 HEALTHCHECK --interval=30s --timeout=5s --start-period=60s \

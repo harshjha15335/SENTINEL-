@@ -4301,6 +4301,29 @@
         ]
       }
     },
+    "/api/v1/operations/webhooks": {
+      "get": {
+        "operationId": "webhook_operations_api_v1_operations_webhooks_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Webhook Operations Api V1 Operations Webhooks Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Webhook Operations",
+        "tags": [
+          "health"
+        ]
+      }
+    },
     "/api/v1/paypal/orders": {
       "post": {
         "operationId": "create_order_api_v1_paypal_orders_post",

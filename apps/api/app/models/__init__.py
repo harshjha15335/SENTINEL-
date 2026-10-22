@@ -11,6 +11,7 @@ from app.models.core import (
     User,
     UserSession,
 )
+from app.models.jobs import RiskScoringJob, WorkerHealth
 from app.models.workflow import (
     ActionExecution,
     ApprovalDecision,
@@ -36,8 +37,10 @@ __all__ = [
     "Product",
     "RawPayload",
     "RiskAssessment",
+    "RiskScoringJob",
     "StoredBlob",
     "Transaction",
     "User",
     "UserSession",
+    "WorkerHealth",
 ]
