@@ -11,7 +11,16 @@ services:
     dockerContext: .
     healthCheckPath: /api/v1/ready
     autoDeploy: false
+    region: singapore
     envVars:
+      - key: SENTINEL_HOSTED_DEPLOYMENT
+        value: "true"
+      - key: SENTINEL_CORS_ORIGINS
+        value: "[]"
+      - key: SENTINEL_AUTO_MIGRATE
+        value: "true"
+      - key: SENTINEL_MIGRATION_TARGET
+        value: 8ab7245e13c0
       - key: SENTINEL_DATABASE_URL
         fromDatabase:
           name: sentinel-app-db
@@ -45,5 +54,6 @@ services:
 databases:
   - name: sentinel-app-db
     plan: basic-256mb
+    region: singapore
     databaseName: sentinel
     user: sentinel

@@ -23,6 +23,10 @@ const CaseDetailPage = lazy(() => import("@/features/cases/CaseDetailPage").then
 const ModelPage = lazy(() => import("@/features/risk/ModelPage").then((m) => ({ default: m.ModelPage })));
 const CheckoutPage = lazy(() => import("@/features/checkout/CheckoutPage").then((m) => ({ default: m.CheckoutPage })));
 
+const OperationsPage = lazy(() => import("@/features/operations/OperationsPage").then(m => ({ default: m.OperationsPage })));
+
+const DemoGuidePage = lazy(() => import("@/features/operations/DemoGuidePage").then(m => ({ default: m.DemoGuidePage })));
+
 const fallback = <Skeleton className="h-64" />;
 
 function makeClient(): QueryClient {
@@ -70,6 +74,8 @@ export function AppRoutes() {
         <Route path="cases/:id" element={<Suspense fallback={fallback}><CaseDetailPage /></Suspense>} />
         <Route path="model" element={<Suspense fallback={fallback}><ModelPage /></Suspense>} />
         <Route path="checkout" element={<Suspense fallback={fallback}><CheckoutPage /></Suspense>} />
+        <Route path="demo" element={<Suspense fallback={fallback}><DemoGuidePage /></Suspense>} />
+        <Route path="operations" element={<Suspense fallback={fallback}><OperationsPage /></Suspense>} />
         <Route path="settings" element={<SettingsPage />} />
         <Route path="*" element={<NotFoundPage />} />
       </Route>

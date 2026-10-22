@@ -7,8 +7,10 @@ from app.api.v1 import (
     cases,
     catalog,
     dashboard,
+    demo,
     health,
     investigations,
+    operations,
     paypal,
     risk,
     transactions,
@@ -46,6 +48,7 @@ def create_app() -> FastAPI:
     v1 = APIRouter(prefix="/api/v1")
     for module in (
         health,
+        operations,
         auth,
         catalog,
         paypal,
@@ -54,6 +57,7 @@ def create_app() -> FastAPI:
         cases,
         investigations,
         dashboard,
+        demo,
         audit,
         webhooks,
     ):

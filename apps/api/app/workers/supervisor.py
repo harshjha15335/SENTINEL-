@@ -6,8 +6,13 @@ import subprocess
 import sys
 import time
 
+from app.core.config import get_settings
+
 
 def main() -> None:
+    settings = get_settings()
+    if settings.hosted_deployment and "*" in os.environ.get("SENTINEL_FORWARDED_ALLOW_IPS", ""):
+        raise SystemExit("Hosted deployment requires explicit trusted proxy addresses")
     commands = [
         [
             sys.executable,

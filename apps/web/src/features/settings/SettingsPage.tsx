@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/Badge";
 import { OriginBadge } from "@/components/ui/OriginBadge";
 import { Panel } from "@/components/ui/Panel";
 import { EmptyState, ErrorState, Skeleton } from "@/components/ui/States";
+import { useAIStatus } from "@/features/investigation/useWorkbench";
 import { useMe } from "@/features/auth/session";
 import { api, type AuditPage } from "@/lib/api";
 import { formatDateTime, humanize } from "@/lib/format";
@@ -14,6 +15,7 @@ import { usePayPalStatus } from "./usePayPalStatus";
 export function SettingsPage() {
   const me = useMe();
   const status = usePayPalStatus();
+  const ai = useAIStatus();
   return (
     <>
       <PageHeader title="Settings" description="Connection status and workspace information. Live PayPal mode is intentionally not available." />
@@ -56,7 +58,7 @@ export function SettingsPage() {
               <dt className="text-fg-subtle">Role</dt>
               <dd><Badge tone="accent">{me.data.role}</Badge></dd>
               <dt className="text-fg-subtle">AI provider</dt>
-              <dd className="text-fg-muted">Not configured (investigation agent arrives in Phase 4)</dd>
+              <dd className="text-fg-muted">{ai.isPending ? "Checking configuration…" : ai.data?.configured ? "Provider configured; real execution is a separate check" : "Deterministic fallback (no provider configured)"}</dd>
             </dl>
           )}
         </Panel>

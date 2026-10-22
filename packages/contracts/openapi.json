@@ -1244,6 +1244,76 @@
         "title": "HTTPValidationError",
         "type": "object"
       },
+      "InboxGroup": {
+        "properties": {
+          "count": {
+            "title": "Count",
+            "type": "integer"
+          },
+          "data_origin": {
+            "$ref": "#/components/schemas/DataOrigin"
+          },
+          "last_attempt_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Attempt At"
+          },
+          "oldest_received_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Oldest Received At"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "data_origin",
+          "status",
+          "count",
+          "oldest_received_at",
+          "last_attempt_at"
+        ],
+        "title": "InboxGroup",
+        "type": "object"
+      },
+      "InboxSnapshot": {
+        "properties": {
+          "groups": {
+            "items": {
+              "$ref": "#/components/schemas/InboxGroup"
+            },
+            "title": "Groups",
+            "type": "array"
+          },
+          "observed_at": {
+            "format": "date-time",
+            "title": "Observed At",
+            "type": "string"
+          }
+        },
+        "required": [
+          "observed_at",
+          "groups"
+        ],
+        "title": "InboxSnapshot",
+        "type": "object"
+      },
       "Indicator": {
         "additionalProperties": false,
         "properties": {
@@ -1267,6 +1337,70 @@
           "sources"
         ],
         "title": "Indicator",
+        "type": "object"
+      },
+      "IntegrationStatus": {
+        "properties": {
+          "ai_configured": {
+            "title": "Ai Configured",
+            "type": "boolean"
+          },
+          "ai_provider": {
+            "title": "Ai Provider",
+            "type": "string"
+          },
+          "last_completed_ai_run_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Completed Ai Run At"
+          },
+          "last_verified_event_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Verified Event At"
+          },
+          "paypal_credentials_configured": {
+            "title": "Paypal Credentials Configured",
+            "type": "boolean"
+          },
+          "paypal_mode": {
+            "title": "Paypal Mode",
+            "type": "string"
+          },
+          "verification_note": {
+            "title": "Verification Note",
+            "type": "string"
+          },
+          "webhook_id_configured": {
+            "title": "Webhook Id Configured",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "paypal_mode",
+          "paypal_credentials_configured",
+          "webhook_id_configured",
+          "last_verified_event_at",
+          "ai_provider",
+          "ai_configured",
+          "last_completed_ai_run_at",
+          "verification_note"
+        ],
+        "title": "IntegrationStatus",
         "type": "object"
       },
       "InvestigationErrorCategory": {
@@ -1556,6 +1690,35 @@
         "title": "InvestigationStatus",
         "type": "string"
       },
+      "JudgeScenarioOut": {
+        "properties": {
+          "case_id": {
+            "format": "uuid",
+            "title": "Case Id",
+            "type": "string"
+          },
+          "data_origin": {
+            "$ref": "#/components/schemas/DataOrigin"
+          },
+          "investigation_mode": {
+            "title": "Investigation Mode",
+            "type": "string"
+          },
+          "transaction_id": {
+            "format": "uuid",
+            "title": "Transaction Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "case_id",
+          "transaction_id",
+          "data_origin",
+          "investigation_mode"
+        ],
+        "title": "JudgeScenarioOut",
+        "type": "object"
+      },
       "LoginRequest": {
         "additionalProperties": false,
         "properties": {
@@ -1839,6 +2002,104 @@
           "reason"
         ],
         "title": "OpenCaseRequest",
+        "type": "object"
+      },
+      "OperationsOut": {
+        "properties": {
+          "api": {
+            "title": "Api",
+            "type": "string"
+          },
+          "checks": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "title": "Checks",
+            "type": "object"
+          },
+          "events": {
+            "items": {
+              "$ref": "#/components/schemas/StageCount"
+            },
+            "title": "Events",
+            "type": "array"
+          },
+          "exhausted_events": {
+            "title": "Exhausted Events",
+            "type": "integer"
+          },
+          "inbox": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/InboxSnapshot"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "inbox_fresh": {
+            "title": "Inbox Fresh",
+            "type": "boolean"
+          },
+          "inbox_scope": {
+            "title": "Inbox Scope",
+            "type": "string"
+          },
+          "integrations": {
+            "$ref": "#/components/schemas/IntegrationStatus"
+          },
+          "investigations": {
+            "items": {
+              "$ref": "#/components/schemas/StageCount"
+            },
+            "title": "Investigations",
+            "type": "array"
+          },
+          "observed_at": {
+            "format": "date-time",
+            "title": "Observed At",
+            "type": "string"
+          },
+          "ready": {
+            "title": "Ready",
+            "type": "boolean"
+          },
+          "scoring_jobs": {
+            "items": {
+              "$ref": "#/components/schemas/StageCount"
+            },
+            "title": "Scoring Jobs",
+            "type": "array"
+          },
+          "storage": {
+            "$ref": "#/components/schemas/StorageStatus"
+          },
+          "workers": {
+            "items": {
+              "$ref": "#/components/schemas/WorkerStatus"
+            },
+            "title": "Workers",
+            "type": "array"
+          }
+        },
+        "required": [
+          "observed_at",
+          "api",
+          "ready",
+          "checks",
+          "workers",
+          "events",
+          "scoring_jobs",
+          "investigations",
+          "exhausted_events",
+          "inbox_scope",
+          "inbox_fresh",
+          "inbox",
+          "storage",
+          "integrations"
+        ],
+        "title": "OperationsOut",
         "type": "object"
       },
       "OrderCreatedOut": {
@@ -2504,6 +2765,28 @@
         "title": "SourceRef",
         "type": "object"
       },
+      "StageCount": {
+        "properties": {
+          "count": {
+            "title": "Count",
+            "type": "integer"
+          },
+          "data_origin": {
+            "$ref": "#/components/schemas/DataOrigin"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "data_origin",
+          "status",
+          "count"
+        ],
+        "title": "StageCount",
+        "type": "object"
+      },
       "StartInvestigationRequest": {
         "additionalProperties": false,
         "properties": {
@@ -2518,6 +2801,39 @@
           }
         },
         "title": "StartInvestigationRequest",
+        "type": "object"
+      },
+      "StorageStatus": {
+        "properties": {
+          "backend": {
+            "title": "Backend",
+            "type": "string"
+          },
+          "database_query": {
+            "title": "Database Query",
+            "type": "string"
+          },
+          "durability": {
+            "title": "Durability",
+            "type": "string"
+          },
+          "stored_bytes": {
+            "title": "Stored Bytes",
+            "type": "integer"
+          },
+          "stored_files": {
+            "title": "Stored Files",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "backend",
+          "database_query",
+          "stored_files",
+          "stored_bytes",
+          "durability"
+        ],
+        "title": "StorageStatus",
         "type": "object"
       },
       "ToolCallOut": {
@@ -3000,6 +3316,70 @@
           "sources"
         ],
         "title": "VerifiedFact",
+        "type": "object"
+      },
+      "WorkerStatus": {
+        "properties": {
+          "failures": {
+            "title": "Failures",
+            "type": "integer"
+          },
+          "fresh": {
+            "title": "Fresh",
+            "type": "boolean"
+          },
+          "heartbeat_at": {
+            "format": "date-time",
+            "title": "Heartbeat At",
+            "type": "string"
+          },
+          "last_error": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Error"
+          },
+          "last_success_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Success At"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "processed": {
+            "title": "Processed",
+            "type": "integer"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "status",
+          "fresh",
+          "heartbeat_at",
+          "last_success_at",
+          "processed",
+          "failures",
+          "last_error"
+        ],
+        "title": "WorkerStatus",
         "type": "object"
       }
     }
@@ -4255,6 +4635,27 @@
         ]
       }
     },
+    "/api/v1/demo/scenario": {
+      "get": {
+        "operationId": "scenario_api_v1_demo_scenario_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/JudgeScenarioOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Scenario",
+        "tags": [
+          "demo"
+        ]
+      }
+    },
     "/api/v1/health": {
       "get": {
         "operationId": "health_api_v1_health_get",
@@ -4309,9 +4710,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Webhook Operations Api V1 Operations Webhooks Get",
-                  "type": "object"
+                  "$ref": "#/components/schemas/OperationsOut"
                 }
               }
             },
@@ -4320,7 +4719,7 @@
         },
         "summary": "Webhook Operations",
         "tags": [
-          "health"
+          "operations"
         ]
       }
     },

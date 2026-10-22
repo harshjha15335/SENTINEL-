@@ -114,7 +114,7 @@ def demo_load(seed_value: int, *, if_empty: bool = False) -> None:
 
 def main() -> None:
     parser = argparse.ArgumentParser(prog="sentinel")
-    parser.add_argument("command", choices=["seed", "demo-load"])
+    parser.add_argument("command", choices=["seed", "demo-load", "judge-demo", "check-schema"])
     parser.add_argument("--seed", type=int, default=2026, help="scenario seed for demo-load")
     parser.add_argument(
         "--if-empty", action="store_true", help="demo-load: skip when synthetic data exists"
@@ -122,6 +122,24 @@ def main() -> None:
     args = parser.parse_args()
     if args.command == "seed":
         seed()
+    elif args.command == "check-schema":
+        from sqlalchemy import text
+
+        from app.services.readiness import expected_revision
+
+        with get_sessionmaker()() as db:
+            versions = set(db.scalars(text("select version_num from alembic_version")))
+            if versions != {expected_revision()}:
+                sys.exit("Application schema does not match the reviewed migration head")
+        print("Application schema matches reviewed head")
+    elif args.command == "judge-demo":
+        import json
+
+        from app.services.demo.judge import prepare
+
+        password = os.environ.get("SENTINEL_JUDGE_PASSWORD", "")
+        with get_sessionmaker()() as db:
+            print(json.dumps(prepare(db, password=password)))
     elif args.command == "demo-load":
         demo_load(args.seed, if_empty=args.if_empty)
 

@@ -288,3 +288,31 @@ def test_fixture_ingress_is_disabled_by_default(app_client, db, tenant, monkeypa
         ).status_code
         == 404
     )
+
+
+def test_lost_http_response_after_api_commit_replays_safely(db, tenant, inbox, fixture_api):
+    enqueue(inbox, event(high_candidate(db, tenant)))
+
+    def accept_then_lose_response(request):
+        response = fixture_api.post(
+            request.url.path, content=request.content, headers=dict(request.headers)
+        )
+        assert response.status_code == 200 and response.json()["durable"] is True
+        raise httpx.ReadTimeout("API committed; response lost in transport")
+
+    with (
+        httpx.Client(
+            base_url="http://localhost", transport=httpx.MockTransport(accept_then_lose_response)
+        ) as api,
+        pytest.raises(DeliveryDeferred),
+    ):
+        forward(inbox, api)
+    row = inbox.execute("select * from public.sentinel_webhook_inbox").fetchone()
+    assert row["status"] == "PENDING" and row["processed_at"] is None
+    assert db.scalar(select(func.count()).select_from(PaymentEvent)) == 1
+    inbox.execute("update public.sentinel_webhook_inbox set available_at=now()-interval '1 second'")
+    assert forward(inbox, fixture_api) == 1
+    assert score_once() == 1
+    assert db.scalar(select(func.count()).select_from(PaymentEvent)) == 1
+    assert db.scalar(select(func.count()).select_from(RiskScoringJob)) == 1
+    assert db.scalar(select(func.count()).select_from(Case)) == 1

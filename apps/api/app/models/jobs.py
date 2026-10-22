@@ -4,7 +4,7 @@ import uuid
 from datetime import datetime
 
 from sqlalchemy import CheckConstraint, DateTime, ForeignKey, Index, Integer, String, Text, func
-from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.dialects.postgresql import JSONB, UUID
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.db.base import Base
@@ -44,3 +44,5 @@ class WorkerHealth(Base):
     processed: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
     failures: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
     last_error: Mapped[str | None] = mapped_column(String(100))
+    last_success_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    inbox_snapshot: Mapped[dict[str, object] | None] = mapped_column(JSONB)

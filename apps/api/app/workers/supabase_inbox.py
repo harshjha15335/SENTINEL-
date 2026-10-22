@@ -4,6 +4,7 @@ import argparse
 import logging
 import os
 import time
+from datetime import UTC, datetime
 from urllib.parse import urlparse
 
 import httpx
@@ -66,6 +67,7 @@ def main() -> None:
     )
     name = "supabase_fixture_bridge" if args.fixtures else "supabase_bridge"
     failures = 0
+    next_metrics = 0.0
     with (
         httpx.Client(
             base_url=url.rstrip("/") + "/rest/v1/rpc/",
@@ -82,7 +84,35 @@ def main() -> None:
                 count = poll_once(
                     client, api_client, fixtures=args.fixtures, fixture_key=fixture_key
                 )
-                heartbeat(name, "HEALTHY", processed=count)
+                snapshot: dict[str, object] | None = None
+                if not args.fixtures and time.monotonic() >= next_metrics:
+                    try:
+                        metrics = client.post("sentinel_webhook_metrics", json={})
+                        metrics.raise_for_status()
+                        rows = metrics.json()
+                        if not isinstance(rows, list):
+                            raise ValueError("MetricsShape")
+                        # Only retain known aggregate fields, never payloads/provider errors.
+                        snapshot = {
+                            "observed_at": datetime.now(UTC).isoformat(),
+                            "groups": [
+                                {
+                                    k: row.get(k)
+                                    for k in (
+                                        "data_origin",
+                                        "status",
+                                        "count",
+                                        "oldest_received_at",
+                                        "last_attempt_at",
+                                    )
+                                }
+                                for row in rows
+                            ],
+                        }
+                    except Exception:
+                        log.warning("inbox metrics unavailable")
+                    next_metrics = time.monotonic() + 30
+                heartbeat(name, "HEALTHY", processed=count, inbox_snapshot=snapshot)
                 failures = 0
             except Exception as exc:
                 failures += 1

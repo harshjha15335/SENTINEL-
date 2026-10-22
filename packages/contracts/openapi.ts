@@ -349,6 +349,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/demo/scenario": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Scenario */
+        get: operations["scenario_api_v1_demo_scenario_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/health": {
         parameters: {
             query?: never;
@@ -1062,12 +1079,53 @@ export interface components {
             /** Detail */
             detail?: components["schemas"]["ValidationError"][];
         };
+        /** InboxGroup */
+        InboxGroup: {
+            /** Count */
+            count: number;
+            data_origin: components["schemas"]["DataOrigin"];
+            /** Last Attempt At */
+            last_attempt_at: string | null;
+            /** Oldest Received At */
+            oldest_received_at: string | null;
+            /** Status */
+            status: string;
+        };
+        /** InboxSnapshot */
+        InboxSnapshot: {
+            /** Groups */
+            groups: components["schemas"]["InboxGroup"][];
+            /**
+             * Observed At
+             * Format: date-time
+             */
+            observed_at: string;
+        };
         /** Indicator */
         Indicator: {
             /** Description */
             description: string;
             /** Sources */
             sources: components["schemas"]["SourceRef"][];
+        };
+        /** IntegrationStatus */
+        IntegrationStatus: {
+            /** Ai Configured */
+            ai_configured: boolean;
+            /** Ai Provider */
+            ai_provider: string;
+            /** Last Completed Ai Run At */
+            last_completed_ai_run_at: string | null;
+            /** Last Verified Event At */
+            last_verified_event_at: string | null;
+            /** Paypal Credentials Configured */
+            paypal_credentials_configured: boolean;
+            /** Paypal Mode */
+            paypal_mode: string;
+            /** Verification Note */
+            verification_note: string;
+            /** Webhook Id Configured */
+            webhook_id_configured: boolean;
         };
         /**
          * InvestigationErrorCategory
@@ -1161,6 +1219,22 @@ export interface components {
          * @enum {string}
          */
         InvestigationStatus: "QUEUED" | "RUNNING" | "COMPLETED" | "FAILED";
+        /** JudgeScenarioOut */
+        JudgeScenarioOut: {
+            /**
+             * Case Id
+             * Format: uuid
+             */
+            case_id: string;
+            data_origin: components["schemas"]["DataOrigin"];
+            /** Investigation Mode */
+            investigation_mode: string;
+            /**
+             * Transaction Id
+             * Format: uuid
+             */
+            transaction_id: string;
+        };
         /** LoginRequest */
         LoginRequest: {
             /**
@@ -1281,6 +1355,39 @@ export interface components {
              * Format: uuid
              */
             transaction_id: string;
+        };
+        /** OperationsOut */
+        OperationsOut: {
+            /** Api */
+            api: string;
+            /** Checks */
+            checks: {
+                [key: string]: string;
+            };
+            /** Events */
+            events: components["schemas"]["StageCount"][];
+            /** Exhausted Events */
+            exhausted_events: number;
+            inbox: components["schemas"]["InboxSnapshot"] | null;
+            /** Inbox Fresh */
+            inbox_fresh: boolean;
+            /** Inbox Scope */
+            inbox_scope: string;
+            integrations: components["schemas"]["IntegrationStatus"];
+            /** Investigations */
+            investigations: components["schemas"]["StageCount"][];
+            /**
+             * Observed At
+             * Format: date-time
+             */
+            observed_at: string;
+            /** Ready */
+            ready: boolean;
+            /** Scoring Jobs */
+            scoring_jobs: components["schemas"]["StageCount"][];
+            storage: components["schemas"]["StorageStatus"];
+            /** Workers */
+            workers: components["schemas"]["WorkerStatus"][];
         };
         /** OrderCreatedOut */
         OrderCreatedOut: {
@@ -1558,6 +1665,14 @@ export interface components {
             /** @description Type of record cited. */
             kind: components["schemas"]["SourceKind"];
         };
+        /** StageCount */
+        StageCount: {
+            /** Count */
+            count: number;
+            data_origin: components["schemas"]["DataOrigin"];
+            /** Status */
+            status: string;
+        };
         /** StartInvestigationRequest */
         StartInvestigationRequest: {
             /**
@@ -1566,6 +1681,19 @@ export interface components {
              * @enum {string}
              */
             mode: "auto" | "deterministic";
+        };
+        /** StorageStatus */
+        StorageStatus: {
+            /** Backend */
+            backend: string;
+            /** Database Query */
+            database_query: string;
+            /** Durability */
+            durability: string;
+            /** Stored Bytes */
+            stored_bytes: number;
+            /** Stored Files */
+            stored_files: number;
         };
         /** ToolCallOut */
         ToolCallOut: {
@@ -1718,6 +1846,28 @@ export interface components {
              * @description A fact stated by the cited records.
              */
             statement: string;
+        };
+        /** WorkerStatus */
+        WorkerStatus: {
+            /** Failures */
+            failures: number;
+            /** Fresh */
+            fresh: boolean;
+            /**
+             * Heartbeat At
+             * Format: date-time
+             */
+            heartbeat_at: string;
+            /** Last Error */
+            last_error: string | null;
+            /** Last Success At */
+            last_success_at: string | null;
+            /** Name */
+            name: string;
+            /** Processed */
+            processed: number;
+            /** Status */
+            status: string;
         };
     };
     responses: never;
@@ -2513,6 +2663,26 @@ export interface operations {
             };
         };
     };
+    scenario_api_v1_demo_scenario_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["JudgeScenarioOut"];
+                };
+            };
+        };
+    };
     health_api_v1_health_get: {
         parameters: {
             query?: never;
@@ -2570,9 +2740,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": {
-                        [key: string]: unknown;
-                    };
+                    "application/json": components["schemas"]["OperationsOut"];
                 };
             };
         };

@@ -12,6 +12,8 @@ const NAV = [
   { to: "/cases", label: "Review Queue", icon: ListChecks, end: false },
   { to: "/model", label: "Risk Model", icon: Gauge, end: false },
   { to: "/checkout", label: "Sandbox Checkout", icon: ShoppingBag, end: false },
+  { to: "/demo", label: "Demo guide", icon: ShieldCheck, end: false },
+  { to: "/operations", label: "Operations", icon: Activity, end: false },
   { to: "/settings", label: "Settings", icon: Settings, end: false },
 ];
 
@@ -39,7 +41,7 @@ export function AppShell() {
           <span className="text-sm font-semibold tracking-[0.16em]">SENTINEL</span>
         </div>
         <nav aria-label="Primary" className="flex gap-1 overflow-x-auto px-2 pb-2 md:flex-col md:pb-0">
-          {NAV.map(({ to, label, icon: Icon, end }) => (
+          {NAV.filter(item => (item.to !== "/operations" || me.data?.role === "ADMIN") && (item.to !== "/demo" || me.data?.merchant.environment === "DEMO")).map(({ to, label, icon: Icon, end }) => (
             <NavLink
               key={to}
               to={to}

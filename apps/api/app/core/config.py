@@ -2,6 +2,7 @@
 
 from enum import StrEnum
 from functools import lru_cache
+from uuid import UUID
 
 from pydantic import Field, SecretStr, field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -38,6 +39,7 @@ class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_prefix="SENTINEL_", env_file=".env", extra="ignore")
 
     environment: str = "development"
+    hosted_deployment: bool = False
     database_url: str = "postgresql+psycopg://sentinel:sentinel@127.0.0.1:5432/sentinel"
     cors_origins: list[str] = Field(default_factory=lambda: ["http://localhost:5173"])
     cookie_secure: bool = False
@@ -63,6 +65,9 @@ class Settings(BaseSettings):
     # Local-only deterministic webhook ingress. Never enabled in production.
     allow_webhook_fixtures: bool = False
     require_workers_ready: bool = False
+    # Global inbox aggregates are visible only to this installation operator's merchant.
+    # Tenant administrators otherwise see their own application queues only.
+    operations_inbox_merchant_id: UUID | None = None
     webhook_fixture_key: SecretStr | None = None
 
     # Evidence uploads and generated packets.
@@ -89,6 +94,17 @@ class Settings(BaseSettings):
 
     @model_validator(mode="after")
     def _no_partial_paypal_credentials(self) -> "Settings":
+        if self.hosted_deployment and (
+            self.environment != "production"
+            or not self.cookie_secure
+            or self.storage_backend is not StorageBackend.DATABASE
+            or not self.require_workers_ready
+            or any(not origin.startswith("https://") for origin in self.cors_origins)
+        ):
+            raise ValueError(
+                "Hosted deployment requires production, secure cookies, database storage, "
+                "worker readiness and HTTPS-only CORS origins (or an empty list)"
+            )
         if self.allow_webhook_fixtures and (
             self.environment == "production" or not self.webhook_fixture_key
         ):
