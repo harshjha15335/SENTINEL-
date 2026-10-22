@@ -20,11 +20,41 @@ ROOT = Path(__file__).resolve().parents[1]
 API = "https://api.supabase.com/v1"
 
 
+def function_upload():
+    """Official CLI-compatible multipart upload, also usable with proxy-backed keys."""
+    boundary = "sentinel-" + secrets.token_hex(16)
+    prefix = "supabase/functions/paypal-webhook/"
+    metadata = {
+        "name": "paypal-webhook",
+        "entrypoint_path": prefix + "index.ts",
+        "verify_jwt": False,
+    }
+    parts = [
+        f'--{boundary}\r\nContent-Disposition: form-data; name="metadata"\r\n\r\n'.encode()
+        + json.dumps(metadata).encode()
+        + b"\r\n"
+    ]
+    for filename in ["index.ts", "receiver.ts"]:
+        path = prefix + filename
+        parts.append(
+            f'--{boundary}\r\nContent-Disposition: form-data; name="file"; filename="{path}"\r\nContent-Type: application/typescript\r\n\r\n'.encode()
+            + (ROOT / path).read_bytes()
+            + b"\r\n"
+        )
+    parts.append(f"--{boundary}--\r\n".encode())
+    return b"".join(parts), f"multipart/form-data; boundary={boundary}"
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--region", default="ap-south-1")
     parser.add_argument(
         "--project-ref", help="Deploy to an existing project instead of creating one"
+    )
+    parser.add_argument(
+        "--use-cli",
+        action="store_true",
+        help="Deploy through the CLI instead of direct API upload",
     )
     args = parser.parse_args()
     token = os.environ.get("SUPABASE_ACCESS_TOKEN")
@@ -33,18 +63,20 @@ def main():
             "Add SUPABASE_ACCESS_TOKEN in secure environment settings. Create an account at https://supabase.com/dashboard first if needed."
         )
     cli = os.environ.get("SUPABASE_CLI") or shutil.which("supabase")
-    if not cli:
+    if args.use_cli and not cli:
         parser.error(
             "Install the official Supabase CLI or set SUPABASE_CLI to its path"
         )
 
-    def request(path, body=None, method=None):
+    def request(path, body=None, method=None, content_type="application/json"):
         req = urllib.request.Request(
             API + path,
-            data=None if body is None else json.dumps(body).encode(),
+            data=body
+            if isinstance(body, bytes)
+            else (None if body is None else json.dumps(body).encode()),
             headers={
                 "Authorization": "Bearer " + token,
-                "Content-Type": "application/json",
+                "Content-Type": content_type,
             },
             method=method or ("POST" if body is not None else "GET"),
         )
@@ -137,24 +169,34 @@ def main():
 
     migration = ROOT / "supabase/migrations/202610200001_webhook_inbox.sql"
     request(f"/projects/{ref}/database/query", {"query": migration.read_text()})
-    subprocess.run(
-        [
-            cli,
-            "functions",
-            "deploy",
-            "paypal-webhook",
-            "--project-ref",
-            ref,
-            "--use-api",
-            "--no-verify-jwt",
-        ],
-        cwd=ROOT,
-        check=True,
-    )
+    if not args.use_cli:
+        body, content_type = function_upload()
+        request(
+            f"/projects/{ref}/functions/deploy?slug=paypal-webhook",
+            body,
+            content_type=content_type,
+        )
+    else:
+        subprocess.run(
+            [
+                cli,
+                "functions",
+                "deploy",
+                "paypal-webhook",
+                "--project-ref",
+                ref,
+                "--use-api",
+                "--no-verify-jwt",
+            ],
+            cwd=ROOT,
+            check=True,
+        )
     url = f"https://{ref}.supabase.co/functions/v1/paypal-webhook"
     with urllib.request.urlopen(url, timeout=30) as response:
         if response.status != 200:
-            raise SystemExit("Deployment check failed: public endpoint did not return HTTP 200")
+            raise SystemExit(
+                "Deployment check failed: public endpoint did not return HTTP 200"
+            )
     unsigned = urllib.request.Request(
         url, data=b"{}", headers={"Content-Type": "application/json"}, method="POST"
     )

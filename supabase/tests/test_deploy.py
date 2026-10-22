@@ -30,15 +30,16 @@ def test_missing_account_access_cannot_create_a_project(monkeypatch, tmp_path):
     assert not (tmp_path / "state").exists()
 
 
+@pytest.mark.parametrize("use_cli", [False, True])
 def test_create_deploy_and_check_url_without_printing_password(
-    monkeypatch, tmp_path, capsys
+    monkeypatch, tmp_path, capsys, use_cli
 ):
     monkeypatch.setenv("SUPABASE_ACCESS_TOKEN", "test-access-token")
     monkeypatch.setenv("SUPABASE_CLI", "/test/supabase")
     monkeypatch.setenv("SENTINEL_SUPABASE_STATE_DIR", str(tmp_path))
     monkeypatch.delenv("SUPABASE_ORGANIZATION_ID", raising=False)
-    monkeypatch.setattr("sys.argv", ["deploy"])
-    calls, commands = [], []
+    monkeypatch.setattr("sys.argv", ["deploy", "--use-cli"] if use_cli else ["deploy"])
+    calls, commands, uploads = [], [], []
 
     def request(req, timeout):
         url = req if isinstance(req, str) else req.full_url
@@ -56,6 +57,16 @@ def test_create_deploy_and_check_url_without_printing_password(
         if url.endswith("/database/query"):
             assert "enable row level security" in json.loads(req.data)["query"]
             return Reply([])
+        if url.endswith("/functions/deploy?slug=paypal-webhook"):
+            assert "multipart/form-data" in req.get_header("Content-type")
+            assert b'"verify_jwt": false' in req.data
+            assert b'filename="supabase/functions/paypal-webhook/index.ts"' in req.data
+            assert (
+                b'filename="supabase/functions/paypal-webhook/receiver.ts"' in req.data
+            )
+            assert b"receiver_test.ts" not in req.data
+            uploads.append(req)
+            return Reply({"slug": "paypal-webhook", "status": "ACTIVE"})
         if method == "POST":
             raise urllib.error.HTTPError(url, 400, "Unsigned", {}, None)
         return Reply({"status": "ok"})
@@ -67,7 +78,10 @@ def test_create_deploy_and_check_url_without_printing_password(
     deploy.main()
     state = json.loads((tmp_path / "deployment.json").read_text())
     assert state["webhook_url"].endswith("/functions/v1/paypal-webhook")
-    assert "--use-api" in commands[0] and "--no-verify-jwt" in commands[0]
+    if use_cli:
+        assert "--use-api" in commands[0] and "--no-verify-jwt" in commands[0]
+    else:
+        assert len(uploads) == 1 and not commands
     assert state["db_password"] not in capsys.readouterr().out
     assert (tmp_path / "deployment.json").stat().st_mode & 0o777 == 0o600
     deploy.main()  # Resume from the same project; never create a duplicate.

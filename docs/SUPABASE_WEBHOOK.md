@@ -6,7 +6,15 @@ Implementation is on `feature/supabase-webhook`, based on the recovered Phase 4 
 
 ## Current deployment state
 
-No Supabase project or public URL has been created. There is no Supabase account login/access token in this environment. Local passing tests do not establish a hosted deployment or a real PayPal delivery.
+Deployed on 22 October 2026 to the user-created SENTINEL project `cfslzvvdjxstpupkqbpw` in `ap-northeast-1`:
+
+```text
+https://cfslzvvdjxstpupkqbpw.supabase.co/functions/v1/paypal-webhook
+```
+
+The Management API reports the function ACTIVE, version 1. Public GET returned 200 and an unsigned POST returned 400. The private inbox schema was applied, and a live query confirmed row-level security is enabled. This verifies deployment and unsigned-request rejection, not a real signed PayPal delivery.
+
+PayPal client ID, client secret and webhook ID are still absent from the Edge Function secrets. Register this URL and supply those settings before testing a real signed sandbox delivery. The SENTINEL inbox bridge still requires its own server configuration and a running Python backend.
 
 The deployment script is ready to create a project in an accessible organization, install the private inbox, deploy the function and check its public URL. It requires an account-owned `SUPABASE_ACCESS_TOKEN`. Create/sign in to your account at https://supabase.com/dashboard, then create a personal access token at https://supabase.com/dashboard/account/tokens and enter it in secure environment settings. Do not paste it into chat or a shell command.
 
@@ -14,18 +22,18 @@ Network requirements `api.supabase.com` and `*.supabase.co`, plus the access-tok
 
 ## Create and deploy
 
-The tested tooling in this environment is Deno 2.9.6 and the official checksum-verified Supabase CLI 2.54.11. Outside this environment, install the official CLI using Supabase's instructions. Here, run:
+The default deployment uses Python's standard-library HTTPS client and Supabase's Management API multipart format. It works with proxy-backed credentials. Deno 2.9.6 is used for local receiver tests; the official checksum-verified Supabase CLI 2.54.11 is optional. To redeploy the existing project, run:
 
 ```bash
 cd /workspace/SENTINEL-recovered
-SUPABASE_CLI=/workspace/sentinel-tools/bin/supabase python scripts/deploy-supabase-webhook.py
+python scripts/deploy-supabase-webhook.py --project-ref cfslzvvdjxstpupkqbpw
 ```
 
 The script uses `SUPABASE_ACCESS_TOKEN` from the environment. With exactly one organization it selects that organization; otherwise set non-secret `SUPABASE_ORGANIZATION_ID` to your chosen organization. It creates a project named `sentinel-<random suffix>` in `ap-south-1` by default. `--region` selects another region. Supabase billing follows the selected organization's plan; the script does not upgrade plans or request a larger instance.
 
 Private resumable state, including the generated database password, is saved outside Git in a mode-700 directory with a mode-600 state file. Default: `/workspace/sentinel-supabase-private/deployment.json`. `SENTINEL_SUPABASE_STATE_DIR` can select another private directory. If creation times out ambiguously, rerunning checks the account's projects rather than blindly creating a duplicate. If the result remains unknown, inspect the dashboard and resume with `--project-ref <ref>`.
 
-The script applies `supabase/migrations/202610200001_webhook_inbox.sql` through the Management API and deploys `paypal-webhook` with `--use-api`. Docker is not required for that deployment. The function's Supabase JWT check is disabled because PayPal sends its own signature; handler signature verification is mandatory. The script verifies HTTP 200 on GET and rejection of an unsigned POST with HTTP 400 before printing a public URL.
+The script applies `supabase/migrations/202610200001_webhook_inbox.sql` through the Management API and uploads only the function's runtime source files using the same multipart format as the official CLI. Docker is not required. Optional `--use-cli` selects the CLI's `--use-api` path for environments with raw credentials; its local token-format check rejects proxy placeholders, so the direct API path is the working default here. The function's Supabase JWT check is disabled because PayPal sends its own signature; handler signature verification is mandatory. The script verifies HTTP 200 on GET and rejection of an unsigned POST with HTTP 400 before printing a public URL.
 
 The final URL will have this form, using the actual reference returned by Supabase:
 
@@ -89,7 +97,7 @@ Existing transaction matching and event status precedence remain in effect. Unkn
 | Final focused bridge tests, including capture reconciliation | 3 passed |
 | Deno receiver tests with mocked external services | 11 passed |
 | PostgreSQL permission/deduplication/lease/concurrency tests | 6 passed |
-| Project creation/deployment-script tests with mocked account API | 3 passed |
+| Project creation/deployment-script tests with mocked account API | 4 passed, including direct API and CLI uploads |
 | Deno check/lint | Passed |
 | Backend Ruff and strict mypy | Passed; 75 source files typed |
 
@@ -102,4 +110,4 @@ DENO_DIR=/workspace/.cache/deno /workspace/sentinel-tools/node_modules/.bin/deno
 SENTINEL_SUPABASE_TEST_DATABASE_URL=postgresql://sentinel:sentinel@127.0.0.1:5432/sentinel_supabase_check apps/api/.venv/bin/pytest supabase/tests
 ```
 
-The existing API suite includes `tests/test_supabase_inbox.py`. No frontend or ML code changed. Live project creation, hosted Edge runtime behavior and real signed sandbox delivery remain blocked by missing account/provider credentials.
+The existing API suite includes `tests/test_supabase_inbox.py`. No frontend or ML code changed. Function deployment to the user-created project and public reachability are verified. Automated project creation was not used for the live deployment. Real signed sandbox delivery and end-to-end processing through the deployed inbox remain unverified until PayPal secrets and the bridge are configured.
