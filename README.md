@@ -5,27 +5,28 @@ explainable, evidence-backed decision. It records PayPal sandbox payments and ev
 with an explainable model, investigates cases with grounded, read-only AI tools, and routes any
 financial action through human approval.
 
-> **Status (2026-10-11):** Built and tested: React → FastAPI → PostgreSQL → PayPal gateway
-> (order creation, capture, verified webhooks), the transaction workspace, an explainable risk
-> model (XGBoost + TreeSHAP, trained on synthetic data, shadow policy), the review queue, and the
-> Phase 4 Investigation Workbench: read-only investigation agent with cited findings, evidence
-> upload, evidence packet PDFs and a two-person approval workflow that records refund intent
-> without moving money.
+> **Current status (22 October 2026):** recovered investigation/evidence/approval workflows,
+> durable Supabase → FastAPI ingestion and scoring, supervised workers, an administrator
+> operations screen and a private read-only judge scenario are implemented locally.
+> The Supabase receiver is public; the complete Python application is **not continuously hosted**.
+> Certificate-host reachability works, but runtime sandbox OAuth failed authentication.
+> No genuine payment was initiated; real PayPal delivery and real AI remain unverified.
+> Synthetic benchmark precision remains 28.2% (122 false positives among 170 HIGH flags).
+> Decisions remain analyst-led; approved-refund execution, disputes and Session 6 analytics are absent.
 >
-> Not yet verified against real services: no live PayPal sandbox payment (no sandbox
-> credentials) and no real AI provider run (no AI credentials; the app falls back to a
-> deterministic summary that is labelled as such). Graph analytics, disputes, policy lab and
-> refund execution are Phase 5. See [`docs/IMPLEMENTATION_STATUS.md`](docs/IMPLEMENTATION_STATUS.md).
+> [Session 8 report](docs/SESSION_8_REPORT.md) · [Hosting readiness](docs/HOSTING_READINESS.md) · [Operations](docs/WEBHOOK_OPERATIONS.md)
 
-## Launch from GitHub
+## Historical demo launch options
+
+Public `main` and images built from it do not contain the recovered local branch. These links are not deployments of the Session 8 implementation. The old free Render blueprint is not a continuous hosting recommendation; use the review-only proposal and readiness checklist after authorization.
 
 | Option | What you get | Needs |
 |---|---|---|
 | [![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/harshjha15335/SENTINEL-) | The full app with its database, in your browser, about 2 minutes after opening | A GitHub account. Codespaces usage counts against your account's quota. |
-| [![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/harshjha15335/SENTINEL-) | A public HTTPS URL that redeploys on every push to `main` | A free Render account |
+| [![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/harshjha15335/SENTINEL-) | A public HTTPS URL that redeploys on every push to `main` | A Render account; verify current limits and pricing |
 | `docker run ghcr.io/harshjha15335/sentinel:main` | The same image CI tests, published from `main` | Docker and a PostgreSQL URL |
 
-Every hosted option runs in **demo mode**:
+The historical launch configurations are intended to run in **demo mode**:
 - PayPal runs in fixture mode, so every payment it creates is labelled **Simulated**.
 - The **Synthetic demo** scenario is loaded.
 - Sign-in passwords are generated, never committed.

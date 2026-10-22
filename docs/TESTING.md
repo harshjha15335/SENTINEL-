@@ -1,5 +1,9 @@
 # Testing
 
+## Session 8 operational status — 22 October 2026
+
+The current recovered branch adds supervised Supabase HTTP ingestion, durable scoring, exact-schema readiness, an administrator operations page and a private read-only judge scenario. The receiver is public; the Python application is still workspace-local. Certificate-host reachability now works; sandbox OAuth authentication failed. Real PayPal payments remain deliberately untested, and the real-AI test remains credential-gated. See [SESSION_8_REPORT.md](SESSION_8_REPORT.md), [HOSTING_READINESS.md](HOSTING_READINESS.md) and [PROVIDER_VERIFICATION.md](PROVIDER_VERIFICATION.md) for current evidence. Older dated results below are historical, not current deployment claims.
+
 ## Run locally
 ```bash
 # Backend (needs PostgreSQL with a sentinel_test database)
@@ -57,3 +61,13 @@ The E2E run uses the dev database after `python -m app.cli demo-load`, so the re
 - `tests/paypal_mock.py` imitates documented PayPal responses to test our HTTP handling. It does **not** prove PayPal integration.
 - The fixture gateway exercises the product flow offline; all its records are `SIMULATED`.
 - A live sandbox integration test (`tests/integration/`) will be added and run once credentials exist; it is not part of this session's results.
+
+## Session 8 validation
+
+Current source passes the full backend suite (134 passed, 1 real-AI skip), including transport-loss replay coverage, unchanged ML (7), frontend (29), browser desktop/mobile (12), Deno receiver (11) and explicitly configured Supabase SQL/deployment checks (12). An initial Supabase run omitted the isolated SQL URL and skipped eight tests; the corrected run set `SENTINEL_SUPABASE_TEST_DATABASE_URL` to the dedicated local `sentinel_supabase_check` database and passed all twelve. Skips are not counted as SQL validation.
+
+The new backend coverage checks exact migration mismatch, stale/future/degraded heartbeats, origin/tenant scoping, operator-only inbox snapshots, idle last-success preservation, hosted security configuration, idempotent judge provisioning and viewer read-only access. The transport-loss regression lets FastAPI commit the event, drops its HTTP response, then verifies replay creates only one event/job/case.
+
+Browser operations/judge checks use actual API data, desktop/mobile viewports and axe. Read the prepared fixture document, download private packets and verify server authorization; never publish the passwords. A full supervisor restart retained sessions and identical evidence/packet SHA-256. A fresh local PostgreSQL dump restored 18,108 transaction rows and all fourteen stored blobs into a separate disposable database. These are local tests, not hosted backup or genuine provider claims.
+
+The hosted SIMULATED fixture run used an isolated integration database, generated one HIGH case, and exercised duplicate delivery, expired claim, API outage, stale acknowledgement, out-of-order status and deliberate invalid HMAC. Provider calls: zero. Its rows are kept labelled, not removed or relabelled as real payments. The ordinary production bridge never claims SIMULATED receipts.

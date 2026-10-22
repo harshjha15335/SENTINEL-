@@ -1,5 +1,9 @@
 # Architecture
 
+## Session 8 operational status — 22 October 2026
+
+The current recovered branch adds supervised Supabase HTTP ingestion, durable scoring, exact-schema readiness, an administrator operations page and a private read-only judge scenario. The receiver is public; the Python application is still workspace-local. Certificate-host reachability now works; sandbox OAuth authentication failed. Real PayPal payments remain deliberately untested, and the real-AI test remains credential-gated. See [SESSION_8_REPORT.md](SESSION_8_REPORT.md), [HOSTING_READINESS.md](HOSTING_READINESS.md) and [PROVIDER_VERIFICATION.md](PROVIDER_VERIFICATION.md) for current evidence. Older dated results below are historical, not current deployment claims.
+
 ```mermaid
 flowchart LR
   subgraph Browser
@@ -56,3 +60,21 @@ flowchart LR
 | Oct 24 | Approvals + refund path, disputes capability detection | SHAP in API | Evidence upload + packet PDF | Workbench, evidence drawer |
 | Oct 31 | Graph analytics, policy lab | Policy cost model | Prompt-injection tests | Graph explorer, policy lab |
 | Nov 7 | Deploy (Render + Vercel), security pass | — | — | Polish, video recording |
+
+## Current hosted-inbox path
+
+```mermaid
+flowchart LR
+  PayPal --> Edge[Existing Supabase receiver]
+  Edge --> Inbox[(Private leased inbox)]
+  Inbox --> Bridge[Supervised HTTP bridge]
+  Bridge --> API[FastAPI verifier + durable receipt]
+  API --> Events[(Application event store)]
+  Events --> Reconcile[Supervised reconciliation]
+  Reconcile --> Jobs[(Durable scoring jobs)]
+  Jobs --> Model[Unchanged model + SHAP]
+  Model --> Case[HIGH-risk case]
+  Case --> Investigation[Investigation / private evidence / packet / approval]
+```
+
+Inbox acceptance, reconciliation, scoring, investigation and approval are distinct stages. Snapshot metrics are sampled by the existing bridge, not by browser service-role access. Worker observability adds nullable fields to application PostgreSQL only. See WEBHOOK_OPERATIONS.md.

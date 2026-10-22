@@ -1,8 +1,12 @@
 # Implementation Status
 
-Last updated: 2026-10-11 (session 3). Update this file whenever real work lands.
+## Session 8 operational status — 22 October 2026
 
-## Implemented and tested
+The current recovered branch adds supervised Supabase HTTP ingestion, durable scoring, exact-schema readiness, an administrator operations page and a private read-only judge scenario. The receiver is public; the Python application is still workspace-local. Certificate-host reachability now works; sandbox OAuth authentication failed. Real PayPal payments remain deliberately untested, and the real-AI test remains credential-gated. See [SESSION_8_REPORT.md](SESSION_8_REPORT.md), [HOSTING_READINESS.md](HOSTING_READINESS.md) and [PROVIDER_VERIFICATION.md](PROVIDER_VERIFICATION.md) for current evidence. Older dated results below are historical, not current deployment claims.
+
+Historical implementation baseline: 2026-10-11 (session 3). Current Session 8 results are above and in SESSION_8_REPORT.md.
+
+## Historical Phase 4 inventory
 
 ### Foundations
 - Monorepo with pinned dependencies and ruff / mypy-strict / ESLint / TS-strict configuration.

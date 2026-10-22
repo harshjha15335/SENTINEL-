@@ -93,3 +93,15 @@ Public application HTTPS, persistent hosted application database/evidence, platf
 ## Current network limitation
 
 Read-only certificate-host reachability checks returned proxy HTTP 403 for `api.sandbox.paypal.com`, `api.paypal.com` and `api-m.paypal.com`. These hosts are allowed by the signature verifier but require activation of the saved cloud network draft before genuine events can be verified reliably. Saving a draft does not activate it. No real payment was initiated.
+
+## Session 8 operations interface
+
+The administrator-only `/operations` page consumes the typed `/api/v1/operations/webhooks` endpoint. Merchant event/job/investigation counts are grouped by origin. Worker health includes freshness, last successful work, failures and error category. Idle polling never advances last-success time. Evidence file counts/byte totals are merchant-scoped database observations, not backup attestations.
+
+The bridge samples `sentinel_webhook_metrics` every 30 seconds into private worker metadata. Metrics failure does not prevent delivery; snapshots older than 90 seconds are shown stale. Requests never expose global inbox payloads. Set `SENTINEL_OPERATIONS_INBOX_MERCHANT_ID` to the installation operator merchant UUID if its administrators should see global origin/state aggregates; it is hidden from all other tenants and disabled by default. This setting is an installation privilege, not a general merchant permission.
+
+Application migration `8ab7245e13c0` adds nullable worker last-success and inbox snapshot fields. Exact-head readiness now rejects an incompatible schema. Container health uses readiness. Startup upgrades only the reviewed migration target; `SENTINEL_AUTO_MIGRATE=false` disables automatic upgrading and `python -m app.cli check-schema` rejects mismatched schemas before supervision starts.
+
+`SENTINEL_HOSTED_DEPLOYMENT=true` enforces production, secure cookies, database evidence, required worker freshness and HTTPS-only/empty CORS. Hosted supervision rejects wildcard proxy trust. These checks do not provision a host or verify its TLS termination and backups.
+
+The old certificate-host limitation above is historical: current requests pass proxy CONNECT and TLS verification. Runtime sandbox OAuth still fails AUTHENTICATION. See PROVIDER_VERIFICATION.md. Startup instructions were saved without publishing configuration; no new cloud network permissions were added in Session 8.

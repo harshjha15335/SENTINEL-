@@ -1,5 +1,9 @@
 # Security
 
+## Session 8 operational status — 22 October 2026
+
+The current recovered branch adds supervised Supabase HTTP ingestion, durable scoring, exact-schema readiness, an administrator operations page and a private read-only judge scenario. The receiver is public; the Python application is still workspace-local. Certificate-host reachability now works; sandbox OAuth authentication failed. Real PayPal payments remain deliberately untested, and the real-AI test remains credential-gated. See [SESSION_8_REPORT.md](SESSION_8_REPORT.md), [HOSTING_READINESS.md](HOSTING_READINESS.md) and [PROVIDER_VERIFICATION.md](PROVIDER_VERIFICATION.md) for current evidence. Older dated results below are historical, not current deployment claims.
+
 Implemented and tested:
 - Argon2id password hashing; timing-equalised unknown-email path; generic login error.
 - Server-side sessions (HttpOnly, SameSite=Lax cookie; token digest stored), immediate revocation on logout, 8-hour TTL.
@@ -46,5 +50,15 @@ Implemented and tested:
 - **Secrets:** the AI key is a `SecretStr`, never returned by `/ai/status` or stored on runs;
   provider error bodies are not persisted.
 
-Known gaps (tracked in `IMPLEMENTATION_STATUS.md`): rate limiter is per-process; no CSP header yet (set at the static host in Phase 6); no antivirus scanning of uploads; PDF active-content detection is heuristic; investigations run as
+Known gaps (tracked in `IMPLEMENTATION_STATUS.md`): rate limiter is per-process; no antivirus scanning of uploads; PDF active-content detection is heuristic; investigations run as
 in-process background tasks (not a durable queue); security review pass scheduled for Phase 6.
+
+## Session 8 controls and limits
+
+`SENTINEL_HOSTED_DEPLOYMENT=true` rejects nonproduction environment, insecure cookies, local evidence storage, disabled worker readiness and non-HTTPS CORS origins. Empty CORS is appropriate for same-origin hosting. Hosted supervisor startup rejects wildcard proxy trust; supply actual trusted addresses after inspecting the chosen host. These guards do not themselves provision HTTPS or shared rate limiting.
+
+Operations requires ADMIN. Event, job, investigation and blob counts are merchant-scoped and origin-separated. Global inbox counts are available only to the merchant explicitly configured in `SENTINEL_OPERATIONS_INBOX_MERCHANT_ID`; the default exposes none. Snapshot age and stale heartbeats are visible. Responses are no-store and contain no raw receipt bodies or evidence text.
+
+The judge account is a VIEWER in an isolated DEMO merchant. A trusted CLI creates synthetic material through existing domain services. Its internal curator password is randomly generated and discarded. Judge password comes from `SENTINEL_JUDGE_PASSWORD`, never a public route or source constant; repeat provisioning does not rotate it or overwrite unrelated merchant data. The prepared attachment explicitly says it is a demo document and remains unverified.
+
+Dependency vulnerability scanning, a shared login limiter, antivirus/OCR and a durable investigation task queue remain limitations. Investigation runs still execute in-process with stale-run recovery; durable payment scoring does not imply durable AI execution.

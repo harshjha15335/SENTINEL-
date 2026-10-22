@@ -1,5 +1,9 @@
 # Deployment
 
+## Session 8 operational status — 22 October 2026
+
+The current recovered branch adds supervised Supabase HTTP ingestion, durable scoring, exact-schema readiness, an administrator operations page and a private read-only judge scenario. The receiver is public; the Python application is still workspace-local. Certificate-host reachability now works; sandbox OAuth authentication failed. Real PayPal payments remain deliberately untested, and the real-AI test remains credential-gated. See [SESSION_8_REPORT.md](SESSION_8_REPORT.md), [HOSTING_READINESS.md](HOSTING_READINESS.md) and [PROVIDER_VERIFICATION.md](PROVIDER_VERIFICATION.md) for current evidence. Older dated results below are historical, not current deployment claims.
+
 SENTINEL ships as **one container**. FastAPI serves the API under `/api` and the built React app on every other path, all from the same origin. Session cookies and CSRF therefore work without any cross-site setup. The image is the root `Dockerfile`.
 
 GitHub Pages is not used: it can host only static files, and SENTINEL needs its API and PostgreSQL. The options below all start from this GitHub repository.
@@ -72,3 +76,9 @@ Set `SENTINEL_PAYPAL_MODE=sandbox` together with the client id and secret, then 
 - The browser bundle contains no secrets.
 - HTML responses carry a Content-Security-Policy. PayPal's sandbox SDK is the only allowed third party. The Playwright suite fails if the app triggers a CSP violation.
 - The login rate limit is per process and uses the client address from the proxy's `X-Forwarded-For` header (`--proxy-headers`). Run a single instance, or move the limiter to a shared store first.
+
+## Current supervised deployment contract
+
+See HOSTING_READINESS.md before deploying. The paid proposal is `deploy/render-continuous.yaml`; it has not been applied. `SENTINEL_HOSTED_DEPLOYMENT=true` enables fail-closed hosted security checks. `SENTINEL_AUTO_MIGRATE` controls startup upgrades and `SENTINEL_MIGRATION_TARGET` pins the reviewed target (currently `8ab7245e13c0`). `check-schema` must pass before workers start. No automatic downgrade exists. `SENTINEL_REQUIRE_WORKERS_READY=true` requires both pipeline and bridge; do not enable that full integration contract on a deployment intentionally omitting the bridge.
+
+Create the optional isolated viewer scenario using `python -m app.cli judge-demo` after securely setting `SENTINEL_JUDGE_PASSWORD` (at least 16 characters). It creates a separate DEMO tenant with synthetic payments, a deterministic investigation, a labelled demo attachment, packet and pending internal approval. Sign in privately and open `/demo`. Repeated provisioning retains existing material/password; it does not rotate credentials or clear real workspaces.
