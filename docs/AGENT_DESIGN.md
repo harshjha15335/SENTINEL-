@@ -1,5 +1,9 @@
 # Investigation Agent Design
 
+## Latest next-phase implementation — 6 November 2026
+
+The new [technical report](NEXT_PHASE_REPORT.md) supersedes older feature-status and environment observations below. Guarded refunds, dispute preparation, validation-only Policy Lab, scoped monitoring/network views and a refreshed judge scenario are now implemented locally. Actual hosting, genuine PayPal/AI and remote bridge access remain separately blocked/unverified. See [setup](NEXT_PHASE_SETUP.md), [runbook](NEXT_PHASE_RUNBOOK.md), [architecture](NEXT_PHASE_ARCHITECTURE.md) and [demo](NEXT_PHASE_DEMO.md). Earlier dated inventories remain historical.
+
 **Status (2026-10-11, session 3): implemented and tested with scripted models. Not yet run
 against a real AI provider** — no provider credentials exist in the build environment, so the
 provider-backed integration test is skipped. Without credentials SENTINEL produces a

@@ -5,20 +5,22 @@ explainable, evidence-backed decision. It records PayPal sandbox payments and ev
 with an explainable model, investigates cases with grounded, read-only AI tools, and routes any
 financial action through human approval.
 
-> **Current status (22 October 2026):** recovered investigation/evidence/approval workflows,
-> durable Supabase → FastAPI ingestion and scoring, supervised workers, an administrator
-> operations screen and a private read-only judge scenario are implemented locally.
-> The Supabase receiver is public; the complete Python application is **not continuously hosted**.
-> Certificate-host reachability works, but runtime sandbox OAuth failed authentication.
-> No genuine payment was initiated; real PayPal delivery and real AI remain unverified.
-> Synthetic benchmark precision remains 28.2% (122 false positives among 170 HIGH flags).
-> Decisions remain analyst-led; approved-refund execution, disputes and Session 6 analytics are absent.
+> **Development status (6 November 2026):** the recovered branch now includes a guarded
+> refund ledger/executor, dispute preparation, validation-only Policy Lab, scoped risk
+> monitoring, payer-reference network exploration and a refreshed private judge scenario.
+> Financial execution is disabled by default; dispute submission is disabled. The existing
+> investigation/evidence/approval system is extended, not replaced.
 >
-> [Session 8 report](docs/SESSION_8_REPORT.md) · [Hosting readiness](docs/HOSTING_READINESS.md) · [Operations](docs/WEBHOOK_OPERATIONS.md)
+> The Python application is still local. The Supabase bridge is blocked by proxy CONNECT
+> denial, sandbox OAuth returns `401 invalid_client`, and real AI remains unverified.
+> Readiness correctly remains 503 while the required bridge is unhealthy. Fixture status
+> never claims successful provider OAuth. Synthetic benchmark precision remains 28.2%.
+>
+> [Technical completion report](docs/NEXT_PHASE_REPORT.md) · [Setup](docs/NEXT_PHASE_SETUP.md) · [Runbook](docs/NEXT_PHASE_RUNBOOK.md) · [Judge guide](docs/NEXT_PHASE_DEMO.md)
 
 ## Historical demo launch options
 
-Public `main` and images built from it do not contain the recovered local branch. These links are not deployments of the Session 8 implementation. The old free Render blueprint is not a continuous hosting recommendation; use the review-only proposal and readiness checklist after authorization.
+Public `main` and images built from it do not contain the recovered local branch (`feature/reliability-next-phase`, not yet published). These links are not deployments of the Session 8 implementation. The old free Render blueprint is not a continuous hosting recommendation; use the review-only proposal and readiness checklist after authorization.
 
 | Option | What you get | Needs |
 |---|---|---|
