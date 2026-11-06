@@ -63,6 +63,7 @@ class InvestigationFailed(Exception):
         super().__init__(message)
         self.category = category
         self.message = message
+        self.denied_calls: list[dict[str, Any]] = []
 
 
 def _expire_stale(db: Session, case_id: uuid.UUID) -> None:
@@ -174,6 +175,7 @@ def execute(run_id: uuid.UUID) -> None:
                 usage.update(usage_out)
         except InvestigationFailed as exc:
             failure = exc
+            denied = exc.denied_calls
         except FindingsRejected as exc:
             failure = InvestigationFailed(
                 InvestigationErrorCategory.UNSUPPORTED_ASSERTION, str(exc)
@@ -247,44 +249,51 @@ def _run_agent(
             timeout=settings.ai_timeout_seconds,
         )
 
-    with capture_run_messages() as messages:
-        try:
-            result = asyncio.run(go())
-        except TimeoutError as exc:
-            raise InvestigationFailed(
-                InvestigationErrorCategory.PROVIDER_TIMEOUT,
-                f"The AI provider did not finish within {settings.ai_timeout_seconds:g} seconds.",
-            ) from exc
-        except UsageLimitExceeded as exc:
-            raise InvestigationFailed(
-                InvestigationErrorCategory.BUDGET_EXCEEDED,
-                "The investigation exceeded its request, tool-call or token budget.",
-            ) from exc
-        except ModelHTTPError as exc:
-            category = (
-                InvestigationErrorCategory.PROVIDER_UNAVAILABLE
-                if exc.status_code in (401, 403)
-                else InvestigationErrorCategory.PROVIDER_ERROR
-            )
-            raise InvestigationFailed(
-                category, f"The AI provider returned HTTP {exc.status_code}."
-            ) from exc
-        except ModelAPIError as exc:
-            raise InvestigationFailed(
-                InvestigationErrorCategory.PROVIDER_ERROR, "The AI provider could not be reached."
-            ) from exc
-        except UnexpectedModelBehavior as exc:
-            if deps.last_rejection:
+    try:
+        with capture_run_messages() as messages:
+            try:
+                result = asyncio.run(go())
+            except TimeoutError as exc:
                 raise InvestigationFailed(
-                    InvestigationErrorCategory.UNSUPPORTED_ASSERTION,
-                    "The AI output was rejected after retries: " + deps.last_rejection,
+                    InvestigationErrorCategory.PROVIDER_TIMEOUT,
+                    "The AI provider did not finish within "
+                    f"{settings.ai_timeout_seconds:g} seconds.",
                 ) from exc
-            raise InvestigationFailed(
-                InvestigationErrorCategory.INVALID_OUTPUT,
-                "The AI output did not match the required findings schema after retries.",
-            ) from exc
-        finally:
-            denied = _denied_calls(box, list(messages))
+            except UsageLimitExceeded as exc:
+                raise InvestigationFailed(
+                    InvestigationErrorCategory.BUDGET_EXCEEDED,
+                    "The investigation exceeded its request, tool-call or token budget.",
+                ) from exc
+            except ModelHTTPError as exc:
+                category = (
+                    InvestigationErrorCategory.PROVIDER_UNAVAILABLE
+                    if exc.status_code in (401, 403)
+                    else InvestigationErrorCategory.PROVIDER_ERROR
+                )
+                raise InvestigationFailed(
+                    category, f"The AI provider returned HTTP {exc.status_code}."
+                ) from exc
+            except ModelAPIError as exc:
+                raise InvestigationFailed(
+                    InvestigationErrorCategory.PROVIDER_ERROR,
+                    "The AI provider could not be reached.",
+                ) from exc
+            except UnexpectedModelBehavior as exc:
+                if deps.last_rejection:
+                    raise InvestigationFailed(
+                        InvestigationErrorCategory.UNSUPPORTED_ASSERTION,
+                        "The AI output was rejected after retries: " + deps.last_rejection,
+                    ) from exc
+                raise InvestigationFailed(
+                    InvestigationErrorCategory.INVALID_OUTPUT,
+                    "The AI output did not match the required findings schema after retries.",
+                ) from exc
+    except InvestigationFailed as exc:
+        # Preserve attempted mutation/unknown tools even when the agent fails or exhausts
+        # its budget; failed runs need the same read-only audit trail as completed runs.
+        exc.denied_calls = _denied_calls(box, list(messages))
+        raise
+    denied = _denied_calls(box, list(messages))
 
     findings: InvestigationFindings = result.output
     validate_findings(findings, box)  # defence in depth; the validator already ran

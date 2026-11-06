@@ -236,3 +236,23 @@ def test_packet_is_not_downloadable_across_merchants(
         TestClient(app).get(f"/api/v1/cases/{case.id}/packets/{packet['id']}/download").status_code
         == 401
     )
+
+
+def test_evidence_storage_outage_is_not_a_successful_download(db, tenant, monkeypatch):
+    case = make_case(db, tenant)
+    client, headers = client_for(tenant, Role.ANALYST)
+    pdf = make_pdf("Private fixture invoice")
+    evidence = upload(client, headers, case.id, pdf).json()
+    url = f"/api/v1/cases/{case.id}/evidence/{evidence['id']}/download"
+
+    def unavailable(self, db, key):
+        raise StorageError("Stored file is missing")
+
+    with monkeypatch.context() as patch:
+        patch.setattr(LocalStorage, "get", unavailable)
+        response = client.get(url)
+        assert response.status_code == 500
+        assert response.json()["error"]["code"] == "storage_error"
+        assert "Private fixture invoice" not in response.text
+    assert client.get(url).content == pdf
+    assert db.get(EvidenceArtifact, uuid.UUID(evidence["id"])) is not None

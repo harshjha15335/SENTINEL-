@@ -237,3 +237,38 @@ def test_fixture_status_never_claims_successful_provider_authentication(
     assert response.status_code == 200
     assert response.json()["mode"] == "fixture"
     assert response.json()["token_check"] == "not_attempted"
+
+
+def test_environment_padding_is_removed_before_basic_auth_and_rotation():
+    import base64
+
+    import httpx
+
+    auth_headers = []
+
+    def token(request):
+        auth_headers.append(request.headers["authorization"])
+        return httpx.Response(200, json={"access_token": "offline-token", "expires_in": 60})
+
+    gw = SandboxPayPalGateway(" cid\n", "\tsecret ", transport=httpx.MockTransport(token))
+    gw.check_credentials()
+    gw.rotate_credentials(" next-client ", "next-secret\n")
+    gw.check_credentials()
+    assert auth_headers == [
+        "Basic " + base64.b64encode(pair).decode()
+        for pair in [b"cid:secret", b"next-client:next-secret"]
+    ]
+
+
+@pytest.mark.parametrize(
+    "client_id,secret", [(" ", "secret"), ("cid", "\n"), ("ci d", "secret"), ("cid", "sec\nret")]
+)
+def test_invalid_credential_shape_fails_before_network(client_id, secret):
+    import httpx
+
+    def forbidden(request):
+        raise AssertionError("Invalid credentials must never reach the network")
+
+    with pytest.raises(PayPalError) as exc:
+        SandboxPayPalGateway(client_id, secret, transport=httpx.MockTransport(forbidden))
+    assert exc.value.kind is PayPalErrorKind.NOT_CONFIGURED

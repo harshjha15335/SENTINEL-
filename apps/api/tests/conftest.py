@@ -36,8 +36,22 @@ PASSWORD = "correct horse battery staple"
 API_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
+def require_disposable_database(url: str) -> None:
+    """Reject user/hosted databases before destructive test migrations or truncation."""
+    from sqlalchemy.engine import make_url
+
+    parsed = make_url(url)
+    if (
+        parsed.host not in ("127.0.0.1", "localhost")
+        or not parsed.database
+        or not parsed.database.endswith("_test")
+    ):
+        raise RuntimeError("Destructive API tests require a loopback database ending in _test")
+
+
 @pytest.fixture(scope="session", autouse=True)
 def _migrated_database() -> Iterator[None]:
+    require_disposable_database(get_settings().database_url)
     cfg = Config(os.path.join(API_DIR, "alembic.ini"))
     cfg.set_main_option("script_location", os.path.join(API_DIR, "alembic"))
     cfg.attributes["database_url"] = get_settings().database_url

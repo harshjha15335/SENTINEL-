@@ -47,8 +47,7 @@ class SandboxPayPalGateway:
         transport: httpx.BaseTransport | None = None,
         max_retries: int = 2,
     ) -> None:
-        self._client_id = client_id
-        self._client_secret = client_secret
+        self._client_id, self._client_secret = _credentials(client_id, client_secret)
         self._http = httpx.Client(base_url=SANDBOX_BASE_URL, timeout=timeout, transport=transport)
         self._max_retries = max_retries
         self._token: str | None = None
@@ -96,10 +95,7 @@ class SandboxPayPalGateway:
 
     def rotate_credentials(self, client_id: str, client_secret: str) -> None:
         """Trusted runtime rotation; invalidate cached tokens atomically. No public endpoint."""
-        if not client_id.strip() or not client_secret.strip():
-            raise PayPalError(
-                PayPalErrorKind.NOT_CONFIGURED, "Both sandbox credentials are required"
-            )
+        client_id, client_secret = _credentials(client_id, client_secret)
         with self._lock:
             self._client_id, self._client_secret = client_id, client_secret
             self._token, self._token_expires_at = None, 0.0
@@ -294,6 +290,18 @@ def _safe_id(value: str) -> str:
     if not value or len(value) > 64 or not all(c.isalnum() or c in "-_" for c in value):
         raise PayPalError(PayPalErrorKind.VALIDATION, "Invalid PayPal resource id")
     return value
+
+
+def _credentials(client_id: str, client_secret: str) -> tuple[str, str]:
+    """Remove environment copy/paste padding before HTTP Basic encoding; never log inputs."""
+    pair = client_id.strip(), client_secret.strip()
+    if not all(pair):
+        raise PayPalError(PayPalErrorKind.NOT_CONFIGURED, "Both sandbox credentials are required")
+    if any(any(char.isspace() for char in value) for value in pair):
+        raise PayPalError(
+            PayPalErrorKind.NOT_CONFIGURED, "Sandbox credentials must not contain whitespace"
+        )
+    return pair
 
 
 def _classify(resp: httpx.Response, fallback: str) -> PayPalError:

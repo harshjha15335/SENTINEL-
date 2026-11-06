@@ -10,11 +10,16 @@ services:
     dockerfilePath: ./Dockerfile
     dockerContext: .
     healthCheckPath: /api/v1/ready
+    # The pipeline holds one PostgreSQL advisory lock; see docs/FINAL_DEPLOYMENT.md for rollouts.
+    numInstances: 1
     autoDeploy: false
     region: singapore
     envVars:
       - key: SENTINEL_HOSTED_DEPLOYMENT
         value: "true"
+      # Inspect the actual ingress proxy; never use wildcard trust.
+      - key: SENTINEL_FORWARDED_ALLOW_IPS
+        sync: false
       - key: SENTINEL_CORS_ORIGINS
         value: "[]"
       - key: SENTINEL_AUTO_MIGRATE
@@ -45,12 +50,8 @@ services:
         value: https://cfslzvvdjxstpupkqbpw.supabase.co
       - key: SENTINEL_SUPABASE_SERVICE_ROLE_KEY
         sync: false
-      - key: SENTINEL_SEED_ADMIN_PASSWORD
-        generateValue: true
-      - key: SENTINEL_SEED_ANALYST_PASSWORD
-        generateValue: true
-      - key: SENTINEL_SEED_VIEWER_PASSWORD
-        generateValue: true
+      # Bootstrap accounts once with a private one-off command. Do not retain
+      # SENTINEL_SEED_* passwords here.
 databases:
   - name: sentinel-app-db
     plan: basic-256mb

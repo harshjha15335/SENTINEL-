@@ -93,6 +93,26 @@ class Settings(BaseSettings):
                 return "postgresql+psycopg://" + value[len(prefix) :]
         return value
 
+    @field_validator("paypal_client_id")
+    @classmethod
+    def _paypal_client_id_shape(cls, value: str | None) -> str | None:
+        if value is None:
+            return None
+        value = value.strip()
+        if not value or any(char.isspace() for char in value):
+            raise ValueError("PayPal client ID must be nonempty without embedded whitespace")
+        return value
+
+    @field_validator("paypal_client_secret")
+    @classmethod
+    def _paypal_secret_shape(cls, value: SecretStr | None) -> SecretStr | None:
+        if value is None:
+            return None
+        normalized = value.get_secret_value().strip()
+        if not normalized or any(char.isspace() for char in normalized):
+            raise ValueError("PayPal secret must be nonempty without embedded whitespace")
+        return SecretStr(normalized)
+
     @model_validator(mode="after")
     def _no_partial_paypal_credentials(self) -> "Settings":
         if self.hosted_deployment and (
