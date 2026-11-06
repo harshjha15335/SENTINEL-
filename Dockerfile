@@ -15,16 +15,22 @@ FROM python:3.12-slim
 ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1 PIP_NO_CACHE_DIR=1 \
     SENTINEL_WEB_DIST=/app/web SENTINEL_STORAGE_BACKEND=database HOST=0.0.0.0
 WORKDIR /app
-COPY apps/api/pyproject.toml ./
-COPY apps/api/app ./app
-RUN --mount=type=secret,id=build_ca \
+# Assemble the runtime in one filesystem layer. This avoids repeated copies of the
+# Python dependency tree on VFS builders while keeping source mounts read-only.
+RUN --mount=type=bind,source=apps/api,target=/source,readonly \
+    --mount=type=bind,from=web,source=/src/apps/web/dist,target=/web-dist,readonly \
+    --mount=type=secret,id=build_ca \
+    set -eu; \
+    cp /source/pyproject.toml ./; \
+    cp -r /source/app ./app; \
+    cp -r /source/alembic ./alembic; \
+    cp /source/alembic.ini ./; \
+    cp /source/scripts/start.sh ./start.sh; \
+    cp -r /web-dist ./web; \
     if [ -f /run/secrets/build_ca ]; then export PIP_CERT=/run/secrets/build_ca; fi; \
-    pip install . && useradd --create-home --uid 10001 sentinel
-COPY apps/api/alembic ./alembic
-COPY apps/api/alembic.ini ./
-COPY apps/api/scripts/start.sh ./start.sh
-COPY --from=web /src/apps/web/dist ./web
-RUN chmod -R a+rX /app && chmod 755 /app/start.sh
+    pip install .; \
+    useradd --create-home --uid 10001 sentinel; \
+    chmod -R a+rX /app; chmod 755 /app/start.sh
 USER sentinel
 EXPOSE 8000
 HEALTHCHECK --interval=30s --timeout=5s --start-period=60s \

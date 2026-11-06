@@ -51,6 +51,7 @@ class Settings(BaseSettings):
     paypal_client_secret: SecretStr | None = None
     paypal_webhook_id: str | None = None
     paypal_timeout_seconds: float = 20.0
+    refund_execution_enabled: bool = False
 
     # Investigation agent. Without a provider and key, only deterministic summaries are produced.
     ai_provider: AIProvider = AIProvider.NONE

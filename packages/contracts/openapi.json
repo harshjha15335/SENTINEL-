@@ -280,6 +280,28 @@
         "title": "ApprovalStatus",
         "type": "string"
       },
+      "AssignDispute": {
+        "additionalProperties": false,
+        "properties": {
+          "user_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "User Id"
+          }
+        },
+        "required": [
+          "user_id"
+        ],
+        "title": "AssignDispute",
+        "type": "object"
+      },
       "AuditOut": {
         "properties": {
           "action": {
@@ -380,6 +402,29 @@
           "category"
         ],
         "title": "Body_upload_evidence_api_v1_cases__case_id__evidence_post",
+        "type": "object"
+      },
+      "CalibrationPoint": {
+        "properties": {
+          "adverse_rate": {
+            "title": "Adverse Rate",
+            "type": "number"
+          },
+          "count": {
+            "title": "Count",
+            "type": "integer"
+          },
+          "mean_score": {
+            "title": "Mean Score",
+            "type": "number"
+          }
+        },
+        "required": [
+          "mean_score",
+          "adverse_rate",
+          "count"
+        ],
+        "title": "CalibrationPoint",
         "type": "object"
       },
       "CaseDetailOut": {
@@ -773,6 +818,24 @@
         "title": "ChecklistItemOut",
         "type": "object"
       },
+      "CountPoint": {
+        "properties": {
+          "count": {
+            "title": "Count",
+            "type": "integer"
+          },
+          "date": {
+            "title": "Date",
+            "type": "string"
+          }
+        },
+        "required": [
+          "date",
+          "count"
+        ],
+        "title": "CountPoint",
+        "type": "object"
+      },
       "CreateApprovalRequest": {
         "additionalProperties": false,
         "properties": {
@@ -805,6 +868,31 @@
         "title": "CreateApprovalRequest",
         "type": "object"
       },
+      "CreateDemoDispute": {
+        "additionalProperties": false,
+        "properties": {
+          "case_id": {
+            "format": "uuid",
+            "title": "Case Id",
+            "type": "string"
+          },
+          "reason": {
+            "default": "ITEM_NOT_RECEIVED",
+            "enum": [
+              "ITEM_NOT_RECEIVED",
+              "SIGNIFICANTLY_NOT_AS_DESCRIBED",
+              "UNAUTHORISED"
+            ],
+            "title": "Reason",
+            "type": "string"
+          }
+        },
+        "required": [
+          "case_id"
+        ],
+        "title": "CreateDemoDispute",
+        "type": "object"
+      },
       "CreateOrderRequest": {
         "additionalProperties": false,
         "properties": {
@@ -825,6 +913,51 @@
           "product_id"
         ],
         "title": "CreateOrderRequest",
+        "type": "object"
+      },
+      "CreatePolicyRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "name": {
+            "maxLength": 120,
+            "minLength": 1,
+            "title": "Name",
+            "type": "string"
+          },
+          "parameters": {
+            "$ref": "#/components/schemas/PolicyParameters"
+          },
+          "rationale": {
+            "maxLength": 4000,
+            "minLength": 10,
+            "title": "Rationale",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "rationale",
+          "parameters"
+        ],
+        "title": "CreatePolicyRequest",
+        "type": "object"
+      },
+      "CurvePoint": {
+        "properties": {
+          "x": {
+            "title": "X",
+            "type": "number"
+          },
+          "y": {
+            "title": "Y",
+            "type": "number"
+          }
+        },
+        "required": [
+          "x",
+          "y"
+        ],
+        "title": "CurvePoint",
         "type": "object"
       },
       "DashboardSummaryOut": {
@@ -913,6 +1046,283 @@
           "comment"
         ],
         "title": "DecideApprovalRequest",
+        "type": "object"
+      },
+      "DecidePolicyRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "decision": {
+            "enum": [
+              "APPROVED",
+              "REJECTED"
+            ],
+            "title": "Decision",
+            "type": "string"
+          }
+        },
+        "required": [
+          "decision"
+        ],
+        "title": "DecidePolicyRequest",
+        "type": "object"
+      },
+      "DisputeChecklistOut": {
+        "properties": {
+          "evidence_ids": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Evidence Ids",
+            "type": "array"
+          },
+          "key": {
+            "title": "Key",
+            "type": "string"
+          },
+          "label": {
+            "title": "Label",
+            "type": "string"
+          },
+          "provided": {
+            "title": "Provided",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "key",
+          "label",
+          "provided",
+          "evidence_ids"
+        ],
+        "title": "DisputeChecklistOut",
+        "type": "object"
+      },
+      "DisputeDetailOut": {
+        "properties": {
+          "checklist": {
+            "items": {
+              "$ref": "#/components/schemas/DisputeChecklistOut"
+            },
+            "title": "Checklist",
+            "type": "array"
+          },
+          "dispute": {
+            "$ref": "#/components/schemas/DisputeOut"
+          },
+          "drafts": {
+            "items": {
+              "$ref": "#/components/schemas/DisputeDraftOut"
+            },
+            "title": "Drafts",
+            "type": "array"
+          },
+          "limitations": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Limitations",
+            "type": "array"
+          }
+        },
+        "required": [
+          "dispute",
+          "checklist",
+          "drafts",
+          "limitations"
+        ],
+        "title": "DisputeDetailOut",
+        "type": "object"
+      },
+      "DisputeDraftOut": {
+        "properties": {
+          "body": {
+            "title": "Body",
+            "type": "string"
+          },
+          "citations": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Citations",
+            "type": "array"
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "dispute_id": {
+            "format": "uuid",
+            "title": "Dispute Id",
+            "type": "string"
+          },
+          "generated_by_ai": {
+            "const": false,
+            "default": false,
+            "title": "Generated By Ai",
+            "type": "boolean"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "label": {
+            "default": "Deterministic response draft \u2014 requires human review",
+            "title": "Label",
+            "type": "string"
+          },
+          "missing_information": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Missing Information",
+            "type": "array"
+          }
+        },
+        "required": [
+          "id",
+          "dispute_id",
+          "body",
+          "citations",
+          "missing_information",
+          "created_at"
+        ],
+        "title": "DisputeDraftOut",
+        "type": "object"
+      },
+      "DisputeOut": {
+        "properties": {
+          "assigned_user_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Assigned User Id"
+          },
+          "case_id": {
+            "format": "uuid",
+            "title": "Case Id",
+            "type": "string"
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "data_origin": {
+            "$ref": "#/components/schemas/DataOrigin"
+          },
+          "external_submission_enabled": {
+            "const": false,
+            "default": false,
+            "title": "External Submission Enabled",
+            "type": "boolean"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "last_synced_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Synced At"
+          },
+          "provider_dispute_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Provider Dispute Id"
+          },
+          "reason": {
+            "title": "Reason",
+            "type": "string"
+          },
+          "response_due_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Response Due At"
+          },
+          "stage": {
+            "title": "Stage",
+            "type": "string"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          },
+          "transaction_id": {
+            "format": "uuid",
+            "title": "Transaction Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "transaction_id",
+          "case_id",
+          "provider_dispute_id",
+          "reason",
+          "status",
+          "stage",
+          "response_due_at",
+          "assigned_user_id",
+          "data_origin",
+          "last_synced_at",
+          "created_at"
+        ],
+        "title": "DisputeOut",
+        "type": "object"
+      },
+      "DisputeSyncOut": {
+        "properties": {
+          "scope": {
+            "default": "Only this merchant's single matched LIVE_SANDBOX captures; first provider page only",
+            "title": "Scope",
+            "type": "string"
+          },
+          "submission_enabled": {
+            "const": false,
+            "default": false,
+            "title": "Submission Enabled",
+            "type": "boolean"
+          },
+          "synchronized": {
+            "minimum": 0.0,
+            "title": "Synchronized",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "synchronized"
+        ],
+        "title": "DisputeSyncOut",
         "type": "object"
       },
       "EventProcessing": {
@@ -1230,6 +1640,156 @@
         ],
         "title": "ExtractionStatus",
         "type": "string"
+      },
+      "FeatureComparison": {
+        "properties": {
+          "current_mean": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Current Mean"
+          },
+          "current_missing_rate": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Current Missing Rate"
+          },
+          "feature": {
+            "title": "Feature",
+            "type": "string"
+          },
+          "reference_mean": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reference Mean"
+          },
+          "reference_missing_rate": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reference Missing Rate"
+          }
+        },
+        "required": [
+          "feature",
+          "reference_missing_rate",
+          "current_missing_rate",
+          "reference_mean",
+          "current_mean"
+        ],
+        "title": "FeatureComparison",
+        "type": "object"
+      },
+      "GraphEdge": {
+        "properties": {
+          "data_origin": {
+            "$ref": "#/components/schemas/DataOrigin"
+          },
+          "explanation": {
+            "title": "Explanation",
+            "type": "string"
+          },
+          "relationship": {
+            "title": "Relationship",
+            "type": "string"
+          },
+          "source": {
+            "title": "Source",
+            "type": "string"
+          },
+          "target": {
+            "title": "Target",
+            "type": "string"
+          },
+          "transaction_id": {
+            "format": "uuid",
+            "title": "Transaction Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "source",
+          "target",
+          "relationship",
+          "explanation",
+          "transaction_id",
+          "data_origin"
+        ],
+        "title": "GraphEdge",
+        "type": "object"
+      },
+      "GraphNode": {
+        "properties": {
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "kind": {
+            "title": "Kind",
+            "type": "string"
+          },
+          "label": {
+            "title": "Label",
+            "type": "string"
+          },
+          "record_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Record Id"
+          },
+          "risk_band": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Risk Band"
+          },
+          "source": {
+            "title": "Source",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "kind",
+          "label",
+          "source"
+        ],
+        "title": "GraphNode",
+        "type": "object"
       },
       "HTTPValidationError": {
         "properties": {
@@ -1697,11 +2257,32 @@
             "title": "Case Id",
             "type": "string"
           },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
           "data_origin": {
             "$ref": "#/components/schemas/DataOrigin"
           },
+          "due_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Due At"
+          },
           "investigation_mode": {
             "title": "Investigation Mode",
+            "type": "string"
+          },
+          "scenario_version": {
+            "title": "Scenario Version",
             "type": "string"
           },
           "transaction_id": {
@@ -1714,7 +2295,10 @@
           "case_id",
           "transaction_id",
           "data_origin",
-          "investigation_mode"
+          "investigation_mode",
+          "scenario_version",
+          "created_at",
+          "due_at"
         ],
         "title": "JudgeScenarioOut",
         "type": "object"
@@ -1980,6 +2564,273 @@
           "expected_cost_no_review"
         ],
         "title": "ModelMetricsOut",
+        "type": "object"
+      },
+      "MonitoringOut": {
+        "properties": {
+          "calibration_status": {
+            "title": "Calibration Status",
+            "type": "string"
+          },
+          "capacity_utilization": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Capacity Utilization"
+          },
+          "case_growth": {
+            "items": {
+              "$ref": "#/components/schemas/CountPoint"
+            },
+            "title": "Case Growth",
+            "type": "array"
+          },
+          "confirmed_adverse_cases": {
+            "title": "Confirmed Adverse Cases",
+            "type": "integer"
+          },
+          "current_scored": {
+            "title": "Current Scored",
+            "type": "integer"
+          },
+          "current_transactions": {
+            "title": "Current Transactions",
+            "type": "integer"
+          },
+          "current_window": {
+            "$ref": "#/components/schemas/TimeWindow"
+          },
+          "data_origin": {
+            "$ref": "#/components/schemas/DataOrigin"
+          },
+          "feature_comparison": {
+            "items": {
+              "$ref": "#/components/schemas/FeatureComparison"
+            },
+            "title": "Feature Comparison",
+            "type": "array"
+          },
+          "high_flag_rate": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "High Flag Rate"
+          },
+          "illustrative_capacity": {
+            "title": "Illustrative Capacity",
+            "type": "number"
+          },
+          "limitations": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Limitations",
+            "type": "array"
+          },
+          "model_versions": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "title": "Model Versions",
+            "type": "object"
+          },
+          "observed_at": {
+            "format": "date-time",
+            "title": "Observed At",
+            "type": "string"
+          },
+          "oldest_pending_hours": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Oldest Pending Hours"
+          },
+          "open_cases": {
+            "title": "Open Cases",
+            "type": "integer"
+          },
+          "overdue_cases": {
+            "title": "Overdue Cases",
+            "type": "integer"
+          },
+          "psi_note": {
+            "title": "Psi Note",
+            "type": "string"
+          },
+          "reference_scored": {
+            "title": "Reference Scored",
+            "type": "integer"
+          },
+          "reference_transactions": {
+            "title": "Reference Transactions",
+            "type": "integer"
+          },
+          "reference_window": {
+            "$ref": "#/components/schemas/TimeWindow"
+          },
+          "resolution_rate": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Resolution Rate"
+          },
+          "resolved_in_window": {
+            "title": "Resolved In Window",
+            "type": "integer"
+          },
+          "risk_bands": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "title": "Risk Bands",
+            "type": "object"
+          },
+          "sample_limit": {
+            "title": "Sample Limit",
+            "type": "integer"
+          },
+          "score_distribution": {
+            "items": {
+              "$ref": "#/components/schemas/ScoreBin"
+            },
+            "title": "Score Distribution",
+            "type": "array"
+          },
+          "score_psi": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Score Psi"
+          },
+          "transaction_volume": {
+            "items": {
+              "$ref": "#/components/schemas/CountPoint"
+            },
+            "title": "Transaction Volume",
+            "type": "array"
+          },
+          "truncated": {
+            "title": "Truncated",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "observed_at",
+          "data_origin",
+          "current_window",
+          "reference_window",
+          "transaction_volume",
+          "current_transactions",
+          "reference_transactions",
+          "current_scored",
+          "reference_scored",
+          "score_distribution",
+          "risk_bands",
+          "model_versions",
+          "high_flag_rate",
+          "illustrative_capacity",
+          "capacity_utilization",
+          "open_cases",
+          "oldest_pending_hours",
+          "overdue_cases",
+          "case_growth",
+          "resolved_in_window",
+          "resolution_rate",
+          "confirmed_adverse_cases",
+          "score_psi",
+          "psi_note",
+          "feature_comparison",
+          "sample_limit",
+          "truncated",
+          "calibration_status",
+          "limitations"
+        ],
+        "title": "MonitoringOut",
+        "type": "object"
+      },
+      "NetworkOut": {
+        "properties": {
+          "data_origin": {
+            "$ref": "#/components/schemas/DataOrigin"
+          },
+          "edges": {
+            "items": {
+              "$ref": "#/components/schemas/GraphEdge"
+            },
+            "title": "Edges",
+            "type": "array"
+          },
+          "limit": {
+            "title": "Limit",
+            "type": "integer"
+          },
+          "limitations": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Limitations",
+            "type": "array"
+          },
+          "nodes": {
+            "items": {
+              "$ref": "#/components/schemas/GraphNode"
+            },
+            "title": "Nodes",
+            "type": "array"
+          },
+          "repeated_payer_groups": {
+            "title": "Repeated Payer Groups",
+            "type": "integer"
+          },
+          "transaction_count": {
+            "title": "Transaction Count",
+            "type": "integer"
+          },
+          "truncated": {
+            "title": "Truncated",
+            "type": "boolean"
+          },
+          "window": {
+            "$ref": "#/components/schemas/TimeWindow"
+          }
+        },
+        "required": [
+          "data_origin",
+          "window",
+          "nodes",
+          "edges",
+          "repeated_payer_groups",
+          "transaction_count",
+          "limit",
+          "truncated",
+          "limitations"
+        ],
+        "title": "NetworkOut",
         "type": "object"
       },
       "OpenCaseRequest": {
@@ -2418,6 +3269,397 @@
         "title": "PolicyDecision",
         "type": "string"
       },
+      "PolicyDraftOut": {
+        "properties": {
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "dataset_sha256": {
+            "title": "Dataset Sha256",
+            "type": "string"
+          },
+          "decided_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Decided At"
+          },
+          "decided_by_user_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Decided By User Id"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "model_version": {
+            "title": "Model Version",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "parameters": {
+            "$ref": "#/components/schemas/PolicyParameters"
+          },
+          "rationale": {
+            "title": "Rationale",
+            "type": "string"
+          },
+          "requested_by_user_id": {
+            "format": "uuid",
+            "title": "Requested By User Id",
+            "type": "string"
+          },
+          "shadow_only": {
+            "title": "Shadow Only",
+            "type": "boolean"
+          },
+          "snapshot_sha256": {
+            "title": "Snapshot Sha256",
+            "type": "string"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          },
+          "submitted_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Submitted At"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "rationale",
+          "parameters",
+          "model_version",
+          "dataset_sha256",
+          "snapshot_sha256",
+          "status",
+          "shadow_only",
+          "requested_by_user_id",
+          "decided_by_user_id",
+          "created_at",
+          "submitted_at",
+          "decided_at"
+        ],
+        "title": "PolicyDraftOut",
+        "type": "object"
+      },
+      "PolicyMetrics": {
+        "properties": {
+          "capacity_utilization": {
+            "title": "Capacity Utilization",
+            "type": "number"
+          },
+          "estimated_recoverable_usd": {
+            "title": "Estimated Recoverable Usd",
+            "type": "number"
+          },
+          "false_positive_cost_usd": {
+            "title": "False Positive Cost Usd",
+            "type": "number"
+          },
+          "false_positive_rate": {
+            "title": "False Positive Rate",
+            "type": "number"
+          },
+          "flag_rate": {
+            "title": "Flag Rate",
+            "type": "number"
+          },
+          "flagged": {
+            "title": "Flagged",
+            "type": "integer"
+          },
+          "fn": {
+            "title": "Fn",
+            "type": "integer"
+          },
+          "fp": {
+            "title": "Fp",
+            "type": "integer"
+          },
+          "missed_outcome_cost_usd": {
+            "title": "Missed Outcome Cost Usd",
+            "type": "number"
+          },
+          "over_capacity": {
+            "title": "Over Capacity",
+            "type": "boolean"
+          },
+          "positives": {
+            "title": "Positives",
+            "type": "integer"
+          },
+          "precision": {
+            "title": "Precision",
+            "type": "number"
+          },
+          "recall": {
+            "title": "Recall",
+            "type": "number"
+          },
+          "residual_loss_usd": {
+            "title": "Residual Loss Usd",
+            "type": "number"
+          },
+          "review_capacity_count": {
+            "title": "Review Capacity Count",
+            "type": "integer"
+          },
+          "review_cost_usd": {
+            "title": "Review Cost Usd",
+            "type": "number"
+          },
+          "rows": {
+            "title": "Rows",
+            "type": "integer"
+          },
+          "tn": {
+            "title": "Tn",
+            "type": "integer"
+          },
+          "total_assumed_cost_usd": {
+            "title": "Total Assumed Cost Usd",
+            "type": "number"
+          },
+          "tp": {
+            "title": "Tp",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "rows",
+          "positives",
+          "tp",
+          "fp",
+          "tn",
+          "fn",
+          "flagged",
+          "precision",
+          "recall",
+          "false_positive_rate",
+          "flag_rate",
+          "review_capacity_count",
+          "capacity_utilization",
+          "over_capacity",
+          "review_cost_usd",
+          "false_positive_cost_usd",
+          "missed_outcome_cost_usd",
+          "residual_loss_usd",
+          "estimated_recoverable_usd",
+          "total_assumed_cost_usd"
+        ],
+        "title": "PolicyMetrics",
+        "type": "object"
+      },
+      "PolicyParameters": {
+        "additionalProperties": false,
+        "properties": {
+          "average_value_at_risk_usd": {
+            "default": 100,
+            "maximum": 1000000.0,
+            "minimum": 0.0,
+            "title": "Average Value At Risk Usd",
+            "type": "number"
+          },
+          "false_negative_cost_usd": {
+            "default": 20,
+            "maximum": 1000000.0,
+            "minimum": 0.0,
+            "title": "False Negative Cost Usd",
+            "type": "number"
+          },
+          "false_positive_cost_usd": {
+            "default": 0,
+            "maximum": 1000000.0,
+            "minimum": 0.0,
+            "title": "False Positive Cost Usd",
+            "type": "number"
+          },
+          "high_threshold": {
+            "default": 0.1036,
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "High Threshold",
+            "type": "number"
+          },
+          "investigation_cost_usd": {
+            "default": 4,
+            "maximum": 1000000.0,
+            "minimum": 0.0,
+            "title": "Investigation Cost Usd",
+            "type": "number"
+          },
+          "recovery_share": {
+            "default": 0.7,
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "Recovery Share",
+            "type": "number"
+          },
+          "review_capacity_share": {
+            "default": 0.08,
+            "exclusiveMinimum": 0.0,
+            "maximum": 1.0,
+            "title": "Review Capacity Share",
+            "type": "number"
+          }
+        },
+        "title": "PolicyParameters",
+        "type": "object"
+      },
+      "PolicySimulationOut": {
+        "properties": {
+          "average_precision": {
+            "title": "Average Precision",
+            "type": "number"
+          },
+          "baseline": {
+            "$ref": "#/components/schemas/PolicyMetrics"
+          },
+          "baseline_parameters": {
+            "$ref": "#/components/schemas/PolicyParameters"
+          },
+          "brier": {
+            "title": "Brier",
+            "type": "number"
+          },
+          "calibration": {
+            "items": {
+              "$ref": "#/components/schemas/CalibrationPoint"
+            },
+            "title": "Calibration",
+            "type": "array"
+          },
+          "data_origin": {
+            "const": "SYNTHETIC_DEMO",
+            "default": "SYNTHETIC_DEMO",
+            "title": "Data Origin",
+            "type": "string"
+          },
+          "dataset_sha256": {
+            "title": "Dataset Sha256",
+            "type": "string"
+          },
+          "frozen_test_rows": {
+            "title": "Frozen Test Rows",
+            "type": "integer"
+          },
+          "limitations": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Limitations",
+            "type": "array"
+          },
+          "model_version": {
+            "title": "Model Version",
+            "type": "string"
+          },
+          "precision_recall_curve": {
+            "items": {
+              "$ref": "#/components/schemas/CurvePoint"
+            },
+            "title": "Precision Recall Curve",
+            "type": "array"
+          },
+          "proposed": {
+            "$ref": "#/components/schemas/PolicyMetrics"
+          },
+          "proposed_parameters": {
+            "$ref": "#/components/schemas/PolicyParameters"
+          },
+          "roc_auc": {
+            "title": "Roc Auc",
+            "type": "number"
+          },
+          "roc_curve": {
+            "items": {
+              "$ref": "#/components/schemas/CurvePoint"
+            },
+            "title": "Roc Curve",
+            "type": "array"
+          },
+          "split": {
+            "const": "validation",
+            "default": "validation",
+            "title": "Split",
+            "type": "string"
+          },
+          "thresholds": {
+            "items": {
+              "$ref": "#/components/schemas/ThresholdPoint"
+            },
+            "title": "Thresholds",
+            "type": "array"
+          },
+          "validation_end": {
+            "format": "date-time",
+            "title": "Validation End",
+            "type": "string"
+          },
+          "validation_rows": {
+            "title": "Validation Rows",
+            "type": "integer"
+          },
+          "validation_start": {
+            "format": "date-time",
+            "title": "Validation Start",
+            "type": "string"
+          }
+        },
+        "required": [
+          "model_version",
+          "dataset_sha256",
+          "validation_rows",
+          "validation_start",
+          "validation_end",
+          "frozen_test_rows",
+          "baseline_parameters",
+          "proposed_parameters",
+          "baseline",
+          "proposed",
+          "roc_auc",
+          "average_precision",
+          "brier",
+          "roc_curve",
+          "precision_recall_curve",
+          "calibration",
+          "thresholds",
+          "limitations"
+        ],
+        "title": "PolicySimulationOut",
+        "type": "object"
+      },
       "ProductOut": {
         "properties": {
           "currency": {
@@ -2468,6 +3710,298 @@
         ],
         "title": "RecommendedAction",
         "type": "string"
+      },
+      "RefundCreate": {
+        "additionalProperties": false,
+        "properties": {
+          "amount_minor": {
+            "anyOf": [
+              {
+                "exclusiveMinimum": 0.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Amount Minor"
+          }
+        },
+        "title": "RefundCreate",
+        "type": "object"
+      },
+      "RefundDecision": {
+        "additionalProperties": false,
+        "properties": {
+          "decision": {
+            "enum": [
+              "APPROVED",
+              "REJECTED"
+            ],
+            "title": "Decision",
+            "type": "string"
+          },
+          "snapshot_sha256": {
+            "pattern": "^[0-9a-f]{64}$",
+            "title": "Snapshot Sha256",
+            "type": "string"
+          }
+        },
+        "required": [
+          "decision",
+          "snapshot_sha256"
+        ],
+        "title": "RefundDecision",
+        "type": "object"
+      },
+      "RefundExecute": {
+        "additionalProperties": false,
+        "properties": {
+          "confirm": {
+            "const": true,
+            "title": "Confirm",
+            "type": "boolean"
+          },
+          "snapshot_sha256": {
+            "pattern": "^[0-9a-f]{64}$",
+            "title": "Snapshot Sha256",
+            "type": "string"
+          }
+        },
+        "required": [
+          "confirm",
+          "snapshot_sha256"
+        ],
+        "title": "RefundExecute",
+        "type": "object"
+      },
+      "RefundHistoryOut": {
+        "properties": {
+          "available_amount_minor": {
+            "title": "Available Amount Minor",
+            "type": "integer"
+          },
+          "balance_known": {
+            "title": "Balance Known",
+            "type": "boolean"
+          },
+          "captured_amount_minor": {
+            "title": "Captured Amount Minor",
+            "type": "integer"
+          },
+          "currency": {
+            "title": "Currency",
+            "type": "string"
+          },
+          "execution_enabled": {
+            "title": "Execution Enabled",
+            "type": "boolean"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/RefundOut"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "limitation": {
+            "title": "Limitation",
+            "type": "string"
+          },
+          "reserved_amount_minor": {
+            "title": "Reserved Amount Minor",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "items",
+          "captured_amount_minor",
+          "reserved_amount_minor",
+          "available_amount_minor",
+          "currency",
+          "balance_known",
+          "execution_enabled",
+          "limitation"
+        ],
+        "title": "RefundHistoryOut",
+        "type": "object"
+      },
+      "RefundOut": {
+        "properties": {
+          "amount_minor": {
+            "title": "Amount Minor",
+            "type": "integer"
+          },
+          "attempts": {
+            "title": "Attempts",
+            "type": "integer"
+          },
+          "case_id": {
+            "format": "uuid",
+            "title": "Case Id",
+            "type": "string"
+          },
+          "completed_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Completed At"
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "currency": {
+            "title": "Currency",
+            "type": "string"
+          },
+          "data_origin": {
+            "$ref": "#/components/schemas/DataOrigin"
+          },
+          "decided_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Decided At"
+          },
+          "decided_by_role": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Decided By Role"
+          },
+          "decided_by_user_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Decided By User Id"
+          },
+          "error_category": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Error Category"
+          },
+          "execution_started_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Execution Started At"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "provider_refund_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Provider Refund Id"
+          },
+          "provider_status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Provider Status"
+          },
+          "request_key": {
+            "title": "Request Key",
+            "type": "string"
+          },
+          "requested_by_user_id": {
+            "format": "uuid",
+            "title": "Requested By User Id",
+            "type": "string"
+          },
+          "snapshot_sha256": {
+            "title": "Snapshot Sha256",
+            "type": "string"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          },
+          "submission_started": {
+            "title": "Submission Started",
+            "type": "boolean"
+          },
+          "transaction_id": {
+            "format": "uuid",
+            "title": "Transaction Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "case_id",
+          "transaction_id",
+          "amount_minor",
+          "currency",
+          "data_origin",
+          "status",
+          "requested_by_user_id",
+          "decided_by_user_id",
+          "decided_by_role",
+          "snapshot_sha256",
+          "request_key",
+          "provider_refund_id",
+          "provider_status",
+          "submission_started",
+          "error_category",
+          "attempts",
+          "created_at",
+          "decided_at",
+          "execution_started_at",
+          "completed_at"
+        ],
+        "title": "RefundOut",
+        "type": "object"
       },
       "ResolveCaseRequest": {
         "additionalProperties": false,
@@ -2708,6 +4242,34 @@
         "title": "Role",
         "type": "string"
       },
+      "ScoreBin": {
+        "properties": {
+          "current_count": {
+            "title": "Current Count",
+            "type": "integer"
+          },
+          "lower": {
+            "title": "Lower",
+            "type": "number"
+          },
+          "reference_count": {
+            "title": "Reference Count",
+            "type": "integer"
+          },
+          "upper": {
+            "title": "Upper",
+            "type": "number"
+          }
+        },
+        "required": [
+          "lower",
+          "upper",
+          "reference_count",
+          "current_count"
+        ],
+        "title": "ScoreBin",
+        "type": "object"
+      },
       "SessionOut": {
         "properties": {
           "csrf_token": {
@@ -2739,7 +4301,9 @@
           "payment_event",
           "case_note",
           "evidence",
-          "payer_history"
+          "payer_history",
+          "dispute",
+          "policy_draft"
         ],
         "title": "SourceKind",
         "type": "string"
@@ -2834,6 +4398,59 @@
           "durability"
         ],
         "title": "StorageStatus",
+        "type": "object"
+      },
+      "ThresholdPoint": {
+        "properties": {
+          "flagged": {
+            "title": "Flagged",
+            "type": "integer"
+          },
+          "precision": {
+            "title": "Precision",
+            "type": "number"
+          },
+          "recall": {
+            "title": "Recall",
+            "type": "number"
+          },
+          "threshold": {
+            "title": "Threshold",
+            "type": "number"
+          },
+          "total_assumed_cost_usd": {
+            "title": "Total Assumed Cost Usd",
+            "type": "number"
+          }
+        },
+        "required": [
+          "threshold",
+          "flagged",
+          "precision",
+          "recall",
+          "total_assumed_cost_usd"
+        ],
+        "title": "ThresholdPoint",
+        "type": "object"
+      },
+      "TimeWindow": {
+        "properties": {
+          "end": {
+            "format": "date-time",
+            "title": "End",
+            "type": "string"
+          },
+          "start": {
+            "format": "date-time",
+            "title": "Start",
+            "type": "string"
+          }
+        },
+        "required": [
+          "start",
+          "end"
+        ],
+        "title": "TimeWindow",
         "type": "object"
       },
       "ToolCallOut": {
@@ -3355,6 +4972,18 @@
               }
             ],
             "title": "Last Success At"
+          },
+          "last_successful_poll_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Successful Poll At"
           },
           "name": {
             "title": "Name",
@@ -4561,6 +6190,59 @@
         ]
       }
     },
+    "/api/v1/cases/{case_id}/refunds": {
+      "post": {
+        "operationId": "request_refund_api_v1_cases__case_id__refunds_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "case_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Case Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RefundCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RefundOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Request Refund",
+        "tags": [
+          "refunds"
+        ]
+      }
+    },
     "/api/v1/cases/{case_id}/resolve": {
       "post": {
         "operationId": "resolve_api_v1_cases__case_id__resolve_post",
@@ -4656,6 +6338,375 @@
         ]
       }
     },
+    "/api/v1/disputes": {
+      "get": {
+        "operationId": "list_disputes_api_v1_disputes_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 25,
+              "maximum": 100,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "offset",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "minimum": 0,
+              "title": "Offset",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "data_origin",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/DataOrigin"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Data Origin"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/DisputeOut"
+                  },
+                  "title": "Response List Disputes Api V1 Disputes Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "List Disputes",
+        "tags": [
+          "disputes"
+        ]
+      }
+    },
+    "/api/v1/disputes/demo": {
+      "post": {
+        "operationId": "create_demo_api_v1_disputes_demo_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateDemoDispute"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DisputeOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Create Demo",
+        "tags": [
+          "disputes"
+        ]
+      }
+    },
+    "/api/v1/disputes/sync": {
+      "post": {
+        "operationId": "synchronize_api_v1_disputes_sync_post",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DisputeSyncOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Synchronize",
+        "tags": [
+          "disputes"
+        ]
+      }
+    },
+    "/api/v1/disputes/{identity}": {
+      "get": {
+        "operationId": "detail_api_v1_disputes__identity__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "identity",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Identity",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DisputeDetailOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Detail",
+        "tags": [
+          "disputes"
+        ]
+      }
+    },
+    "/api/v1/disputes/{identity}/assign": {
+      "post": {
+        "operationId": "assign_api_v1_disputes__identity__assign_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "identity",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Identity",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AssignDispute"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DisputeOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Assign",
+        "tags": [
+          "disputes"
+        ]
+      }
+    },
+    "/api/v1/disputes/{identity}/drafts": {
+      "post": {
+        "operationId": "create_draft_api_v1_disputes__identity__drafts_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "identity",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Identity",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DisputeDraftOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Create Draft",
+        "tags": [
+          "disputes"
+        ]
+      }
+    },
+    "/api/v1/disputes/{identity}/drafts/{draft_id}/download": {
+      "get": {
+        "operationId": "download_draft_api_v1_disputes__identity__drafts__draft_id__download_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "identity",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Identity",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "draft_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Draft Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Download Draft",
+        "tags": [
+          "disputes"
+        ]
+      }
+    },
+    "/api/v1/disputes/{identity}/submit": {
+      "post": {
+        "operationId": "disabled_submission_api_v1_disputes__identity__submit_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "identity",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Identity",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Disabled Submission",
+        "tags": [
+          "disputes"
+        ]
+      }
+    },
     "/api/v1/health": {
       "get": {
         "operationId": "health_api_v1_health_get",
@@ -4699,6 +6750,203 @@
         "summary": "Me",
         "tags": [
           "auth"
+        ]
+      }
+    },
+    "/api/v1/monitoring/risk": {
+      "get": {
+        "operationId": "risk_monitoring_api_v1_monitoring_risk_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "data_origin",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/DataOrigin"
+            }
+          },
+          {
+            "in": "query",
+            "name": "days",
+            "required": false,
+            "schema": {
+              "default": 30,
+              "maximum": 180,
+              "minimum": 1,
+              "title": "Days",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "as_of",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "format": "date-time",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "As Of"
+            }
+          },
+          {
+            "in": "query",
+            "name": "capacity",
+            "required": false,
+            "schema": {
+              "default": 0.08,
+              "exclusiveMinimum": 0,
+              "maximum": 1,
+              "title": "Capacity",
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MonitoringOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Risk Monitoring",
+        "tags": [
+          "monitoring"
+        ]
+      }
+    },
+    "/api/v1/network": {
+      "get": {
+        "operationId": "relationship_network_api_v1_network_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "data_origin",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/DataOrigin"
+            }
+          },
+          {
+            "in": "query",
+            "name": "days",
+            "required": false,
+            "schema": {
+              "default": 90,
+              "maximum": 365,
+              "minimum": 1,
+              "title": "Days",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "as_of",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "format": "date-time",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "As Of"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 30,
+              "maximum": 60,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "payer",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maxLength": 64,
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Payer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "risk_band",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/RiskBand"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Risk Band"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NetworkOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Relationship Network",
+        "tags": [
+          "monitoring"
         ]
       }
     },
@@ -4838,6 +7086,283 @@
         ]
       }
     },
+    "/api/v1/policy-lab/drafts": {
+      "get": {
+        "operationId": "drafts_api_v1_policy_lab_drafts_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/PolicyDraftOut"
+                  },
+                  "title": "Response Drafts Api V1 Policy Lab Drafts Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Drafts",
+        "tags": [
+          "policy-lab"
+        ]
+      },
+      "post": {
+        "operationId": "create_api_v1_policy_lab_drafts_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreatePolicyRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PolicyDraftOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Create",
+        "tags": [
+          "policy-lab"
+        ]
+      }
+    },
+    "/api/v1/policy-lab/drafts/{ident}/decide": {
+      "post": {
+        "operationId": "decide_api_v1_policy_lab_drafts__ident__decide_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "ident",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Ident",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DecidePolicyRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PolicyDraftOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Decide",
+        "tags": [
+          "policy-lab"
+        ]
+      }
+    },
+    "/api/v1/policy-lab/drafts/{ident}/submit": {
+      "post": {
+        "operationId": "submit_api_v1_policy_lab_drafts__ident__submit_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "ident",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Ident",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PolicyDraftOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Submit",
+        "tags": [
+          "policy-lab"
+        ]
+      }
+    },
+    "/api/v1/policy-lab/simulate": {
+      "get": {
+        "operationId": "simulate_api_v1_policy_lab_simulate_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "high_threshold",
+            "required": false,
+            "schema": {
+              "default": 0.1036,
+              "maximum": 1,
+              "minimum": 0,
+              "title": "High Threshold",
+              "type": "number"
+            }
+          },
+          {
+            "in": "query",
+            "name": "review_capacity_share",
+            "required": false,
+            "schema": {
+              "default": 0.08,
+              "exclusiveMinimum": 0,
+              "maximum": 1,
+              "title": "Review Capacity Share",
+              "type": "number"
+            }
+          },
+          {
+            "in": "query",
+            "name": "false_positive_cost_usd",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "maximum": 1000000,
+              "minimum": 0,
+              "title": "False Positive Cost Usd",
+              "type": "number"
+            }
+          },
+          {
+            "in": "query",
+            "name": "false_negative_cost_usd",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "maximum": 1000000,
+              "minimum": 0,
+              "title": "False Negative Cost Usd",
+              "type": "number"
+            }
+          },
+          {
+            "in": "query",
+            "name": "investigation_cost_usd",
+            "required": false,
+            "schema": {
+              "default": 4,
+              "maximum": 1000000,
+              "minimum": 0,
+              "title": "Investigation Cost Usd",
+              "type": "number"
+            }
+          },
+          {
+            "in": "query",
+            "name": "average_value_at_risk_usd",
+            "required": false,
+            "schema": {
+              "default": 100,
+              "maximum": 1000000,
+              "minimum": 0,
+              "title": "Average Value At Risk Usd",
+              "type": "number"
+            }
+          },
+          {
+            "in": "query",
+            "name": "recovery_share",
+            "required": false,
+            "schema": {
+              "default": 0.7,
+              "maximum": 1,
+              "minimum": 0,
+              "title": "Recovery Share",
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PolicySimulationOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Simulate",
+        "tags": [
+          "policy-lab"
+        ]
+      }
+    },
     "/api/v1/products": {
       "get": {
         "operationId": "list_products_api_v1_products_get",
@@ -4879,6 +7404,223 @@
         "summary": "Ready",
         "tags": [
           "health"
+        ]
+      }
+    },
+    "/api/v1/refunds": {
+      "get": {
+        "operationId": "list_refunds_api_v1_refunds_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/RefundOut"
+                  },
+                  "title": "Response List Refunds Api V1 Refunds Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "List Refunds",
+        "tags": [
+          "refunds"
+        ]
+      }
+    },
+    "/api/v1/refunds/{refund_id}": {
+      "get": {
+        "operationId": "get_refund_api_v1_refunds__refund_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "refund_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Refund Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RefundOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Refund",
+        "tags": [
+          "refunds"
+        ]
+      }
+    },
+    "/api/v1/refunds/{refund_id}/decision": {
+      "post": {
+        "operationId": "decide_refund_api_v1_refunds__refund_id__decision_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "refund_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Refund Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RefundDecision"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RefundOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Decide Refund",
+        "tags": [
+          "refunds"
+        ]
+      }
+    },
+    "/api/v1/refunds/{refund_id}/execute": {
+      "post": {
+        "operationId": "execute_refund_api_v1_refunds__refund_id__execute_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "refund_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Refund Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RefundExecute"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RefundOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Execute Refund",
+        "tags": [
+          "refunds"
+        ]
+      }
+    },
+    "/api/v1/refunds/{refund_id}/reconcile": {
+      "post": {
+        "operationId": "reconcile_refund_api_v1_refunds__refund_id__reconcile_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "refund_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Refund Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RefundOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Reconcile Refund",
+        "tags": [
+          "refunds"
         ]
       }
     },
@@ -5049,6 +7791,49 @@
         "summary": "Detail",
         "tags": [
           "transactions"
+        ]
+      }
+    },
+    "/api/v1/transactions/{transaction_id}/refunds": {
+      "get": {
+        "operationId": "history_api_v1_transactions__transaction_id__refunds_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "transaction_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Transaction Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RefundHistoryOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "History",
+        "tags": [
+          "refunds"
         ]
       }
     },

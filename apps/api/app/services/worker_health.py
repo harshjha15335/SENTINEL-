@@ -3,7 +3,8 @@
 import logging
 from datetime import UTC, datetime
 
-from sqlalchemy.dialects.postgresql import insert
+from sqlalchemy import func, literal
+from sqlalchemy.dialects.postgresql import JSONB, insert
 
 from app.db.session import get_sessionmaker
 from app.models import WorkerHealth
@@ -18,10 +19,14 @@ def heartbeat(
     processed: int = 0,
     failure: str | None = None,
     inbox_snapshot: dict[str, object] | None = None,
+    poll_succeeded: bool = False,
 ) -> None:
     try:
         with get_sessionmaker()() as db:
             now = datetime.now(UTC)
+            snapshot_delta = dict(inbox_snapshot or {})
+            if poll_succeeded:
+                snapshot_delta["last_successful_poll_at"] = now.isoformat()
             statement = insert(WorkerHealth).values(
                 name=name,
                 heartbeat_at=now,
@@ -30,7 +35,7 @@ def heartbeat(
                 failures=int(failure is not None),
                 last_error=failure,
                 last_success_at=now if processed else None,
-                inbox_snapshot=inbox_snapshot,
+                inbox_snapshot=snapshot_delta or None,
             )
             changes: dict[str, object] = {
                 "heartbeat_at": statement.excluded.heartbeat_at,
@@ -41,8 +46,10 @@ def heartbeat(
             }
             if processed:
                 changes["last_success_at"] = now
-            if inbox_snapshot is not None:
-                changes["inbox_snapshot"] = inbox_snapshot
+            if snapshot_delta:
+                changes["inbox_snapshot"] = func.coalesce(
+                    WorkerHealth.inbox_snapshot, literal({}, type_=JSONB)
+                ).op("||")(literal(snapshot_delta, type_=JSONB))
             db.execute(
                 statement.on_conflict_do_update(
                     index_elements=["name"],

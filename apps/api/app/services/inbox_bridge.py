@@ -47,6 +47,7 @@ def poll_once(
             log.warning("inbox lease lost before forwarding")
             continue
         success, category = False, None
+        trace_id = hashlib.sha256(str(row["provider_event_id"]).encode()).hexdigest()[:32]
         try:
             raw = row["raw_body"].encode("utf-8")
             try:
@@ -65,6 +66,7 @@ def poll_once(
                 if name in row["signature_headers"]
             }
             headers["content-type"] = "application/json"
+            headers["x-correlation-id"] = trace_id
             path = "/api/v1/webhooks/paypal"
             if fixtures:
                 if not fixture_key or not str(payload["id"]).startswith("FIXTURE-"):
@@ -108,7 +110,14 @@ def poll_once(
         processed += int(success)
         log.info(
             "inbox forward",
-            extra={"data": {"origin": origin, "accepted": success, "category": category}},
+            extra={
+                "data": {
+                    "origin": origin,
+                    "accepted": success,
+                    "category": category,
+                    "event_trace_id": trace_id,
+                }
+            },
         )
         if category and category.startswith("RETRY_"):
             raise DeliveryDeferred(category)

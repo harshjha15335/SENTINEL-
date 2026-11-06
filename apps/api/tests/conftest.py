@@ -55,7 +55,8 @@ def _clean_tables() -> Iterator[None]:
     with get_engine().begin() as conn:
         conn.execute(
             text(
-                "TRUNCATE worker_health, risk_scoring_jobs, stored_blobs, "
+                "TRUNCATE refund_requests, dispute_drafts, disputes, policy_drafts, "
+                "worker_health, risk_scoring_jobs, stored_blobs, "
                 "approval_decisions, action_executions, "
                 "approval_requests, evidence_packets, evidence_artifacts, investigation_runs, "
                 "case_notes, cases, risk_assessments, audit_events, payment_events, "

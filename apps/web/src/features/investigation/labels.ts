@@ -38,6 +38,8 @@ export const ACTION_LABEL: Record<RecommendedAction, string> = {
 };
 
 export const SOURCE_LABEL: Record<SourceRef["kind"], string> = {
+  dispute: "Dispute record",
+  policy_draft: "Shadow policy proposal",
   case: "Case",
   transaction: "Payment",
   risk_assessment: "Risk assessment",

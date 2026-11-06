@@ -19,6 +19,8 @@ class SourceKind(StrEnum):
     CASE_NOTE = "case_note"
     EVIDENCE = "evidence"
     PAYER_HISTORY = "payer_history"
+    DISPUTE = "dispute"
+    POLICY_DRAFT = "policy_draft"
 
 
 class RecommendedAction(StrEnum):

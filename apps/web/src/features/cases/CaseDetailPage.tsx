@@ -100,6 +100,13 @@ function Detail({ c }: { c: CaseDetail }) {
         </div>
         <div className="space-y-4">
           <Actions c={c} />
+          <Panel title="Refund and dispute workflows">
+            <p className="mb-3 text-xs text-fg-muted">Requests require independent approval. Sandbox execution is disabled by default; dispute submission is disabled.</p>
+            <div className="flex flex-wrap gap-4 text-sm">
+              <Link to={`/refunds?case=${c.id}`} className="text-accent hover:underline">Refund history and requests</Link>
+              <Link to={`/disputes?case=${c.id}`} className="text-accent hover:underline">Dispute preparation</Link>
+            </div>
+          </Panel>
           <ApprovalsPanel caseId={c.id} me={me.data} canRequest={operator} resolved={c.status === "RESOLVED"} />
           <PacketPanel caseId={c.id} canGenerate={operator} />
           <ChecklistPanel caseId={c.id} />

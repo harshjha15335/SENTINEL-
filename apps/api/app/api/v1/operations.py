@@ -38,6 +38,14 @@ from app.services.readiness import readiness, worker_fresh
 router = APIRouter(tags=["operations"])
 
 
+def poll_time(worker: WorkerHealth) -> datetime | None:
+    value = (worker.inbox_snapshot or {}).get("last_successful_poll_at")
+    if isinstance(value, str):
+        with suppress(ValueError):
+            return datetime.fromisoformat(value)
+    return None
+
+
 @router.get("/operations/webhooks", response_model=OperationsOut)
 def webhook_operations(
     response: Response,
@@ -87,6 +95,7 @@ def webhook_operations(
                 fresh=worker_fresh(w, now),
                 heartbeat_at=w.heartbeat_at,
                 last_success_at=w.last_success_at,
+                last_successful_poll_at=poll_time(w),
                 processed=w.processed,
                 failures=w.failures,
                 last_error=w.last_error,

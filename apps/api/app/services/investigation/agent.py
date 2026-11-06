@@ -14,7 +14,7 @@ from app.services.investigation.schemas import InvestigationFindings
 from app.services.investigation.toolbox import CaseToolbox
 from app.services.investigation.validation import FindingsRejected, validate_findings
 
-PROMPT_VERSION = "investigation-v1"
+PROMPT_VERSION = "investigation-v2"
 
 INSTRUCTIONS = """\
 You are SENTINEL's payment investigation assistant. You help a merchant's analyst review one
@@ -36,8 +36,10 @@ Rules:
 6. Risk scores are model-generated and the policy runs in shadow mode; say so when you use them.
 7. You cannot take any action: no refunds, holds, messages or submissions. Do not claim that
    any action was taken. Recommend at most; a human decides and approves.
-8. Graph, dispute and policy tools report that they are not available yet. Note the gap; do
-   not guess their results.
+8. Graph tools return bounded, earlier same-payer relationships, never proof of fraud.
+   Dispute tools read stored records only and may be stale or explicitly simulated. Policy
+   tools read shadow proposals only; even APPROVED proposals are not active serving or refund
+   policies. Empty results are not proof that no dispute, relationship or policy exists.
 9. Evidence excerpts must be verbatim quotes from read_evidence_text, or omitted.
 10. Keep the summary short and factual. human_approval_required is always true.
 """
@@ -133,18 +135,18 @@ def build_agent(model: Model, *, retries: int = 2) -> Agent[AgentDeps, Investiga
 
     @agent.tool
     async def get_graph_neighbors(ctx: RunContext[AgentDeps]) -> dict[str, object]:
-        """Linked payers, devices or payments (not available until Phase 5)."""
-        return ctx.deps.box.unavailable("get_graph_neighbors")
+        """At most 25 earlier payments with this payment's recorded payer, merchant and origin."""
+        return ctx.deps.box.graph_neighbors()
 
     @agent.tool
     async def get_related_disputes(ctx: RunContext[AgentDeps]) -> dict[str, object]:
-        """PayPal disputes related to this payment (not available until Phase 5)."""
-        return ctx.deps.box.unavailable("get_related_disputes")
+        """Stored disputes for this owned payment and origin; no provider call or submission."""
+        return ctx.deps.box.related_disputes()
 
     @agent.tool
     async def get_merchant_policy(ctx: RunContext[AgentDeps]) -> dict[str, object]:
-        """The merchant's refund and risk policy (not available until Phase 5)."""
-        return ctx.deps.box.unavailable("get_merchant_policy")
+        """Saved shadow risk proposals, not activated thresholds or a contractual refund policy."""
+        return ctx.deps.box.merchant_policy()
 
     @agent.output_validator
     async def grounded(

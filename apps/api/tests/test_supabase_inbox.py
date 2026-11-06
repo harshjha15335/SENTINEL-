@@ -298,6 +298,9 @@ def test_lost_http_response_after_api_commit_replays_safely(db, tenant, inbox, f
             request.url.path, content=request.content, headers=dict(request.headers)
         )
         assert response.status_code == 200 and response.json()["durable"] is True
+        expected_trace = hashlib.sha256(json.loads(request.content)["id"].encode()).hexdigest()[:32]
+        assert request.headers["x-correlation-id"] == expected_trace
+        assert response.headers["x-correlation-id"] == expected_trace
         raise httpx.ReadTimeout("API committed; response lost in transport")
 
     with (
@@ -315,4 +318,63 @@ def test_lost_http_response_after_api_commit_replays_safely(db, tenant, inbox, f
     assert score_once() == 1
     assert db.scalar(select(func.count()).select_from(PaymentEvent)) == 1
     assert db.scalar(select(func.count()).select_from(RiskScoringJob)) == 1
+    assert db.scalar(select(func.count()).select_from(Case)) == 1
+
+
+def test_fixture_event_reaches_investigation_packet_and_independent_approval(
+    db, tenant, inbox, fixture_api
+):
+    from app.auth.deps import Principal
+    from app.models import InvestigationRun, UserSession
+    from app.models.enums import ApprovalActionType, ApprovalDecisionValue, EvidenceCategory, Role
+    from app.services import approvals, packets
+    from app.services.evidence import service as evidence
+    from app.services.investigation import runner
+    from tests.phase4 import make_pdf
+
+    txn = high_candidate(db, tenant)
+    enqueue(inbox, event(txn))
+    assert forward(inbox, fixture_api) == 1
+    assert score_once() == 1
+    case = db.scalar(select(Case).where(Case.transaction_id == txn.id))
+    assert case is not None
+    analyst = Principal(user=tenant.users[Role.ANALYST], session=UserSession())
+    admin = Principal(user=tenant.users[Role.ADMIN], session=UserSession())
+    artifact = evidence.upload(
+        db,
+        analyst,
+        case.id,
+        data=make_pdf("SIMULATED workflow fixture; not proof of delivery."),
+        declared_type="application/pdf",
+        filename="fixture-evidence.pdf",
+        category=EvidenceCategory.OTHER,
+        description="Authorized deterministic test attachment; not provider evidence.",
+    )
+    run = runner.start(db, analyst, case.id, deterministic=True)
+    runner.execute(run.id)
+    db.expire_all()
+    assert db.get(InvestigationRun, run.id).status.value == "COMPLETED"
+    packet = packets.generate(db, analyst, case.id)
+    request = approvals.create(
+        db,
+        analyst,
+        case.id,
+        action=ApprovalActionType.EVIDENCE_PACKET_INTERNAL,
+        packet_id=packet.id,
+        justification="Fixture: independent internal packet review, no submission.",
+    )
+    decided = approvals.decide(
+        db,
+        admin,
+        case.id,
+        request.id,
+        decision=ApprovalDecisionValue.APPROVED,
+        comment="Fixture approval; no provider action.",
+    )
+    assert decided.status.value == "APPROVED"
+    assert decided.requested_by_user_id != decided.decision.decided_by_user_id
+    assert decided.execution.provider_called is False
+    assert artifact.data_origin == DataOrigin.MERCHANT_PROVIDED
+    assert case.data_origin == DataOrigin.SIMULATED
+    assert forward(inbox, fixture_api) == 0
     assert db.scalar(select(func.count()).select_from(Case)) == 1

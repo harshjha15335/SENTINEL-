@@ -333,3 +333,23 @@ def test_certificate_network_denial_is_retryable_not_an_invalid_signature(
     assert response.status_code == 503
     assert response.json()["error"]["code"] == "verification_unavailable"
     assert db.scalar(select(PaymentEvent)) is None
+
+
+@pytest.mark.parametrize(
+    "url",
+    [
+        "https://user:pass@api.sandbox.paypal.com/v1/notifications/certs/CERT-x",
+        "https://api.sandbox.paypal.com:8443/v1/notifications/certs/CERT-x",
+        "https://api.sandbox.paypal.com/v1/notifications/certs/CERT-x?redirect=x",
+        "https://api.sandbox.paypal.com/other",
+        "https://api.sandbox.paypal.com/v1/notifications/certs/../other",
+    ],
+)
+def test_certificate_url_rejects_credentials_ports_and_noncert_paths(url):
+    from app.services.webhooks import SignatureVerifier, WebhookVerificationError
+
+    calls = []
+    verifier = SignatureVerifier(fetch=lambda url: calls.append(url))
+    with pytest.raises(WebhookVerificationError):
+        verifier._certificate(url)
+    assert not calls

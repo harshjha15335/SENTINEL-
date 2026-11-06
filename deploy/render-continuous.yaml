@@ -6,7 +6,7 @@ services:
     name: sentinel-api
     runtime: docker
     plan: starter
-    branch: feature/supabase-webhook
+    branch: feature/reliability-next-phase
     dockerfilePath: ./Dockerfile
     dockerContext: .
     healthCheckPath: /api/v1/ready
@@ -20,7 +20,7 @@ services:
       - key: SENTINEL_AUTO_MIGRATE
         value: "true"
       - key: SENTINEL_MIGRATION_TARGET
-        value: 8ab7245e13c0
+        value: d105a4143283
       - key: SENTINEL_DATABASE_URL
         fromDatabase:
           name: sentinel-app-db

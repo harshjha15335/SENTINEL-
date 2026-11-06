@@ -14,6 +14,11 @@ const NAV = [
   { to: "/checkout", label: "Sandbox Checkout", icon: ShoppingBag, end: false },
   { to: "/demo", label: "Demo guide", icon: ShieldCheck, end: false },
   { to: "/operations", label: "Operations", icon: Activity, end: false },
+  { to: "/refunds", label: "Refunds", icon: Activity, end: false },
+  { to: "/disputes", label: "Disputes", icon: ListChecks, end: false },
+  { to: "/policy", label: "Policy Lab", icon: Gauge, end: false },
+  { to: "/monitoring", label: "Risk Monitoring", icon: Activity, end: false },
+  { to: "/network", label: "Network Explorer", icon: Activity, end: false },
   { to: "/settings", label: "Settings", icon: Settings, end: false },
 ];
 

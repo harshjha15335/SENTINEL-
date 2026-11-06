@@ -19,6 +19,7 @@ class WorkerStatus(BaseModel):
     fresh: bool
     heartbeat_at: datetime
     last_success_at: datetime | None
+    last_successful_poll_at: datetime | None = None
     processed: int
     failures: int
     last_error: str | None

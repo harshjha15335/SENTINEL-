@@ -64,9 +64,14 @@ CertFetcher = Callable[[str], bytes]
 
 
 def _default_fetch(url: str) -> bytes:
-    resp = httpx.get(url, timeout=10.0, follow_redirects=False)
-    resp.raise_for_status()
-    return resp.content
+    body = bytearray()
+    with httpx.stream("GET", url, timeout=10.0, follow_redirects=False) as resp:
+        resp.raise_for_status()
+        for chunk in resp.iter_bytes(chunk_size=4096):
+            body.extend(chunk)
+            if len(body) > 64 * 1024:
+                raise WebhookVerificationError("Certificate response exceeds size limit")
+    return bytes(body)
 
 
 class SignatureVerifier:
@@ -77,7 +82,22 @@ class SignatureVerifier:
 
     def _certificate(self, url: str) -> x509.Certificate:
         parsed = urlparse(url)
-        if parsed.scheme != "https" or parsed.hostname not in _ALLOWED_CERT_HOSTS:
+        try:
+            valid_port = parsed.port in (None, 443)
+        except ValueError:
+            valid_port = False
+        if (
+            parsed.scheme != "https"
+            or parsed.hostname not in _ALLOWED_CERT_HOSTS
+            or parsed.username
+            or parsed.password
+            or not valid_port
+            or parsed.query
+            or parsed.fragment
+            or not parsed.path.startswith("/v1/notifications/certs/")
+            or ".." in parsed.path
+            or "%" in parsed.path
+        ):
             raise WebhookVerificationError("Certificate URL is not a PayPal HTTPS host")
         with self._lock:
             cert = self._cache.get(url)
@@ -95,6 +115,8 @@ class SignatureVerifier:
                     f"Could not load certificate: {type(exc).__name__}"
                 ) from exc
             with self._lock:
+                if len(self._cache) >= 128:
+                    self._cache.pop(next(iter(self._cache)))
                 self._cache[url] = cert
         now = datetime.now(UTC)
         if not cert.not_valid_before_utc <= now <= cert.not_valid_after_utc:

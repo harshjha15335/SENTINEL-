@@ -132,3 +132,17 @@ def test_hosted_security_configuration_rejects_insecure_defaults():
         cors_origins=[],
     )
     assert settings.hosted_deployment
+
+
+def test_poll_success_is_not_fabricated_from_acceptance_or_failed_heartbeat(db):
+    from app.models import WorkerHealth
+    from app.services.worker_health import heartbeat
+
+    heartbeat("supabase_bridge", "HEALTHY", poll_succeeded=True)
+    worker = db.get(WorkerHealth, "supabase_bridge")
+    original = worker.inbox_snapshot["last_successful_poll_at"]
+    assert worker.last_success_at is None
+    heartbeat("supabase_bridge", "DEGRADED", failure="ProxyError")
+    db.refresh(worker)
+    assert worker.inbox_snapshot["last_successful_poll_at"] == original
+    assert worker.status == "DEGRADED"

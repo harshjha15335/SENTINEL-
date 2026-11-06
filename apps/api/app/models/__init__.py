@@ -11,7 +11,10 @@ from app.models.core import (
     User,
     UserSession,
 )
+from app.models.disputes import Dispute, DisputeDraft
 from app.models.jobs import RiskScoringJob, WorkerHealth
+from app.models.policy import PolicyDraft
+from app.models.refunds import RefundRequest
 from app.models.workflow import (
     ActionExecution,
     ApprovalDecision,
@@ -29,13 +32,17 @@ __all__ = [
     "AuditEvent",
     "Case",
     "CaseNote",
+    "Dispute",
+    "DisputeDraft",
     "EvidenceArtifact",
     "EvidencePacket",
     "InvestigationRun",
     "Merchant",
     "PaymentEvent",
+    "PolicyDraft",
     "Product",
     "RawPayload",
+    "RefundRequest",
     "RiskAssessment",
     "RiskScoringJob",
     "StoredBlob",

@@ -6,7 +6,7 @@ set -eu
 # Only the reviewed target is eligible for automatic upgrade. Set false to require an
 # operator-managed migration, e.g. on an established production database.
 case "${SENTINEL_AUTO_MIGRATE:-true}" in
-  1|true|TRUE|yes) alembic upgrade "${SENTINEL_MIGRATION_TARGET:-8ab7245e13c0}" ;;
+  1|true|TRUE|yes) alembic upgrade "${SENTINEL_MIGRATION_TARGET:-d105a4143283}" ;;
 esac
 python -m app.cli check-schema
 

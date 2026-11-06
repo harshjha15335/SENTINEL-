@@ -106,8 +106,8 @@ def test_deterministic_summary_without_credentials(db: Session, tenant: Tenant) 
     refs = {(r["kind"], r["id"]) for r in run["source_refs"]}
     assert cited <= refs
     outcomes = {c["name"]: c["outcome"] for c in run["tool_calls"]}
-    assert outcomes["get_related_disputes"] == "unavailable"
-    assert outcomes["get_graph_neighbors"] == "unavailable"
+    assert outcomes["get_related_disputes"] == "ok"
+    assert outcomes["get_graph_neighbors"] == "ok"
     # The run does not change the case.
     db.expire_all()
     assert db.get(Case, case.id).status is CaseStatus.OPEN  # type: ignore[union-attr]
@@ -162,7 +162,7 @@ def test_ai_investigation_uses_read_only_tools_and_saves_metadata(
     assert run["generated_by_ai"] is True
     assert run["label"] == "AI-generated analysis"
     assert (run["provider"], run["model_name"]) == ("test", "function:scripted")
-    assert run["prompt_version"] == "investigation-v1"
+    assert run["prompt_version"] == "investigation-v2"
     assert run["usage"]["requests"] == 3
     names = [c["name"] for c in run["tool_calls"]]
     assert "read_evidence_text" in names and "get_payer_history" in names

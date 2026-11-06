@@ -39,6 +39,7 @@ export function OperationsPage() {
             <div className="flex flex-wrap items-center gap-2"><span>{humanize(w.name)}</span><Badge tone={w.fresh && w.status === "HEALTHY" ? "positive" : "critical"}>{w.fresh ? humanize(w.status) : "Stale"}</Badge></div>
             <p className="mt-1 text-xs text-fg-muted">Heartbeat: {formatDateTime(w.heartbeat_at)} · Tasks: {w.processed} · Failures: {w.failures}</p>
             <p className="mt-1 text-xs text-fg-muted">Last accepted task: {w.last_success_at ? formatDateTime(w.last_success_at) : "None recorded"}{w.last_error ? ` · ${w.last_error}` : ""}</p>
+            {w.name.includes("bridge") && <p className="mt-1 text-xs text-fg-muted">Last successful poll: {w.last_successful_poll_at ? formatDateTime(w.last_successful_poll_at) : "None recorded"}</p>}
           </li>)}</ul>
         </Panel>
         <Panel title="Supabase inbox">
@@ -51,7 +52,7 @@ export function OperationsPage() {
               <ul className="mt-3 space-y-3">{q.data.inbox.groups.map(g => <li key={`${g.data_origin}-${g.status}`} className="text-sm">
                 <div className="flex flex-wrap items-center gap-2"><OriginBadge origin={g.data_origin} /><span>{humanize(g.status)}: {g.count}</span></div>
                 {(g.status === "PENDING" || g.status === "RUNNING") && <p className="mt-1 text-xs text-fg-muted">Oldest waiting receipt: {g.oldest_received_at ? formatDateTime(g.oldest_received_at) : "Unknown"}</p>}
-              </li>)}</ul>
+          </li>)}</ul>
             </>}
           </>}
         </Panel>

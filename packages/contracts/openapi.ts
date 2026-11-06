@@ -315,6 +315,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/cases/{case_id}/refunds": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Request Refund */
+        post: operations["request_refund_api_v1_cases__case_id__refunds_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/cases/{case_id}/resolve": {
         parameters: {
             query?: never;
@@ -366,6 +383,142 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/disputes": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Disputes */
+        get: operations["list_disputes_api_v1_disputes_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/disputes/demo": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Create Demo */
+        post: operations["create_demo_api_v1_disputes_demo_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/disputes/sync": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Synchronize */
+        post: operations["synchronize_api_v1_disputes_sync_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/disputes/{identity}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Detail */
+        get: operations["detail_api_v1_disputes__identity__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/disputes/{identity}/assign": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Assign */
+        post: operations["assign_api_v1_disputes__identity__assign_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/disputes/{identity}/drafts": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Create Draft */
+        post: operations["create_draft_api_v1_disputes__identity__drafts_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/disputes/{identity}/drafts/{draft_id}/download": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Download Draft */
+        get: operations["download_draft_api_v1_disputes__identity__drafts__draft_id__download_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/disputes/{identity}/submit": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Disabled Submission */
+        post: operations["disabled_submission_api_v1_disputes__identity__submit_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/health": {
         parameters: {
             query?: never;
@@ -392,6 +545,40 @@ export interface paths {
         };
         /** Me */
         get: operations["me_api_v1_me_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/monitoring/risk": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Risk Monitoring */
+        get: operations["risk_monitoring_api_v1_monitoring_risk_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/network": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Relationship Network */
+        get: operations["relationship_network_api_v1_network_get"];
         put?: never;
         post?: never;
         delete?: never;
@@ -468,6 +655,75 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/policy-lab/drafts": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Drafts */
+        get: operations["drafts_api_v1_policy_lab_drafts_get"];
+        put?: never;
+        /** Create */
+        post: operations["create_api_v1_policy_lab_drafts_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/policy-lab/drafts/{ident}/decide": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Decide */
+        post: operations["decide_api_v1_policy_lab_drafts__ident__decide_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/policy-lab/drafts/{ident}/submit": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Submit */
+        post: operations["submit_api_v1_policy_lab_drafts__ident__submit_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/policy-lab/simulate": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Simulate */
+        get: operations["simulate_api_v1_policy_lab_simulate_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/products": {
         parameters: {
             query?: never;
@@ -496,6 +752,91 @@ export interface paths {
         get: operations["ready_api_v1_ready_get"];
         put?: never;
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/refunds": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Refunds */
+        get: operations["list_refunds_api_v1_refunds_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/refunds/{refund_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Refund */
+        get: operations["get_refund_api_v1_refunds__refund_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/refunds/{refund_id}/decision": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Decide Refund */
+        post: operations["decide_refund_api_v1_refunds__refund_id__decision_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/refunds/{refund_id}/execute": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Execute Refund */
+        post: operations["execute_refund_api_v1_refunds__refund_id__execute_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/refunds/{refund_id}/reconcile": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Reconcile Refund */
+        post: operations["reconcile_refund_api_v1_refunds__refund_id__reconcile_post"];
         delete?: never;
         options?: never;
         head?: never;
@@ -548,6 +889,23 @@ export interface paths {
         };
         /** Detail */
         get: operations["detail_api_v1_transactions__transaction_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/transactions/{transaction_id}/refunds": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** History */
+        get: operations["history_api_v1_transactions__transaction_id__refunds_get"];
         put?: never;
         post?: never;
         delete?: never;
@@ -703,6 +1061,11 @@ export interface components {
          * @enum {string}
          */
         ApprovalStatus: "PENDING" | "APPROVED" | "REJECTED";
+        /** AssignDispute */
+        AssignDispute: {
+            /** User Id */
+            user_id: string | null;
+        };
         /** AuditOut */
         AuditOut: {
             /** Action */
@@ -742,6 +1105,15 @@ export interface components {
             description: string;
             /** File */
             file: string;
+        };
+        /** CalibrationPoint */
+        CalibrationPoint: {
+            /** Adverse Rate */
+            adverse_rate: number;
+            /** Count */
+            count: number;
+            /** Mean Score */
+            mean_score: number;
         };
         /** CaseDetailOut */
         CaseDetailOut: {
@@ -886,6 +1258,13 @@ export interface components {
             /** Provided */
             provided: boolean;
         };
+        /** CountPoint */
+        CountPoint: {
+            /** Count */
+            count: number;
+            /** Date */
+            date: string;
+        };
         /** CreateApprovalRequest */
         CreateApprovalRequest: {
             action_type: components["schemas"]["ApprovalActionType"];
@@ -893,6 +1272,20 @@ export interface components {
             justification: string;
             /** Packet Id */
             packet_id?: string | null;
+        };
+        /** CreateDemoDispute */
+        CreateDemoDispute: {
+            /**
+             * Case Id
+             * Format: uuid
+             */
+            case_id: string;
+            /**
+             * Reason
+             * @default ITEM_NOT_RECEIVED
+             * @enum {string}
+             */
+            reason: "ITEM_NOT_RECEIVED" | "SIGNIFICANTLY_NOT_AS_DESCRIBED" | "UNAUTHORISED";
         };
         /** CreateOrderRequest */
         CreateOrderRequest: {
@@ -906,6 +1299,21 @@ export interface components {
              * @default 1
              */
             quantity: number;
+        };
+        /** CreatePolicyRequest */
+        CreatePolicyRequest: {
+            /** Name */
+            name: string;
+            parameters: components["schemas"]["PolicyParameters"];
+            /** Rationale */
+            rationale: string;
+        };
+        /** CurvePoint */
+        CurvePoint: {
+            /** X */
+            x: number;
+            /** Y */
+            y: number;
         };
         /** DashboardSummaryOut */
         DashboardSummaryOut: {
@@ -938,6 +1346,132 @@ export interface components {
         DecideApprovalRequest: {
             /** Comment */
             comment: string;
+        };
+        /** DecidePolicyRequest */
+        DecidePolicyRequest: {
+            /**
+             * Decision
+             * @enum {string}
+             */
+            decision: "APPROVED" | "REJECTED";
+        };
+        /** DisputeChecklistOut */
+        DisputeChecklistOut: {
+            /** Evidence Ids */
+            evidence_ids: string[];
+            /** Key */
+            key: string;
+            /** Label */
+            label: string;
+            /** Provided */
+            provided: boolean;
+        };
+        /** DisputeDetailOut */
+        DisputeDetailOut: {
+            /** Checklist */
+            checklist: components["schemas"]["DisputeChecklistOut"][];
+            dispute: components["schemas"]["DisputeOut"];
+            /** Drafts */
+            drafts: components["schemas"]["DisputeDraftOut"][];
+            /** Limitations */
+            limitations: string[];
+        };
+        /** DisputeDraftOut */
+        DisputeDraftOut: {
+            /** Body */
+            body: string;
+            /** Citations */
+            citations: {
+                [key: string]: unknown;
+            }[];
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /**
+             * Dispute Id
+             * Format: uuid
+             */
+            dispute_id: string;
+            /**
+             * Generated By Ai
+             * @default false
+             * @constant
+             */
+            generated_by_ai: false;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /**
+             * Label
+             * @default Deterministic response draft — requires human review
+             */
+            label: string;
+            /** Missing Information */
+            missing_information: string[];
+        };
+        /** DisputeOut */
+        DisputeOut: {
+            /** Assigned User Id */
+            assigned_user_id: string | null;
+            /**
+             * Case Id
+             * Format: uuid
+             */
+            case_id: string;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            data_origin: components["schemas"]["DataOrigin"];
+            /**
+             * External Submission Enabled
+             * @default false
+             * @constant
+             */
+            external_submission_enabled: false;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Last Synced At */
+            last_synced_at: string | null;
+            /** Provider Dispute Id */
+            provider_dispute_id: string | null;
+            /** Reason */
+            reason: string;
+            /** Response Due At */
+            response_due_at: string | null;
+            /** Stage */
+            stage: string;
+            /** Status */
+            status: string;
+            /**
+             * Transaction Id
+             * Format: uuid
+             */
+            transaction_id: string;
+        };
+        /** DisputeSyncOut */
+        DisputeSyncOut: {
+            /**
+             * Scope
+             * @default Only this merchant's single matched LIVE_SANDBOX captures; first provider page only
+             */
+            scope: string;
+            /**
+             * Submission Enabled
+             * @default false
+             * @constant
+             */
+            submission_enabled: false;
+            /** Synchronized */
+            synchronized: number;
         };
         /**
          * EventProcessing
@@ -1074,6 +1608,51 @@ export interface components {
          * @enum {string}
          */
         ExtractionStatus: "EXTRACTED" | "NO_TEXT" | "NOT_SUPPORTED" | "FAILED";
+        /** FeatureComparison */
+        FeatureComparison: {
+            /** Current Mean */
+            current_mean: number | null;
+            /** Current Missing Rate */
+            current_missing_rate: number | null;
+            /** Feature */
+            feature: string;
+            /** Reference Mean */
+            reference_mean: number | null;
+            /** Reference Missing Rate */
+            reference_missing_rate: number | null;
+        };
+        /** GraphEdge */
+        GraphEdge: {
+            data_origin: components["schemas"]["DataOrigin"];
+            /** Explanation */
+            explanation: string;
+            /** Relationship */
+            relationship: string;
+            /** Source */
+            source: string;
+            /** Target */
+            target: string;
+            /**
+             * Transaction Id
+             * Format: uuid
+             */
+            transaction_id: string;
+        };
+        /** GraphNode */
+        GraphNode: {
+            /** Id */
+            id: string;
+            /** Kind */
+            kind: string;
+            /** Label */
+            label: string;
+            /** Record Id */
+            record_id?: string | null;
+            /** Risk Band */
+            risk_band?: string | null;
+            /** Source */
+            source: string;
+        };
         /** HTTPValidationError */
         HTTPValidationError: {
             /** Detail */
@@ -1226,9 +1805,18 @@ export interface components {
              * Format: uuid
              */
             case_id: string;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
             data_origin: components["schemas"]["DataOrigin"];
+            /** Due At */
+            due_at: string | null;
             /** Investigation Mode */
             investigation_mode: string;
+            /** Scenario Version */
+            scenario_version: string;
             /**
              * Transaction Id
              * Format: uuid
@@ -1345,6 +1933,90 @@ export interface components {
             rows: number;
             /** Threshold */
             threshold: number;
+        };
+        /** MonitoringOut */
+        MonitoringOut: {
+            /** Calibration Status */
+            calibration_status: string;
+            /** Capacity Utilization */
+            capacity_utilization: number | null;
+            /** Case Growth */
+            case_growth: components["schemas"]["CountPoint"][];
+            /** Confirmed Adverse Cases */
+            confirmed_adverse_cases: number;
+            /** Current Scored */
+            current_scored: number;
+            /** Current Transactions */
+            current_transactions: number;
+            current_window: components["schemas"]["TimeWindow"];
+            data_origin: components["schemas"]["DataOrigin"];
+            /** Feature Comparison */
+            feature_comparison: components["schemas"]["FeatureComparison"][];
+            /** High Flag Rate */
+            high_flag_rate: number | null;
+            /** Illustrative Capacity */
+            illustrative_capacity: number;
+            /** Limitations */
+            limitations: string[];
+            /** Model Versions */
+            model_versions: {
+                [key: string]: number;
+            };
+            /**
+             * Observed At
+             * Format: date-time
+             */
+            observed_at: string;
+            /** Oldest Pending Hours */
+            oldest_pending_hours: number | null;
+            /** Open Cases */
+            open_cases: number;
+            /** Overdue Cases */
+            overdue_cases: number;
+            /** Psi Note */
+            psi_note: string;
+            /** Reference Scored */
+            reference_scored: number;
+            /** Reference Transactions */
+            reference_transactions: number;
+            reference_window: components["schemas"]["TimeWindow"];
+            /** Resolution Rate */
+            resolution_rate: number | null;
+            /** Resolved In Window */
+            resolved_in_window: number;
+            /** Risk Bands */
+            risk_bands: {
+                [key: string]: number;
+            };
+            /** Sample Limit */
+            sample_limit: number;
+            /** Score Distribution */
+            score_distribution: components["schemas"]["ScoreBin"][];
+            /** Score Psi */
+            score_psi: number | null;
+            /** Transaction Volume */
+            transaction_volume: components["schemas"]["CountPoint"][];
+            /** Truncated */
+            truncated: boolean;
+        };
+        /** NetworkOut */
+        NetworkOut: {
+            data_origin: components["schemas"]["DataOrigin"];
+            /** Edges */
+            edges: components["schemas"]["GraphEdge"][];
+            /** Limit */
+            limit: number;
+            /** Limitations */
+            limitations: string[];
+            /** Nodes */
+            nodes: components["schemas"]["GraphNode"][];
+            /** Repeated Payer Groups */
+            repeated_payer_groups: number;
+            /** Transaction Count */
+            transaction_count: number;
+            /** Truncated */
+            truncated: boolean;
+            window: components["schemas"]["TimeWindow"];
         };
         /** OpenCaseRequest */
         OpenCaseRequest: {
@@ -1506,6 +2178,179 @@ export interface components {
          * @enum {string}
          */
         PolicyDecision: "ALLOW" | "REVIEW" | "ESCALATE";
+        /** PolicyDraftOut */
+        PolicyDraftOut: {
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Dataset Sha256 */
+            dataset_sha256: string;
+            /** Decided At */
+            decided_at: string | null;
+            /** Decided By User Id */
+            decided_by_user_id: string | null;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Model Version */
+            model_version: string;
+            /** Name */
+            name: string;
+            parameters: components["schemas"]["PolicyParameters"];
+            /** Rationale */
+            rationale: string;
+            /**
+             * Requested By User Id
+             * Format: uuid
+             */
+            requested_by_user_id: string;
+            /** Shadow Only */
+            shadow_only: boolean;
+            /** Snapshot Sha256 */
+            snapshot_sha256: string;
+            /** Status */
+            status: string;
+            /** Submitted At */
+            submitted_at: string | null;
+        };
+        /** PolicyMetrics */
+        PolicyMetrics: {
+            /** Capacity Utilization */
+            capacity_utilization: number;
+            /** Estimated Recoverable Usd */
+            estimated_recoverable_usd: number;
+            /** False Positive Cost Usd */
+            false_positive_cost_usd: number;
+            /** False Positive Rate */
+            false_positive_rate: number;
+            /** Flag Rate */
+            flag_rate: number;
+            /** Flagged */
+            flagged: number;
+            /** Fn */
+            fn: number;
+            /** Fp */
+            fp: number;
+            /** Missed Outcome Cost Usd */
+            missed_outcome_cost_usd: number;
+            /** Over Capacity */
+            over_capacity: boolean;
+            /** Positives */
+            positives: number;
+            /** Precision */
+            precision: number;
+            /** Recall */
+            recall: number;
+            /** Residual Loss Usd */
+            residual_loss_usd: number;
+            /** Review Capacity Count */
+            review_capacity_count: number;
+            /** Review Cost Usd */
+            review_cost_usd: number;
+            /** Rows */
+            rows: number;
+            /** Tn */
+            tn: number;
+            /** Total Assumed Cost Usd */
+            total_assumed_cost_usd: number;
+            /** Tp */
+            tp: number;
+        };
+        /** PolicyParameters */
+        PolicyParameters: {
+            /**
+             * Average Value At Risk Usd
+             * @default 100
+             */
+            average_value_at_risk_usd: number;
+            /**
+             * False Negative Cost Usd
+             * @default 20
+             */
+            false_negative_cost_usd: number;
+            /**
+             * False Positive Cost Usd
+             * @default 0
+             */
+            false_positive_cost_usd: number;
+            /**
+             * High Threshold
+             * @default 0.1036
+             */
+            high_threshold: number;
+            /**
+             * Investigation Cost Usd
+             * @default 4
+             */
+            investigation_cost_usd: number;
+            /**
+             * Recovery Share
+             * @default 0.7
+             */
+            recovery_share: number;
+            /**
+             * Review Capacity Share
+             * @default 0.08
+             */
+            review_capacity_share: number;
+        };
+        /** PolicySimulationOut */
+        PolicySimulationOut: {
+            /** Average Precision */
+            average_precision: number;
+            baseline: components["schemas"]["PolicyMetrics"];
+            baseline_parameters: components["schemas"]["PolicyParameters"];
+            /** Brier */
+            brier: number;
+            /** Calibration */
+            calibration: components["schemas"]["CalibrationPoint"][];
+            /**
+             * Data Origin
+             * @default SYNTHETIC_DEMO
+             * @constant
+             */
+            data_origin: "SYNTHETIC_DEMO";
+            /** Dataset Sha256 */
+            dataset_sha256: string;
+            /** Frozen Test Rows */
+            frozen_test_rows: number;
+            /** Limitations */
+            limitations: string[];
+            /** Model Version */
+            model_version: string;
+            /** Precision Recall Curve */
+            precision_recall_curve: components["schemas"]["CurvePoint"][];
+            proposed: components["schemas"]["PolicyMetrics"];
+            proposed_parameters: components["schemas"]["PolicyParameters"];
+            /** Roc Auc */
+            roc_auc: number;
+            /** Roc Curve */
+            roc_curve: components["schemas"]["CurvePoint"][];
+            /**
+             * Split
+             * @default validation
+             * @constant
+             */
+            split: "validation";
+            /** Thresholds */
+            thresholds: components["schemas"]["ThresholdPoint"][];
+            /**
+             * Validation End
+             * Format: date-time
+             */
+            validation_end: string;
+            /** Validation Rows */
+            validation_rows: number;
+            /**
+             * Validation Start
+             * Format: date-time
+             */
+            validation_start: string;
+        };
         /** ProductOut */
         ProductOut: {
             /** Currency */
@@ -1529,6 +2374,109 @@ export interface components {
          * @enum {string}
          */
         RecommendedAction: "NO_FURTHER_ACTION" | "CONTINUE_MANUAL_REVIEW" | "REQUEST_MORE_EVIDENCE" | "PREPARE_EVIDENCE_PACKET" | "CONSIDER_REFUND" | "ESCALATE";
+        /** RefundCreate */
+        RefundCreate: {
+            /** Amount Minor */
+            amount_minor?: number | null;
+        };
+        /** RefundDecision */
+        RefundDecision: {
+            /**
+             * Decision
+             * @enum {string}
+             */
+            decision: "APPROVED" | "REJECTED";
+            /** Snapshot Sha256 */
+            snapshot_sha256: string;
+        };
+        /** RefundExecute */
+        RefundExecute: {
+            /**
+             * Confirm
+             * @constant
+             */
+            confirm: true;
+            /** Snapshot Sha256 */
+            snapshot_sha256: string;
+        };
+        /** RefundHistoryOut */
+        RefundHistoryOut: {
+            /** Available Amount Minor */
+            available_amount_minor: number;
+            /** Balance Known */
+            balance_known: boolean;
+            /** Captured Amount Minor */
+            captured_amount_minor: number;
+            /** Currency */
+            currency: string;
+            /** Execution Enabled */
+            execution_enabled: boolean;
+            /** Items */
+            items: components["schemas"]["RefundOut"][];
+            /** Limitation */
+            limitation: string;
+            /** Reserved Amount Minor */
+            reserved_amount_minor: number;
+        };
+        /** RefundOut */
+        RefundOut: {
+            /** Amount Minor */
+            amount_minor: number;
+            /** Attempts */
+            attempts: number;
+            /**
+             * Case Id
+             * Format: uuid
+             */
+            case_id: string;
+            /** Completed At */
+            completed_at: string | null;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Currency */
+            currency: string;
+            data_origin: components["schemas"]["DataOrigin"];
+            /** Decided At */
+            decided_at: string | null;
+            /** Decided By Role */
+            decided_by_role: string | null;
+            /** Decided By User Id */
+            decided_by_user_id: string | null;
+            /** Error Category */
+            error_category: string | null;
+            /** Execution Started At */
+            execution_started_at: string | null;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Provider Refund Id */
+            provider_refund_id: string | null;
+            /** Provider Status */
+            provider_status: string | null;
+            /** Request Key */
+            request_key: string;
+            /**
+             * Requested By User Id
+             * Format: uuid
+             */
+            requested_by_user_id: string;
+            /** Snapshot Sha256 */
+            snapshot_sha256: string;
+            /** Status */
+            status: string;
+            /** Submission Started */
+            submission_started: boolean;
+            /**
+             * Transaction Id
+             * Format: uuid
+             */
+            transaction_id: string;
+        };
         /** ResolveCaseRequest */
         ResolveCaseRequest: {
             /** Note */
@@ -1639,6 +2587,17 @@ export interface components {
          * @enum {string}
          */
         Role: "ADMIN" | "ANALYST" | "VIEWER";
+        /** ScoreBin */
+        ScoreBin: {
+            /** Current Count */
+            current_count: number;
+            /** Lower */
+            lower: number;
+            /** Reference Count */
+            reference_count: number;
+            /** Upper */
+            upper: number;
+        };
         /** SessionOut */
         SessionOut: {
             /** Csrf Token */
@@ -1654,7 +2613,7 @@ export interface components {
          * SourceKind
          * @enum {string}
          */
-        SourceKind: "case" | "transaction" | "risk_assessment" | "payment_event" | "case_note" | "evidence" | "payer_history";
+        SourceKind: "case" | "transaction" | "risk_assessment" | "payment_event" | "case_note" | "evidence" | "payer_history" | "dispute" | "policy_draft";
         /** SourceRef */
         SourceRef: {
             /**
@@ -1694,6 +2653,32 @@ export interface components {
             stored_bytes: number;
             /** Stored Files */
             stored_files: number;
+        };
+        /** ThresholdPoint */
+        ThresholdPoint: {
+            /** Flagged */
+            flagged: number;
+            /** Precision */
+            precision: number;
+            /** Recall */
+            recall: number;
+            /** Threshold */
+            threshold: number;
+            /** Total Assumed Cost Usd */
+            total_assumed_cost_usd: number;
+        };
+        /** TimeWindow */
+        TimeWindow: {
+            /**
+             * End
+             * Format: date-time
+             */
+            end: string;
+            /**
+             * Start
+             * Format: date-time
+             */
+            start: string;
         };
         /** ToolCallOut */
         ToolCallOut: {
@@ -1862,6 +2847,8 @@ export interface components {
             last_error: string | null;
             /** Last Success At */
             last_success_at: string | null;
+            /** Last Successful Poll At */
+            last_successful_poll_at?: string | null;
             /** Name */
             name: string;
             /** Processed */
@@ -2608,6 +3595,41 @@ export interface operations {
             };
         };
     };
+    request_refund_api_v1_cases__case_id__refunds_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                case_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RefundCreate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RefundOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     resolve_api_v1_cases__case_id__resolve_post: {
         parameters: {
             query?: never;
@@ -2683,6 +3705,252 @@ export interface operations {
             };
         };
     };
+    list_disputes_api_v1_disputes_get: {
+        parameters: {
+            query?: {
+                limit?: number;
+                offset?: number;
+                data_origin?: components["schemas"]["DataOrigin"] | null;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DisputeOut"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    create_demo_api_v1_disputes_demo_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateDemoDispute"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DisputeOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    synchronize_api_v1_disputes_sync_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DisputeSyncOut"];
+                };
+            };
+        };
+    };
+    detail_api_v1_disputes__identity__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                identity: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DisputeDetailOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    assign_api_v1_disputes__identity__assign_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                identity: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AssignDispute"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DisputeOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    create_draft_api_v1_disputes__identity__drafts_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                identity: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DisputeDraftOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    download_draft_api_v1_disputes__identity__drafts__draft_id__download_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                identity: string;
+                draft_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    disabled_submission_api_v1_disputes__identity__submit_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                identity: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     health_api_v1_health_get: {
         parameters: {
             query?: never;
@@ -2721,6 +3989,76 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["MeOut"];
+                };
+            };
+        };
+    };
+    risk_monitoring_api_v1_monitoring_risk_get: {
+        parameters: {
+            query: {
+                data_origin: components["schemas"]["DataOrigin"];
+                days?: number;
+                as_of?: string | null;
+                capacity?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MonitoringOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    relationship_network_api_v1_network_get: {
+        parameters: {
+            query: {
+                data_origin: components["schemas"]["DataOrigin"];
+                days?: number;
+                as_of?: string | null;
+                limit?: number;
+                payer?: string | null;
+                risk_band?: components["schemas"]["RiskBand"] | null;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["NetworkOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
         };
@@ -2831,6 +4169,162 @@ export interface operations {
             };
         };
     };
+    drafts_api_v1_policy_lab_drafts_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PolicyDraftOut"][];
+                };
+            };
+        };
+    };
+    create_api_v1_policy_lab_drafts_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreatePolicyRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PolicyDraftOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    decide_api_v1_policy_lab_drafts__ident__decide_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                ident: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DecidePolicyRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PolicyDraftOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    submit_api_v1_policy_lab_drafts__ident__submit_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                ident: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PolicyDraftOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    simulate_api_v1_policy_lab_simulate_get: {
+        parameters: {
+            query?: {
+                high_threshold?: number;
+                review_capacity_share?: number;
+                false_positive_cost_usd?: number;
+                false_negative_cost_usd?: number;
+                investigation_cost_usd?: number;
+                average_value_at_risk_usd?: number;
+                recovery_share?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PolicySimulationOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     list_products_api_v1_products_get: {
         parameters: {
             query?: never;
@@ -2867,6 +4361,158 @@ export interface operations {
                 };
                 content: {
                     "application/json": unknown;
+                };
+            };
+        };
+    };
+    list_refunds_api_v1_refunds_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RefundOut"][];
+                };
+            };
+        };
+    };
+    get_refund_api_v1_refunds__refund_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                refund_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RefundOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    decide_refund_api_v1_refunds__refund_id__decision_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                refund_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RefundDecision"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RefundOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    execute_refund_api_v1_refunds__refund_id__execute_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                refund_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RefundExecute"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RefundOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    reconcile_refund_api_v1_refunds__refund_id__reconcile_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                refund_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RefundOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
         };
@@ -2944,6 +4590,37 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["TransactionDetailOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    history_api_v1_transactions__transaction_id__refunds_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                transaction_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RefundHistoryOut"];
                 };
             };
             /** @description Validation Error */

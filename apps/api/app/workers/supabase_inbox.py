@@ -12,6 +12,7 @@ import httpx
 from app.core.config import get_settings
 from app.core.logging import configure_logging
 from app.services.inbox_bridge import poll_once
+from app.services.outbound import failure_diagnostic
 from app.services.worker_health import heartbeat
 
 __all__ = ["poll_once"]
@@ -112,12 +113,17 @@ def main() -> None:
                     except Exception:
                         log.warning("inbox metrics unavailable")
                     next_metrics = time.monotonic() + 30
-                heartbeat(name, "HEALTHY", processed=count, inbox_snapshot=snapshot)
+                heartbeat(
+                    name, "HEALTHY", processed=count, inbox_snapshot=snapshot, poll_succeeded=True
+                )
                 failures = 0
             except Exception as exc:
                 failures += 1
                 heartbeat(name, "DEGRADED", failure=type(exc).__name__)
-                log.error("inbox poll failed", extra={"data": {"category": type(exc).__name__}})
+                log.error(
+                    "inbox poll failed",
+                    extra={"data": failure_diagnostic(exc, url, "claim_and_forward_inbox")},
+                )
                 if args.once:
                     raise SystemExit(1) from None
             if args.once:

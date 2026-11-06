@@ -27,6 +27,12 @@ const OperationsPage = lazy(() => import("@/features/operations/OperationsPage")
 
 const DemoGuidePage = lazy(() => import("@/features/operations/DemoGuidePage").then(m => ({ default: m.DemoGuidePage })));
 
+const RefundsPage = lazy(() => import("@/features/refunds/RefundsPage").then(m => ({ default: m.RefundsPage })));
+const DisputesPage = lazy(() => import("@/features/disputes/DisputesPage").then(m => ({ default: m.DisputesPage })));
+const PolicyLabPage = lazy(() => import("@/features/policy/PolicyLabPage").then(m => ({ default: m.PolicyLabPage })));
+const MonitoringPage = lazy(() => import("@/features/monitoring/MonitoringPage").then(m => ({ default: m.MonitoringPage })));
+const NetworkPage = lazy(() => import("@/features/network/NetworkPage").then(m => ({ default: m.NetworkPage })));
+
 const fallback = <Skeleton className="h-64" />;
 
 function makeClient(): QueryClient {
@@ -76,6 +82,11 @@ export function AppRoutes() {
         <Route path="checkout" element={<Suspense fallback={fallback}><CheckoutPage /></Suspense>} />
         <Route path="demo" element={<Suspense fallback={fallback}><DemoGuidePage /></Suspense>} />
         <Route path="operations" element={<Suspense fallback={fallback}><OperationsPage /></Suspense>} />
+        <Route path="refunds" element={<Suspense fallback={fallback}><RefundsPage /></Suspense>} />
+        <Route path="disputes" element={<Suspense fallback={fallback}><DisputesPage /></Suspense>} />
+        <Route path="policy" element={<Suspense fallback={fallback}><PolicyLabPage /></Suspense>} />
+        <Route path="monitoring" element={<Suspense fallback={fallback}><MonitoringPage /></Suspense>} />
+        <Route path="network" element={<Suspense fallback={fallback}><NetworkPage /></Suspense>} />
         <Route path="settings" element={<SettingsPage />} />
         <Route path="*" element={<NotFoundPage />} />
       </Route>

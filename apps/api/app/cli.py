@@ -119,7 +119,14 @@ def main() -> None:
     parser.add_argument(
         "--if-empty", action="store_true", help="demo-load: skip when synthetic data exists"
     )
+    parser.add_argument(
+        "--fresh",
+        action="store_true",
+        help="judge-demo: append today's versioned SIMULATED scenario; preserve historical cases",
+    )
     args = parser.parse_args()
+    if args.fresh and args.command != "judge-demo":
+        parser.error("--fresh is supported only for judge-demo")
     if args.command == "seed":
         seed()
     elif args.command == "check-schema":
@@ -139,7 +146,7 @@ def main() -> None:
 
         password = os.environ.get("SENTINEL_JUDGE_PASSWORD", "")
         with get_sessionmaker()() as db:
-            print(json.dumps(prepare(db, password=password)))
+            print(json.dumps(prepare(db, password=password, fresh=args.fresh)))
     elif args.command == "demo-load":
         demo_load(args.seed, if_empty=args.if_empty)
 

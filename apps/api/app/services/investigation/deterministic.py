@@ -15,7 +15,7 @@ from app.services.investigation.schemas import (
     SourceRef,
     VerifiedFact,
 )
-from app.services.investigation.toolbox import PHASE5_UNAVAILABLE, CaseToolbox
+from app.services.investigation.toolbox import CaseToolbox
 
 DETERMINISTIC_LABEL = "Deterministic summary — AI provider unavailable"
 DETERMINISTIC_CHOSEN_LABEL = "Deterministic summary — AI not used"
@@ -37,8 +37,9 @@ def build_summary(box: CaseToolbox) -> InvestigationFindings:
     notes = box.case_notes()
     evidence = box.evidence_inventory()
     capture = box.capture_information()
-    for name in ("get_graph_neighbors", "get_related_disputes", "get_merchant_policy"):
-        box.unavailable(name)
+    graph = box.graph_neighbors()
+    related = box.related_disputes()
+    proposals = box.merchant_policy()
 
     t_ref = _ref(SourceKind.TRANSACTION, txn["id"])
     facts = [
@@ -64,12 +65,38 @@ def build_summary(box: CaseToolbox) -> InvestigationFindings:
             VerifiedFact(statement="This payment has a recorded dispute.", sources=[t_ref])
         )
 
+    for item in related["disputes"][:3]:
+        facts.append(
+            VerifiedFact(
+                statement=(
+                    f"A stored dispute record has status {item['status']}, stage "
+                    f"{item['stage']}, data origin {item['data_origin']}. "
+                    "No provider request or submission was made by this summary."
+                ),
+                sources=[_ref(SourceKind.DISPUTE, item["id"])],
+            )
+        )
+    for item in proposals["proposals"][:2]:
+        facts.append(
+            VerifiedFact(
+                statement=(
+                    f"A saved risk-policy proposal has status {item['status']} and is "
+                    "shadow-only; it has not changed the serving decision rule."
+                ),
+                sources=[_ref(SourceKind.POLICY_DRAFT, item["id"])],
+            )
+        )
+    # Graph records are retrieved and auditable; no additional fraud assertion is inferred.
+    assert isinstance(graph["available"], bool)
+
     risk_ind: list[Indicator] = []
     counter: list[Indicator] = []
     limitations: list[str] = [
         "No AI analysis was performed. This summary restates stored records and the model's "
         "own explanation; it does not interpret documents.",
-        f"Graph links, PayPal disputes and merchant policy checks: {PHASE5_UNAVAILABLE}",
+        "Graph relationships use only earlier same-payer records; devices, IPs and cards "
+        "are not inferred. Stored disputes may be stale, and shadow proposals never change "
+        "serving thresholds or establish a contractual refund policy.",
     ]
     band = None
     if risk.get("available"):

@@ -1,9 +1,11 @@
+from datetime import UTC, datetime, timedelta
+
 from fastapi.testclient import TestClient
 from sqlalchemy import func, select
 
-from app.models import ApprovalRequest, Case, Transaction, User
+from app.models import ApprovalRequest, AuditEvent, Case, Transaction, User
 from app.models.enums import DataOrigin, Role
-from app.services.demo.judge import JUDGE_EMAIL, prepare
+from app.services.demo.judge import FRESH_VERSION, JUDGE_EMAIL, prepare
 from tests.conftest import PASSWORD
 
 
@@ -67,3 +69,54 @@ def test_judge_scenario_is_not_a_public_or_cross_workspace_route(app_client, oth
     assert app_client.get("/api/v1/demo/scenario").status_code == 401
     login(app_client, other_tenant.users[Role.ADMIN].email)
     assert app_client.get("/api/v1/demo/scenario").status_code == 404
+
+
+def test_fresh_demo_appends_mapped_fixture_without_rewriting_history(db, app_client):
+    original = prepare(db, password=PASSWORD)
+    old_case = db.get(Case, original["case_id"])
+    before = datetime.now(UTC)
+    old_case.created_at = before - timedelta(days=8)
+    old_case.due_at = before - timedelta(days=7)
+    db.commit()
+    old_case_values = (old_case.created_at, old_case.due_at, old_case.status)
+    old_ids = set(db.scalars(select(Transaction.id)))
+    old_audit = {
+        row.id: (row.created_at, row.action, row.metadata_)
+        for row in db.scalars(select(AuditEvent))
+    }
+
+    fresh = prepare(db, password=PASSWORD, fresh=True)
+    assert fresh["case_id"] != original["case_id"]
+    assert fresh["data_origin"] == DataOrigin.SIMULATED.value
+    case = db.get(Case, fresh["case_id"])
+    txn = db.get(Transaction, case.transaction_id)
+    assert case.due_at > before + timedelta(hours=23)
+    assert before - timedelta(minutes=2) <= txn.occurred_at <= datetime.now(UTC)
+    assert txn.product is not None and txn.product.name == "Demonstration review bundle"
+    assert txn.product.price_minor == txn.amount_minor
+    assert txn.provider_summary["judge_scenario_version"] == FRESH_VERSION
+    assert case.risk_assessment_id is not None
+    assert len(set(db.scalars(select(Transaction.id))) - old_ids) == 21
+    db.refresh(old_case)
+    assert (old_case.created_at, old_case.due_at, old_case.status) == old_case_values
+    assert all(
+        (
+            db.get(AuditEvent, identity).created_at,
+            db.get(AuditEvent, identity).action,
+            db.get(AuditEvent, identity).metadata_,
+        )
+        == values
+        for identity, values in old_audit.items()
+    )
+
+    assert prepare(db, password=PASSWORD, fresh=True) == fresh
+    assert len(set(db.scalars(select(Transaction.id))) - old_ids) == 21
+    response = app_client.post(
+        "/api/v1/auth/login", json={"email": JUDGE_EMAIL, "password": PASSWORD}
+    )
+    assert response.status_code == 200
+    scenario = app_client.get("/api/v1/demo/scenario").json()
+    assert scenario["case_id"] == fresh["case_id"]
+    assert scenario["scenario_version"] == FRESH_VERSION
+    assert scenario["investigation_mode"] == "DETERMINISTIC"
+    assert app_client.get("/api/v1/operations/webhooks").status_code == 403

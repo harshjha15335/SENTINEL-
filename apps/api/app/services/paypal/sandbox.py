@@ -8,6 +8,7 @@ See docs/decisions/0002-paypal-rest-over-sdk.md.
 """
 
 import logging
+import re
 import threading
 import time
 from typing import Any
@@ -58,6 +59,8 @@ class SandboxPayPalGateway:
 
     def _access_token(self, *, force: bool = False) -> str:
         with self._lock:
+            if force:
+                self._token, self._token_expires_at = None, 0.0
             now = time.monotonic()
             if not force and self._token and now < self._token_expires_at:
                 return self._token
@@ -74,12 +77,32 @@ class SandboxPayPalGateway:
                 ) from exc
             if resp.status_code != 200:
                 raise _classify(resp, "OAuth2 token request rejected")
-            body = resp.json()
-            self._token = str(body["access_token"])
-            ttl = int(body.get("expires_in", 0))
-            self._token_expires_at = now + max(ttl - _TOKEN_REFRESH_MARGIN_SECONDS, 30)
+            try:
+                body = resp.json()
+                token = body["access_token"]
+                ttl = int(body["expires_in"])
+                if not isinstance(token, str) or not token or ttl <= 0:
+                    raise ValueError("Invalid token lifetime")
+                if str(body.get("token_type", "Bearer")).lower() != "bearer":
+                    raise ValueError("Unsupported token type")
+            except (ValueError, TypeError, KeyError) as exc:
+                raise PayPalError(PayPalErrorKind.PROVIDER_ERROR, "Invalid OAuth response") from exc
+            self._token = token
+            # Never retain a short-lived token longer than the provider TTL.
+            margin = min(_TOKEN_REFRESH_MARGIN_SECONDS, ttl * 0.1)
+            self._token_expires_at = time.monotonic() + ttl - margin
             log.info("paypal token acquired", extra={"data": {"expires_in": ttl}})
             return self._token
+
+    def rotate_credentials(self, client_id: str, client_secret: str) -> None:
+        """Trusted runtime rotation; invalidate cached tokens atomically. No public endpoint."""
+        if not client_id.strip() or not client_secret.strip():
+            raise PayPalError(
+                PayPalErrorKind.NOT_CONFIGURED, "Both sandbox credentials are required"
+            )
+        with self._lock:
+            self._client_id, self._client_secret = client_id, client_secret
+            self._token, self._token_expires_at = None, 0.0
 
     def check_credentials(self) -> None:
         self._access_token()
@@ -219,6 +242,9 @@ class SandboxPayPalGateway:
     def get_capture(self, capture_id: str) -> dict[str, Any]:
         return self._request("GET", f"/v2/payments/captures/{_safe_id(capture_id)}")
 
+    def get_refund(self, refund_id: str) -> dict[str, Any]:
+        return self._request("GET", f"/v2/payments/refunds/{_safe_id(refund_id)}")
+
     def refund_capture(
         self, capture_id: str, *, amount: Money | None, request_id: str, note: str | None
     ) -> RefundResult:
@@ -271,16 +297,18 @@ def _safe_id(value: str) -> str:
 
 
 def _classify(resp: httpx.Response, fallback: str) -> PayPalError:
-    debug_id = resp.headers.get("paypal-debug-id")
+    debug_id = _safe_diagnostic(resp.headers.get("paypal-debug-id"))
     issue: str | None = None
     message = fallback
     try:
         body = resp.json()
         details = body.get("details") or []
         if details:
-            issue = details[0].get("issue")
-        message = body.get("message") or body.get("error_description") or fallback
-    except ValueError:
+            issue = _safe_diagnostic(details[0].get("issue"))
+        elif body.get("error") in {"invalid_client", "invalid_request", "unsupported_grant_type"}:
+            issue = str(body["error"])
+        # Provider messages are untrusted and may echo secrets/PII; retain only a local summary.
+    except (ValueError, TypeError, AttributeError):
         pass
     status = resp.status_code
     if status == 401:
@@ -304,3 +332,7 @@ def _classify(resp: httpx.Response, fallback: str) -> PayPalError:
         extra={"data": {"status": status, "kind": kind, "issue": issue, "debug_id": debug_id}},
     )
     return PayPalError(kind, message, status_code=status, debug_id=debug_id, issue=issue)
+
+
+def _safe_diagnostic(value: object) -> str | None:
+    return value if isinstance(value, str) and re.fullmatch(r"[A-Za-z0-9_-]{1,64}", value) else None
