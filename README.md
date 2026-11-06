@@ -1,3 +1,5 @@
+Current release verification: [Final release report](SENTINEL_FINAL_RELEASE_REPORT.md) and [deployment requirements](docs/FINAL_DEPLOYMENT.md), 6 November 2026. Local tests pass; genuine bridge/OAuth/AI and continuous public hosting remain blocked or unverified.
+
 # SENTINEL · AI Payment Trust & Recovery
 
 SENTINEL helps merchants who take payments with PayPal go from a suspicious payment to an
