@@ -1,6 +1,8 @@
 # REVIEW-ONLY proposal. Starter + managed PostgreSQL are billable.
 # Do not apply without hosting access and explicit approval of the provider costs.
 # This branch is local; nothing here deploys, purchases, pushes or enables auto-deploy.
+# Capacity gate: local aggregate PSS was about 516 MiB on 7 November 2026.
+# Do not provision Starter until current plan limits, workload peaks and a quote are reviewed.
 services:
   - type: web
     name: sentinel-api
@@ -23,7 +25,7 @@ services:
       - key: SENTINEL_CORS_ORIGINS
         value: "[]"
       - key: SENTINEL_AUTO_MIGRATE
-        value: "true"
+        value: "false"
       - key: SENTINEL_MIGRATION_TARGET
         value: d105a4143283
       - key: SENTINEL_DATABASE_URL
@@ -46,6 +48,23 @@ services:
         sync: false
       - key: SENTINEL_PAYPAL_WEBHOOK_ID
         sync: false
+      # Owner-selected provider/model. API availability and paid usage are unverified.
+      - key: SENTINEL_AI_PROVIDER
+        value: openai
+      - key: SENTINEL_AI_MODEL
+        value: gpt-6.1-terra
+      - key: SENTINEL_AI_API_KEY
+        sync: false
+      - key: SENTINEL_AI_TIMEOUT_SECONDS
+        value: "45"
+      - key: SENTINEL_AI_REQUEST_LIMIT
+        value: "4"
+      - key: SENTINEL_AI_TOOL_CALLS_LIMIT
+        value: "8"
+      - key: SENTINEL_AI_TOTAL_TOKENS_LIMIT
+        value: "8000"
+      - key: SENTINEL_REFUND_EXECUTION_ENABLED
+        value: "false"
       - key: SENTINEL_SUPABASE_URL
         value: https://cfslzvvdjxstpupkqbpw.supabase.co
       - key: SENTINEL_SUPABASE_SERVICE_ROLE_KEY

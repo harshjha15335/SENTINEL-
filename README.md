@@ -1,4 +1,6 @@
-Current release verification: [Final release report](SENTINEL_FINAL_RELEASE_REPORT.md) and [deployment requirements](docs/FINAL_DEPLOYMENT.md), 6 November 2026. Local tests pass; genuine bridge/OAuth/AI and continuous public hosting remain blocked or unverified.
+Current external release review: [7 November 2026 status and owner actions](docs/PUBLIC_RELEASE_REVIEW.md). Supabase project is INACTIVE; public release remains blocked. Render and OpenAI/gpt-6.1-terra are selected proposals, not verified deployments or paid-use authorization.
+
+Previous release verification: [Final release report](SENTINEL_FINAL_RELEASE_REPORT.md) and [deployment requirements](docs/FINAL_DEPLOYMENT.md), 6 November 2026. Local tests pass; genuine bridge/OAuth/AI and continuous public hosting remain blocked or unverified.
 
 # SENTINEL · AI Payment Trust & Recovery
 

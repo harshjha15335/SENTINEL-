@@ -1,3 +1,5 @@
+Latest review: [7 November external release review](PUBLIC_RELEASE_REVIEW.md). The proposal now defaults SENTINEL_AUTO_MIGRATE=false for an operator-managed upgrade and includes owner-selected OpenAI inputs. Supabase is confirmed INACTIVE; Starter sizing and current prices remain unverified.
+
 # Final deployment proposal — 6 November 2026
 
 SENTINEL is prepared for a single continuously running Docker service and a separate persistent PostgreSQL database. Deployment remains pending hosting access, a reviewed current quote and validation on the chosen host. No resource was deployed or purchased during this review. No current price, available plan capacity, provider authentication or public Python application URL is claimed.
