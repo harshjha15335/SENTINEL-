@@ -1,3 +1,5 @@
+Superseded Supabase availability status: [post-restoration review](POST_RESTORATION_REVIEW.md) confirms ACTIVE_HEALTHY, real RPC/healthy bridge and readiness200. Older INACTIVE/CONNECT observations below are historical. Public deployment and other provider verification remain separate.
+
 # SENTINEL — Public release unblocking review
 
 Verified 07 November 2026, 15:19 IST. **Public release is blocked.** No public Python URL, genuine PayPal delivery, successful sandbox OAuth or real AI inference is claimed. Application code was retained; this round changes only deployment configuration/templates and release documentation.
