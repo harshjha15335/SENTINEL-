@@ -5,14 +5,34 @@ import signal
 import subprocess
 import sys
 import time
+from ipaddress import IPv4Network, IPv6Network, collapse_addresses, ip_network
 
 from app.core.config import get_settings
 
 
+def forwarded_allow_ips(value: str, *, hosted: bool) -> str:
+    if not hosted:
+        return value or "127.0.0.1"
+    try:
+        if not value.strip():
+            raise ValueError("Missing trusted proxy scope")
+        networks = [ip_network(part.strip(), strict=False) for part in value.split(",")]
+        v4 = list(collapse_addresses(n for n in networks if isinstance(n, IPv4Network)))
+        v6 = list(collapse_addresses(n for n in networks if isinstance(n, IPv6Network)))
+        if any(network.prefixlen == 0 for network in v4) or any(
+            network.prefixlen == 0 for network in v6
+        ):
+            raise ValueError("Unrestricted proxy scope")
+    except ValueError as exc:
+        raise SystemExit("Hosted deployment requires explicit bounded proxy IPs or CIDRs") from exc
+    return ",".join(part.strip() for part in value.split(","))
+
+
 def main() -> None:
     settings = get_settings()
-    if settings.hosted_deployment and "*" in os.environ.get("SENTINEL_FORWARDED_ALLOW_IPS", ""):
-        raise SystemExit("Hosted deployment requires explicit trusted proxy addresses")
+    proxies = forwarded_allow_ips(
+        os.environ.get("SENTINEL_FORWARDED_ALLOW_IPS", ""), hosted=settings.hosted_deployment
+    )
     commands = [
         [
             sys.executable,
@@ -25,7 +45,7 @@ def main() -> None:
             os.environ.get("PORT", "8040"),
             "--proxy-headers",
             "--forwarded-allow-ips",
-            os.environ.get("SENTINEL_FORWARDED_ALLOW_IPS", "127.0.0.1"),
+            proxies,
         ],
         [sys.executable, "-m", "app.workers.pipeline"],
     ]

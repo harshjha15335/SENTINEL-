@@ -32,7 +32,7 @@ test("viewer explores next-phase modules without financial or write controls", a
       await expect(page.getByText(/Pending approval/i).first()).toBeVisible();
     }
     if (route === "disputes") {
-      await page.getByRole("button", { name: /Demonstration dispute/ }).click();
+      await page.getByRole("button", { name: /Demonstration dispute/ }).first().click();
       await expect(page.getByRole("heading", { name: "Dispute context" })).toBeVisible();
       await expect(page.getByRole("button", { name: /Create labelled demo|Read-only sandbox sync|Generate response/i })).toHaveCount(0);
     }

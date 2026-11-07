@@ -61,7 +61,9 @@ def resolve_provider(settings: Settings | None = None) -> ProviderSpec | None:
             from pydantic_ai.models.anthropic import AnthropicModel
             from pydantic_ai.providers.anthropic import AnthropicProvider
 
-            return AnthropicModel(model_name, provider=AnthropicProvider(api_key=key))
+            provider = AnthropicProvider(api_key=key)
+            provider.client.max_retries = settings.ai_sdk_max_retries
+            return AnthropicModel(model_name, provider=provider)
 
         return ProviderSpec("anthropic", model_name, build_anthropic)
     if settings.ai_provider is AIProvider.OPENAI:
@@ -70,7 +72,9 @@ def resolve_provider(settings: Settings | None = None) -> ProviderSpec | None:
             from pydantic_ai.models.openai import OpenAIChatModel
             from pydantic_ai.providers.openai import OpenAIProvider
 
-            return OpenAIChatModel(model_name, provider=OpenAIProvider(api_key=key))
+            provider = OpenAIProvider(api_key=key)
+            provider.client.max_retries = settings.ai_sdk_max_retries
+            return OpenAIChatModel(model_name, provider=provider)
 
         return ProviderSpec("openai", model_name, build_openai)
     return None

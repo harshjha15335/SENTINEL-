@@ -38,6 +38,9 @@ def test_denied_tool_attempt_survives_agent_failure(monkeypatch, failure, catego
         ai_tool_calls_limit=24,
         ai_total_tokens_limit=120_000,
         ai_timeout_seconds=0.1 if failure == "timeout" else 10,
+        ai_max_input_bytes=64_000,
+        ai_total_input_bytes_limit=256_000,
+        ai_max_output_tokens=2048,
     )
     monkeypatch.setattr(runner, "get_settings", lambda: settings)
     calls = 0
@@ -112,6 +115,7 @@ def test_execute_persists_denied_attempts_on_failed_run(monkeypatch):
         InvestigationErrorCategory.BUDGET_EXCEEDED, "Budget exceeded."
     )
     failure.denied_calls = [{"name": "refund_payment", "outcome": "denied", "arguments": {}}]
+    failure.usage = {"requests": 1, "input_tokens": 17, "usage_complete": False}
 
     def fail(*args):
         raise failure
@@ -126,3 +130,4 @@ def test_execute_persists_denied_attempts_on_failed_run(monkeypatch):
     assert commits == [InvestigationStatus.RUNNING, InvestigationStatus.FAILED]
     assert run.error_category == InvestigationErrorCategory.BUDGET_EXCEEDED
     assert run.tool_calls == failure.denied_calls
+    assert run.usage == failure.usage

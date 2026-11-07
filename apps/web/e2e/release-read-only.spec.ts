@@ -6,11 +6,12 @@ test("release route audit preserves the read-only judge workflow", async ({ page
   test.setTimeout(180_000);
   const password = process.env.SENTINEL_JUDGE_PASSWORD;
   test.skip(!password, "Private judge credential required for complete route inspection");
+  if (!password) return;
   const errors: string[] = [];
   page.on("pageerror", error => errors.push(error.message));
   await page.goto("/login");
   await page.getByLabel("Work email").fill("judge@sentinel-demo.example");
-  await page.getByLabel("Password").fill(password!);
+  await page.getByLabel("Password").fill(password);
   await page.getByRole("button", { name: "Sign in", exact: true }).click();
   await expect(page.getByRole("heading", { name: "Command Center" })).toBeVisible();
   const response = await page.request.get("/api/v1/demo/scenario");

@@ -19,6 +19,11 @@ dependencies = [
   "numpy==2.5.4",
   "xgboost-cpu==3.4.1",
   "pydantic-ai-slim[anthropic,openai]==2.55.0",
+  # Keep the provider/HTTP stack aligned with the tested retry and adapter behavior.
+  "openai==3.35.1",
+  "anthropic==1.15.0",
+  "httpx2==2.15.1",
+  "httpcore2==2.15.1",
   "python-multipart==0.0.32",
   "pypdf==6.20.0",
   "reportlab==5.0.1",

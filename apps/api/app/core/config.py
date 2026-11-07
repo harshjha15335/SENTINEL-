@@ -41,6 +41,7 @@ class Settings(BaseSettings):
     environment: str = "development"
     hosted_deployment: bool = False
     database_url: str = "postgresql+psycopg://sentinel:sentinel@127.0.0.1:5432/sentinel"
+    database_ssl_root_cert: str | None = None
     cors_origins: list[str] = Field(default_factory=lambda: ["http://localhost:5173"])
     cookie_secure: bool = False
     session_ttl_minutes: int = 8 * 60
@@ -57,10 +58,16 @@ class Settings(BaseSettings):
     ai_provider: AIProvider = AIProvider.NONE
     ai_model: str | None = None
     ai_api_key: SecretStr | None = None
-    ai_timeout_seconds: float = 90.0
-    ai_request_limit: int = 12
-    ai_tool_calls_limit: int = 24
-    ai_total_tokens_limit: int = 120_000
+    ai_timeout_seconds: float = Field(default=90.0, gt=0, allow_inf_nan=False)
+    ai_request_limit: int = Field(default=12, ge=1)
+    ai_tool_calls_limit: int = Field(default=24, ge=1)
+    ai_total_tokens_limit: int = Field(default=120_000, ge=1)
+    ai_sdk_max_retries: int = Field(default=0, ge=0, le=2)
+    ai_max_output_tokens: int = Field(default=2048, ge=1)
+    # Local serialized input bounds include instructions, history and tool/output schemas.
+    # Bytes are a model-independent context safeguard, not an exact token estimate.
+    ai_max_input_bytes: int = Field(default=64_000, ge=1)
+    ai_total_input_bytes_limit: int = Field(default=256_000, ge=1)
     investigation_stale_seconds: int = 600
 
     # Local-only deterministic webhook ingress. Never enabled in production.

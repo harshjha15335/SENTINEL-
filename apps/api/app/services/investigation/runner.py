@@ -11,18 +11,29 @@ import asyncio
 import logging
 import time
 import uuid
+from collections.abc import AsyncIterator
+from contextlib import asynccontextmanager
 from datetime import UTC, datetime, timedelta
 from typing import Any
 
-from pydantic_ai import capture_run_messages
+from pydantic_ai import RunContext, capture_run_messages
 from pydantic_ai.exceptions import (
     ModelAPIError,
     ModelHTTPError,
     UnexpectedModelBehavior,
     UsageLimitExceeded,
 )
-from pydantic_ai.messages import ModelResponse, ToolCallPart
-from pydantic_ai.usage import UsageLimits
+from pydantic_ai.messages import (
+    ModelMessage,
+    ModelMessagesTypeAdapter,
+    ModelResponse,
+    ToolCallPart,
+)
+from pydantic_ai.models import Model, ModelRequestParameters, StreamedResponse
+from pydantic_ai.models.wrapper import WrapperModel
+from pydantic_ai.settings import ModelSettings
+from pydantic_ai.usage import RunUsage, UsageLimits
+from pydantic_core import to_json
 from sqlalchemy import select, update
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
@@ -64,6 +75,7 @@ class InvestigationFailed(Exception):
         self.category = category
         self.message = message
         self.denied_calls: list[dict[str, Any]] = []
+        self.usage: dict[str, Any] = {}
 
 
 def _expire_stale(db: Session, case_id: uuid.UUID) -> None:
@@ -176,6 +188,7 @@ def execute(run_id: uuid.UUID) -> None:
         except InvestigationFailed as exc:
             failure = exc
             denied = exc.denied_calls
+            usage.update(exc.usage)
         except FindingsRejected as exc:
             failure = InvestigationFailed(
                 InvestigationErrorCategory.UNSUPPORTED_ASSERTION, str(exc)
@@ -230,7 +243,13 @@ def _run_agent(
     box: CaseToolbox, spec: ProviderSpec
 ) -> tuple[InvestigationFindings, dict[str, Any], list[dict[str, Any]]]:
     settings = get_settings()
-    agent = build_agent(spec.build())
+    model = _InputBudgetModel(
+        spec.build(),
+        max_input_bytes=settings.ai_max_input_bytes,
+        total_input_bytes_limit=settings.ai_total_input_bytes_limit,
+    )
+    agent = build_agent(model)
+    run_usage = RunUsage()
     deps = AgentDeps(box=box)
     limits = UsageLimits(
         request_limit=settings.ai_request_limit,
@@ -244,7 +263,12 @@ def _run_agent(
                 USER_PROMPT,
                 deps=deps,
                 usage_limits=limits,
-                model_settings={"timeout": settings.ai_timeout_seconds, "temperature": 0.0},
+                usage=run_usage,
+                model_settings={
+                    "timeout": settings.ai_timeout_seconds,
+                    "temperature": 0.0,
+                    "max_tokens": settings.ai_max_output_tokens,
+                },
             ),
             timeout=settings.ai_timeout_seconds,
         )
@@ -253,6 +277,12 @@ def _run_agent(
         with capture_run_messages() as messages:
             try:
                 result = asyncio.run(go())
+                findings: InvestigationFindings = result.output
+                validate_findings(findings, box)  # defence in depth after the output validator
+            except FindingsRejected as exc:
+                raise InvestigationFailed(
+                    InvestigationErrorCategory.UNSUPPORTED_ASSERTION, str(exc)
+                ) from exc
             except TimeoutError as exc:
                 raise InvestigationFailed(
                     InvestigationErrorCategory.PROVIDER_TIMEOUT,
@@ -262,7 +292,7 @@ def _run_agent(
             except UsageLimitExceeded as exc:
                 raise InvestigationFailed(
                     InvestigationErrorCategory.BUDGET_EXCEEDED,
-                    "The investigation exceeded its request, tool-call or token budget.",
+                    "The investigation exceeded its request, tool-call, token or input budget.",
                 ) from exc
             except ModelHTTPError as exc:
                 category = (
@@ -292,19 +322,78 @@ def _run_agent(
         # Preserve attempted mutation/unknown tools even when the agent fails or exhausts
         # its budget; failed runs need the same read-only audit trail as completed runs.
         exc.denied_calls = _denied_calls(box, list(messages))
+        exc.usage = _usage_snapshot(run_usage, model, complete=False)
         raise
     denied = _denied_calls(box, list(messages))
 
-    findings: InvestigationFindings = result.output
-    validate_findings(findings, box)  # defence in depth; the validator already ran
-    u = result.usage
-    usage = {
-        "requests": u.requests,
-        "tool_calls": u.tool_calls,
-        "input_tokens": u.input_tokens,
-        "output_tokens": u.output_tokens,
+    return findings, _usage_snapshot(result.usage, model, complete=True), denied
+
+
+class _InputBudgetModel(WrapperModel):
+    """Bound every nonstreaming investigation request before the provider call.
+
+    Includes the initial prompt, accumulated history, instructions and all schemas. Rejects
+    oversized context without truncating source facts. The bound is on local UTF-8 input,
+    not exact provider tokens or the provider-specific wire representation.
+    """
+
+    def __init__(self, model: Model, *, max_input_bytes: int, total_input_bytes_limit: int):
+        super().__init__(model)
+        self.max_input_bytes = max_input_bytes
+        self.total_input_bytes_limit = total_input_bytes_limit
+        self.input_bytes = 0
+        self.max_request_input_bytes = 0
+        self.requests_attempted = 0
+        self.requests_rejected = 0
+
+    async def request(
+        self,
+        messages: list[ModelMessage],
+        model_settings: ModelSettings | None,
+        model_request_parameters: ModelRequestParameters,
+    ) -> ModelResponse:
+        size = (
+            len(ModelMessagesTypeAdapter.dump_json(messages))
+            + len(to_json(model_request_parameters))
+            + len(to_json(model_settings))
+        )
+        if size > self.max_input_bytes or self.input_bytes + size > self.total_input_bytes_limit:
+            self.requests_rejected += 1
+            raise UsageLimitExceeded("The next request would exceed the local input byte budget.")
+        self.input_bytes += size
+        self.max_request_input_bytes = max(self.max_request_input_bytes, size)
+        self.requests_attempted += 1
+        return await self.wrapped.request(messages, model_settings, model_request_parameters)
+
+    @asynccontextmanager
+    async def request_stream(
+        self,
+        messages: list[ModelMessage],
+        model_settings: ModelSettings | None,
+        model_request_parameters: ModelRequestParameters,
+        run_context: RunContext[Any] | None = None,
+    ) -> AsyncIterator[StreamedResponse]:
+        # Investigations use nonstreaming calls. Fail closed if a future caller attempts
+        # a streaming path, rather than inheriting WrapperModel's unguarded delegation.
+        self.requests_rejected += 1
+        raise UsageLimitExceeded("Streaming investigations are disabled by the input budget guard.")
+        yield  # pragma: no cover — makes this an async context manager; never reached
+
+
+def _usage_snapshot(usage: RunUsage, model: _InputBudgetModel, *, complete: bool) -> dict[str, Any]:
+    return {
+        "requests": usage.requests,
+        "tool_calls": usage.tool_calls,
+        "input_tokens": usage.input_tokens,
+        "output_tokens": usage.output_tokens,
+        "model_requests_attempted": model.requests_attempted,
+        "input_bytes": model.input_bytes,
+        "max_request_input_bytes": model.max_request_input_bytes,
+        "input_requests_rejected": model.requests_rejected,
+        # Missing/failed provider responses may carry no usage; never imply zero billing.
+        "token_usage_available": bool(usage.input_tokens or usage.output_tokens),
+        "usage_complete": complete and bool(usage.input_tokens or usage.output_tokens),
     }
-    return findings, usage, denied
 
 
 def _denied_calls(box: CaseToolbox, messages: list[Any]) -> list[dict[str, Any]]:

@@ -1,13 +1,15 @@
-# REVIEW-ONLY proposal. Starter + managed PostgreSQL are billable.
+# REVIEW-ONLY proposal. Web compute and managed PostgreSQL are billable.
 # Do not apply without hosting access and explicit approval of the provider costs.
 # This branch is local; nothing here deploys, purchases, pushes or enables auto-deploy.
-# Capacity gate: local aggregate PSS was about 516 MiB on 7 November 2026.
-# Do not provision Starter until current plan limits, workload peaks and a quote are reviewed.
+# Capacity gate: verify current quotes for 2 GiB and 4 GiB candidates.
+# Verified isolated 1-CPU cgroup peaks were 597/600 MiB at 2/4 GiB (mock inbox).
+# See docs/RELEASE_FINALIZATION.md. Verify actual plan limits and quote before provisioning.
 services:
   - type: web
     name: sentinel-api
     runtime: docker
-    plan: starter
+    # Intentionally unresolved: fill from an approved current quote, never guess a tier.
+    plan: REVIEW_REQUIRED_2_OR_4_GIB_WEB_PLAN
     branch: feature/reliability-next-phase
     dockerfilePath: ./Dockerfile
     dockerContext: .
@@ -55,6 +57,14 @@ services:
         value: gpt-6.1-terra
       - key: SENTINEL_AI_API_KEY
         sync: false
+      - key: SENTINEL_AI_SDK_MAX_RETRIES
+        value: "0"
+      - key: SENTINEL_AI_MAX_OUTPUT_TOKENS
+        value: "2048"
+      - key: SENTINEL_AI_MAX_INPUT_BYTES
+        value: "64000"
+      - key: SENTINEL_AI_TOTAL_INPUT_BYTES_LIMIT
+        value: "256000"
       - key: SENTINEL_AI_TIMEOUT_SECONDS
         value: "45"
       - key: SENTINEL_AI_REQUEST_LIMIT
@@ -73,7 +83,7 @@ services:
       # SENTINEL_SEED_* passwords here.
 databases:
   - name: sentinel-app-db
-    plan: basic-256mb
+    plan: REVIEW_REQUIRED_DATABASE_PLAN
     region: singapore
     databaseName: sentinel
     user: sentinel

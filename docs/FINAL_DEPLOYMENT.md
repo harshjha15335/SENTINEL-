@@ -1,3 +1,5 @@
+Latest deployment controls: [release finalization](RELEASE_FINALIZATION.md) and [controlled runbook](RELEASE_RUNBOOK.md). Hosted DB/migrations force verify-full, bounded proxy scopes are required, SDK retries default0 and unapproved plan names are intentionally unresolved.
+
 Superseded Supabase availability status: [post-restoration review](POST_RESTORATION_REVIEW.md) confirms ACTIVE_HEALTHY, real RPC/healthy bridge and readiness200. Older INACTIVE/CONNECT observations below are historical. Public deployment and other provider verification remain separate.
 
 Latest review: [7 November external release review](PUBLIC_RELEASE_REVIEW.md). The proposal now defaults SENTINEL_AUTO_MIGRATE=false for an operator-managed upgrade and includes owner-selected OpenAI inputs. Supabase is confirmed INACTIVE; Starter sizing and current prices remain unverified.
