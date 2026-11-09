@@ -4,6 +4,7 @@ import app.models  # noqa: F401  (registers tables)
 from alembic import context
 from app.core.config import get_settings
 from app.db.base import Base
+from app.db.session import database_connect_args
 
 target_metadata = Base.metadata
 
@@ -15,7 +16,7 @@ def run() -> None:
         with context.begin_transaction():
             context.run_migrations()
         return
-    engine = create_engine(url)
+    engine = create_engine(url, connect_args=database_connect_args(get_settings()))
     with engine.connect() as conn:
         context.configure(connection=conn, target_metadata=target_metadata, compare_type=True)
         with context.begin_transaction():

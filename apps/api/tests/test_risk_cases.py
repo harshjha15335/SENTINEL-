@@ -166,6 +166,13 @@ def test_model_card_reports_training_metadata(app_client: TestClient, tenant: Te
     assert card["thresholds"] == meta["thresholds"]
     assert card["training_data"].startswith("SYNTHETIC_DEMO")
     assert len(card["features"]) == 12
+    # Review capacity: recorded 9.4% test flag rate vs the 8% validation assumption.
+    cap = card["review_capacity"]
+    assert cap["capacity_share"] == meta["cost_assumptions"]["review_capacity_share"]
+    assert cap["test_flag_rate"] == meta["test_metrics"]["flag_rate"]
+    assert cap["exceeded"] is True
+    assert cap["policy_mode"] == "SHADOW"
+    assert "not re-tuned" in cap["message"]
 
 
 def test_case_workflow_and_audit(

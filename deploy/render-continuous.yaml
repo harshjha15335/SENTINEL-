@@ -1,0 +1,89 @@
+# REVIEW-ONLY proposal. Web compute and managed PostgreSQL are billable.
+# Do not apply without hosting access and explicit approval of the provider costs.
+# This branch is local; nothing here deploys, purchases, pushes or enables auto-deploy.
+# Capacity gate: verify current quotes for 2 GiB and 4 GiB candidates.
+# Verified isolated 1-CPU cgroup peaks were 597/600 MiB at 2/4 GiB (mock inbox).
+# See docs/RELEASE_FINALIZATION.md. Verify actual plan limits and quote before provisioning.
+services:
+  - type: web
+    name: sentinel-api
+    runtime: docker
+    # Intentionally unresolved: fill from an approved current quote, never guess a tier.
+    plan: REVIEW_REQUIRED_2_OR_4_GIB_WEB_PLAN
+    branch: feature/reliability-next-phase
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    healthCheckPath: /api/v1/ready
+    # The pipeline holds one PostgreSQL advisory lock; see docs/FINAL_DEPLOYMENT.md for rollouts.
+    numInstances: 1
+    autoDeploy: false
+    region: singapore
+    envVars:
+      - key: SENTINEL_HOSTED_DEPLOYMENT
+        value: "true"
+      # Inspect the actual ingress proxy; never use wildcard trust.
+      - key: SENTINEL_FORWARDED_ALLOW_IPS
+        sync: false
+      - key: SENTINEL_CORS_ORIGINS
+        value: "[]"
+      - key: SENTINEL_AUTO_MIGRATE
+        value: "false"
+      - key: SENTINEL_MIGRATION_TARGET
+        value: d105a4143283
+      - key: SENTINEL_DATABASE_URL
+        fromDatabase:
+          name: sentinel-app-db
+          property: connectionString
+      - key: SENTINEL_ENVIRONMENT
+        value: production
+      - key: SENTINEL_STORAGE_BACKEND
+        value: database
+      - key: SENTINEL_COOKIE_SECURE
+        value: "true"
+      - key: SENTINEL_REQUIRE_WORKERS_READY
+        value: "true"
+      - key: SENTINEL_PAYPAL_MODE
+        value: sandbox
+      - key: SENTINEL_PAYPAL_CLIENT_ID
+        sync: false
+      - key: SENTINEL_PAYPAL_CLIENT_SECRET
+        sync: false
+      - key: SENTINEL_PAYPAL_WEBHOOK_ID
+        sync: false
+      # Owner-selected provider/model. API availability and paid usage are unverified.
+      - key: SENTINEL_AI_PROVIDER
+        value: google
+      - key: SENTINEL_AI_MODEL
+        value: gemini-3.1-flash-lite
+      - key: SENTINEL_AI_API_KEY
+        sync: false
+      - key: SENTINEL_AI_SDK_MAX_RETRIES
+        value: "0"
+      - key: SENTINEL_AI_MAX_OUTPUT_TOKENS
+        value: "2048"
+      - key: SENTINEL_AI_MAX_INPUT_BYTES
+        value: "64000"
+      - key: SENTINEL_AI_TOTAL_INPUT_BYTES_LIMIT
+        value: "256000"
+      - key: SENTINEL_AI_TIMEOUT_SECONDS
+        value: "45"
+      - key: SENTINEL_AI_REQUEST_LIMIT
+        value: "4"
+      - key: SENTINEL_AI_TOOL_CALLS_LIMIT
+        value: "8"
+      - key: SENTINEL_AI_TOTAL_TOKENS_LIMIT
+        value: "8000"
+      - key: SENTINEL_REFUND_EXECUTION_ENABLED
+        value: "false"
+      - key: SENTINEL_SUPABASE_URL
+        value: https://cfslzvvdjxstpupkqbpw.supabase.co
+      - key: SENTINEL_SUPABASE_SERVICE_ROLE_KEY
+        sync: false
+      # Bootstrap accounts once with a private one-off command. Do not retain
+      # SENTINEL_SEED_* passwords here.
+databases:
+  - name: sentinel-app-db
+    plan: REVIEW_REQUIRED_DATABASE_PLAN
+    region: singapore
+    databaseName: sentinel
+    user: sentinel

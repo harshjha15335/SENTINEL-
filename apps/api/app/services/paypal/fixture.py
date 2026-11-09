@@ -89,6 +89,9 @@ class FixturePayPalGateway:
             raise PayPalError(PayPalErrorKind.NOT_FOUND, "Simulated capture not found")
         return {"id": c["id"], "status": c["status"], "simulated": True}
 
+    def get_refund(self, refund_id: str) -> dict[str, Any]:
+        raise PayPalError(PayPalErrorKind.NOT_FOUND, "No stored simulated provider refund")
+
     def refund_capture(
         self, capture_id: str, *, amount: Money | None, request_id: str, note: str | None
     ) -> RefundResult:

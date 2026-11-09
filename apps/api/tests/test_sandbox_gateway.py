@@ -161,3 +161,114 @@ def test_provider_failure_records_state(sandbox_client, tenant: Tenant) -> None:
     assert resp.json()["error"]["details"]["kind"] == "UNPROCESSABLE"
     detail = client.get(f"/api/v1/transactions/{order['transaction_id']}").json()
     assert detail["status"] == "CAPTURE_FAILED"
+
+
+def test_short_lived_token_never_outlives_provider_expiry(monkeypatch):
+    import httpx
+
+    from app.services.paypal import sandbox
+
+    clock = [100.0]
+    monkeypatch.setattr(sandbox.time, "monotonic", lambda: clock[0])
+    calls = []
+
+    def token(request):
+        calls.append(request)
+        return httpx.Response(200, json={"access_token": "short-lived", "expires_in": 5})
+
+    gw = SandboxPayPalGateway("cid", "secret", transport=httpx.MockTransport(token))
+    gw.check_credentials()
+    clock[0] = 106
+    gw.check_credentials()
+    assert len(calls) == 2
+
+
+def test_oauth_untrusted_error_message_is_never_returned():
+    import httpx
+
+    def fail(request):
+        return httpx.Response(
+            401,
+            json={"error": "invalid_client", "error_description": "secret was echoed"},
+            headers={"paypal-debug-id": "safe123"},
+        )
+
+    gw = SandboxPayPalGateway("cid", "secret", transport=httpx.MockTransport(fail))
+    with pytest.raises(PayPalError) as exc:
+        gw.check_credentials()
+    assert exc.value.kind == PayPalErrorKind.AUTHENTICATION
+    assert exc.value.issue == "invalid_client"
+    assert "secret" not in str(exc.value)
+
+
+@pytest.mark.parametrize(
+    "body", [[], {}, {"access_token": "x", "expires_in": 0}, {"access_token": "", "expires_in": 10}]
+)
+def test_invalid_oauth_response_rejected(body):
+    import httpx
+
+    gw = SandboxPayPalGateway(
+        "cid", "secret", transport=httpx.MockTransport(lambda r: httpx.Response(200, json=body))
+    )
+    with pytest.raises(PayPalError, match="Invalid OAuth response"):
+        gw.check_credentials()
+
+
+def test_credential_rotation_invalidates_cached_token():
+    fake = FakePayPal()
+    gw = _gateway(fake)
+    gw.check_credentials()
+    gw.rotate_credentials("new-client", "new-secret")
+    gw.check_credentials()
+    assert fake.token_calls == 2
+
+
+def test_fixture_status_never_claims_successful_provider_authentication(
+    app_client, tenant, monkeypatch
+):
+    from app.api.v1 import paypal
+
+    def forbidden():
+        raise AssertionError("Offline status must not check provider credentials")
+
+    monkeypatch.setattr(paypal, "get_gateway", forbidden)
+    login(app_client, tenant.users[Role.VIEWER].email)
+    response = app_client.get("/api/v1/paypal/status")
+    assert response.status_code == 200
+    assert response.json()["mode"] == "fixture"
+    assert response.json()["token_check"] == "not_attempted"
+
+
+def test_environment_padding_is_removed_before_basic_auth_and_rotation():
+    import base64
+
+    import httpx
+
+    auth_headers = []
+
+    def token(request):
+        auth_headers.append(request.headers["authorization"])
+        return httpx.Response(200, json={"access_token": "offline-token", "expires_in": 60})
+
+    gw = SandboxPayPalGateway(" cid\n", "\tsecret ", transport=httpx.MockTransport(token))
+    gw.check_credentials()
+    gw.rotate_credentials(" next-client ", "next-secret\n")
+    gw.check_credentials()
+    assert auth_headers == [
+        "Basic " + base64.b64encode(pair).decode()
+        for pair in [b"cid:secret", b"next-client:next-secret"]
+    ]
+
+
+@pytest.mark.parametrize(
+    "client_id,secret", [(" ", "secret"), ("cid", "\n"), ("ci d", "secret"), ("cid", "sec\nret")]
+)
+def test_invalid_credential_shape_fails_before_network(client_id, secret):
+    import httpx
+
+    def forbidden(request):
+        raise AssertionError("Invalid credentials must never reach the network")
+
+    with pytest.raises(PayPalError) as exc:
+        SandboxPayPalGateway(client_id, secret, transport=httpx.MockTransport(forbidden))
+    assert exc.value.kind is PayPalErrorKind.NOT_CONFIGURED

@@ -1,5 +1,13 @@
 # Deployment
 
+## Latest next-phase implementation — 6 November 2026
+
+The new [technical report](NEXT_PHASE_REPORT.md) supersedes older feature-status and environment observations below. Guarded refunds, dispute preparation, validation-only Policy Lab, scoped monitoring/network views and a refreshed judge scenario are now implemented locally. Actual hosting, genuine PayPal/AI and remote bridge access remain separately blocked/unverified. See [setup](NEXT_PHASE_SETUP.md), [runbook](NEXT_PHASE_RUNBOOK.md), [architecture](NEXT_PHASE_ARCHITECTURE.md) and [demo](NEXT_PHASE_DEMO.md). Earlier dated inventories remain historical.
+
+## Session 8 operational status — 22 October 2026
+
+The current recovered branch adds supervised Supabase HTTP ingestion, durable scoring, exact-schema readiness, an administrator operations page and a private read-only judge scenario. The receiver is public; the Python application is still workspace-local. Certificate-host reachability now works; sandbox OAuth authentication failed. Real PayPal payments remain deliberately untested, and the real-AI test remains credential-gated. See [SESSION_8_REPORT.md](SESSION_8_REPORT.md), [HOSTING_READINESS.md](HOSTING_READINESS.md) and [PROVIDER_VERIFICATION.md](PROVIDER_VERIFICATION.md) for current evidence. Older dated results below are historical, not current deployment claims.
+
 SENTINEL ships as **one container**. FastAPI serves the API under `/api` and the built React app on every other path, all from the same origin. Session cookies and CSRF therefore work without any cross-site setup. The image is the root `Dockerfile`.
 
 The full app needs its API and PostgreSQL, so options 1 to 3 run the container. GitHub Pages can host only static files, so option 4 is a read-only snapshot. All four start from this GitHub repository.
@@ -88,6 +96,8 @@ The same build also runs on hosts that serve a single page and cannot handle dee
 | `SENTINEL_DEMO_AUTOLOAD` | `true` loads the SYNTHETIC_DEMO scenario once. |
 | `SENTINEL_COOKIE_SECURE` | `true` behind HTTPS. |
 | `SENTINEL_WEB_DIST` | Path of the built web app. The image sets it to `/app/web`. |
+| `SENTINEL_STORAGE_BACKEND` | Where evidence uploads and packets are stored. The image sets `database`, because container disks are ephemeral and the app directory is read-only for the runtime user. |
+| `SENTINEL_AI_PROVIDER`, `SENTINEL_AI_API_KEY`, `SENTINEL_AI_MODEL` | Investigation agent (`anthropic` or `openai`). Without them, investigations produce the labelled deterministic summary. |
 | `PORT` | Listen port, default 8000. |
 
 ## Switching a deployment to the PayPal sandbox
@@ -97,3 +107,9 @@ Set `SENTINEL_PAYPAL_MODE=sandbox` together with the client id and secret, then 
 - The browser bundle contains no secrets.
 - HTML responses carry a Content-Security-Policy. PayPal's sandbox SDK is the only allowed third party. The Playwright suite fails if the app triggers a CSP violation.
 - The login rate limit is per process and uses the client address from the proxy's `X-Forwarded-For` header (`--proxy-headers`). Run a single instance, or move the limiter to a shared store first.
+
+## Current supervised deployment contract
+
+See HOSTING_READINESS.md before deploying. The paid proposal is `deploy/render-continuous.yaml`; it has not been applied. `SENTINEL_HOSTED_DEPLOYMENT=true` enables fail-closed hosted security checks. `SENTINEL_AUTO_MIGRATE` controls startup upgrades and `SENTINEL_MIGRATION_TARGET` pins the reviewed target (currently `8ab7245e13c0`). `check-schema` must pass before workers start. No automatic downgrade exists. `SENTINEL_REQUIRE_WORKERS_READY=true` requires both pipeline and bridge; do not enable that full integration contract on a deployment intentionally omitting the bridge.
+
+Create the optional isolated viewer scenario using `python -m app.cli judge-demo` after securely setting `SENTINEL_JUDGE_PASSWORD` (at least 16 characters). It creates a separate DEMO tenant with synthetic payments, a deterministic investigation, a labelled demo attachment, packet and pending internal approval. Sign in privately and open `/demo`. Repeated provisioning retains existing material/password; it does not rotate credentials or clear real workspaces.

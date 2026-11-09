@@ -27,6 +27,15 @@ const CheckoutPage = lazy(() => import("@/features/checkout/CheckoutPage").then(
 const ROUTER_BASE = import.meta.env.BASE_URL.replace(/\/$/, "") || "/";
 // Hosts that serve one page and cannot rewrite paths (an embedded artifact) keep the route in the hash.
 const HASH_ROUTES = import.meta.env.VITE_ROUTER === "hash";
+const OperationsPage = lazy(() => import("@/features/operations/OperationsPage").then(m => ({ default: m.OperationsPage })));
+
+const DemoGuidePage = lazy(() => import("@/features/operations/DemoGuidePage").then(m => ({ default: m.DemoGuidePage })));
+
+const RefundsPage = lazy(() => import("@/features/refunds/RefundsPage").then(m => ({ default: m.RefundsPage })));
+const DisputesPage = lazy(() => import("@/features/disputes/DisputesPage").then(m => ({ default: m.DisputesPage })));
+const PolicyLabPage = lazy(() => import("@/features/policy/PolicyLabPage").then(m => ({ default: m.PolicyLabPage })));
+const MonitoringPage = lazy(() => import("@/features/monitoring/MonitoringPage").then(m => ({ default: m.MonitoringPage })));
+const NetworkPage = lazy(() => import("@/features/network/NetworkPage").then(m => ({ default: m.NetworkPage })));
 
 const fallback = <Skeleton className="h-64" />;
 
@@ -81,6 +90,13 @@ export function AppRoutes() {
         <Route path="cases/:id" element={<Suspense fallback={fallback}><CaseDetailPage /></Suspense>} />
         <Route path="model" element={<Suspense fallback={fallback}><ModelPage /></Suspense>} />
         <Route path="checkout" element={<Suspense fallback={fallback}><CheckoutPage /></Suspense>} />
+        <Route path="demo" element={<Suspense fallback={fallback}><DemoGuidePage /></Suspense>} />
+        <Route path="operations" element={<Suspense fallback={fallback}><OperationsPage /></Suspense>} />
+        <Route path="refunds" element={<Suspense fallback={fallback}><RefundsPage /></Suspense>} />
+        <Route path="disputes" element={<Suspense fallback={fallback}><DisputesPage /></Suspense>} />
+        <Route path="policy" element={<Suspense fallback={fallback}><PolicyLabPage /></Suspense>} />
+        <Route path="monitoring" element={<Suspense fallback={fallback}><MonitoringPage /></Suspense>} />
+        <Route path="network" element={<Suspense fallback={fallback}><NetworkPage /></Suspense>} />
         <Route path="settings" element={<SettingsPage />} />
         <Route path="*" element={<NotFoundPage />} />
       </Route>

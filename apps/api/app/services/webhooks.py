@@ -15,7 +15,7 @@ import logging
 import threading
 import zlib
 from collections.abc import Callable
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 from typing import Any
 from urllib.parse import urlparse
 
@@ -25,9 +25,11 @@ from cryptography.exceptions import InvalidSignature
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.asymmetric import padding, rsa
 from sqlalchemy import or_, select
+from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
+from app.core.config import get_settings
 from app.models import PaymentEvent, RawPayload, Transaction
 from app.models.enums import (
     DataOrigin,
@@ -54,13 +56,22 @@ class WebhookVerificationError(Exception):
     pass
 
 
+class WebhookVerificationUnavailable(WebhookVerificationError):
+    """A certificate fetch could not complete; provider delivery should retry."""
+
+
 CertFetcher = Callable[[str], bytes]
 
 
 def _default_fetch(url: str) -> bytes:
-    resp = httpx.get(url, timeout=10.0, follow_redirects=False)
-    resp.raise_for_status()
-    return resp.content
+    body = bytearray()
+    with httpx.stream("GET", url, timeout=10.0, follow_redirects=False) as resp:
+        resp.raise_for_status()
+        for chunk in resp.iter_bytes(chunk_size=4096):
+            body.extend(chunk)
+            if len(body) > 64 * 1024:
+                raise WebhookVerificationError("Certificate response exceeds size limit")
+    return bytes(body)
 
 
 class SignatureVerifier:
@@ -71,18 +82,41 @@ class SignatureVerifier:
 
     def _certificate(self, url: str) -> x509.Certificate:
         parsed = urlparse(url)
-        if parsed.scheme != "https" or parsed.hostname not in _ALLOWED_CERT_HOSTS:
+        try:
+            valid_port = parsed.port in (None, 443)
+        except ValueError:
+            valid_port = False
+        if (
+            parsed.scheme != "https"
+            or parsed.hostname not in _ALLOWED_CERT_HOSTS
+            or parsed.username
+            or parsed.password
+            or not valid_port
+            or parsed.query
+            or parsed.fragment
+            or not parsed.path.startswith("/v1/notifications/certs/")
+            or ".." in parsed.path
+            or "%" in parsed.path
+        ):
             raise WebhookVerificationError("Certificate URL is not a PayPal HTTPS host")
         with self._lock:
             cert = self._cache.get(url)
         if cert is None:
             try:
                 cert = x509.load_pem_x509_certificate(self._fetch(url))
+            except httpx.RequestError as exc:
+                raise WebhookVerificationUnavailable("Certificate service unavailable") from exc
+            except httpx.HTTPStatusError as exc:
+                # A blocked proxy or unavailable certificate endpoint must retry;
+                # only a cryptographically invalid signature is definitive rejection.
+                raise WebhookVerificationUnavailable("Certificate service unavailable") from exc
             except Exception as exc:
                 raise WebhookVerificationError(
                     f"Could not load certificate: {type(exc).__name__}"
                 ) from exc
             with self._lock:
+                if len(self._cache) >= 128:
+                    self._cache.pop(next(iter(self._cache)))
                 self._cache[url] = cert
         now = datetime.now(UTC)
         if not cert.not_valid_before_utc <= now <= cert.not_valid_after_utc:
@@ -147,30 +181,43 @@ def classify_verification(
 
 
 def store_event(
-    db: Session, raw_body: bytes, verification: EventVerification, transmission_id: str | None
+    db: Session,
+    raw_body: bytes,
+    verification: EventVerification,
+    transmission_id: str | None,
+    signature_headers: dict[str, str] | None = None,
 ) -> tuple[PaymentEvent, bool]:
     """Persist the event exactly once. Returns (event, created)."""
     try:
         payload = json.loads(raw_body)
     except ValueError as exc:
         raise WebhookVerificationError("Body is not JSON") from exc
+    if not isinstance(payload, dict):
+        raise WebhookVerificationError("Body must be an object")
     event_id = str(payload.get("id") or "")
     event_type = str(payload.get("event_type") or "")
     if not event_id or not event_type:
         raise WebhookVerificationError("Event id or type missing")
 
-    existing = db.scalar(select(PaymentEvent).where(PaymentEvent.provider_event_id == event_id))
+    sha = hashlib.sha256(raw_body).hexdigest()
+    existing = db.scalar(
+        select(PaymentEvent).where(PaymentEvent.provider_event_id == event_id).with_for_update()
+    )
     if existing is not None:
+        if existing.payload_sha256 != sha or existing.verification_status is not verification:
+            db.rollback()
+            raise WebhookVerificationError("Event id conflicts with a stored delivery")
         existing.delivery_count += 1
         db.commit()
         return existing, False
 
-    sha = hashlib.sha256(raw_body).hexdigest()
+    db.execute(
+        insert(RawPayload)
+        .values(sha256=sha, body=raw_body)
+        .on_conflict_do_nothing(index_elements=["sha256"])
+    )
     raw = db.scalar(select(RawPayload).where(RawPayload.sha256 == sha))
-    if raw is None:
-        raw = RawPayload(sha256=sha, body=raw_body)
-        db.add(raw)
-        db.flush()
+    assert raw is not None
     resource = payload.get("resource") or {}
     event = PaymentEvent(
         provider_event_id=event_id,
@@ -179,6 +226,7 @@ def store_event(
         payload_sha256=sha,
         payload_reference=raw.id,
         transmission_id=transmission_id,
+        signature_headers=signature_headers or {},
         verification_status=verification,
         processing_status=EventProcessing.RECEIVED,
         data_origin=(
@@ -195,6 +243,8 @@ def store_event(
         db.rollback()
         dup = db.scalar(select(PaymentEvent).where(PaymentEvent.provider_event_id == event_id))
         assert dup is not None
+        if dup.payload_sha256 != sha or dup.verification_status is not verification:
+            raise WebhookVerificationError("Event id conflicts with a stored delivery") from None
         return dup, False
     return event, True
 
@@ -227,6 +277,11 @@ def process_event(db: Session, event_id: Any) -> PaymentEvent:
     if event.processing_status in (EventProcessing.PROCESSED, EventProcessing.IGNORED):
         db.rollback()
         return event
+    if event.processing_status is EventProcessing.FAILED and (
+        event.attempts >= MAX_PROCESSING_ATTEMPTS or event.next_attempt_at > datetime.now(UTC)
+    ):
+        db.rollback()
+        return event
     event.attempts += 1
     try:
         raw = db.get(RawPayload, event.payload_reference)
@@ -243,10 +298,11 @@ def process_event(db: Session, event_id: Any) -> PaymentEvent:
         assert event is not None
         event.attempts += 1
         event.processing_status = EventProcessing.FAILED
-        event.error_reason = f"{type(exc).__name__}: {exc}"[:500]
-        log.exception(
-            "webhook processing failed", extra={"data": {"event": event.provider_event_id}}
+        event.error_reason = type(exc).__name__
+        event.next_attempt_at = datetime.now(UTC) + timedelta(
+            seconds=min(300, 5 * 2**event.attempts)
         )
+        log.warning("webhook processing failed", extra={"data": {"category": type(exc).__name__}})
     db.commit()
     return event
 
@@ -284,7 +340,14 @@ def _apply(db: Session, event: PaymentEvent, payload: dict[str, Any]) -> EventPr
 
     event.transaction_id = txn.id
     event.merchant_id = txn.merchant_id
-    if (
+    fixture_scope = (
+        get_settings().allow_webhook_fixtures
+        and get_settings().environment != "production"
+        and event.provider_event_id.startswith("FIXTURE-")
+        and event.data_origin is DataOrigin.SIMULATED
+        and txn.data_origin is DataOrigin.SIMULATED
+    )
+    if not fixture_scope and (
         event.data_origin is not DataOrigin.LIVE_SANDBOX
         or txn.data_origin is not DataOrigin.LIVE_SANDBOX
     ):
@@ -293,6 +356,21 @@ def _apply(db: Session, event: PaymentEvent, payload: dict[str, Any]) -> EventPr
         return EventProcessing.IGNORED
 
     if target is not None:
+        if target is TransactionStatus.CAPTURED:
+            amount = resource.get("amount") or {}
+            if amount:
+                money = Money.from_paypal(str(amount["value"]), str(amount["currency_code"]))
+                if money.amount_minor != txn.amount_minor or money.currency != txn.currency:
+                    raise ValueError("Capture amount or currency does not match transaction")
+            txn.occurred_at = (
+                txn.occurred_at
+                or _parse_time(resource.get("create_time"))
+                or event.occurred_at
+                or datetime.now(UTC)
+            )
+            from app.services.risk.jobs import enqueue
+
+            enqueue(db, txn.id)
         if (
             capture_id
             and not txn.paypal_capture_id
@@ -349,6 +427,7 @@ def pending_event_ids(db: Session, limit: int = 50) -> list[Any]:
         .where(
             PaymentEvent.processing_status.in_([EventProcessing.RECEIVED, EventProcessing.FAILED]),
             PaymentEvent.attempts < MAX_PROCESSING_ATTEMPTS,
+            PaymentEvent.next_attempt_at <= datetime.now(UTC),
         )
         .order_by(PaymentEvent.received_at)
         .limit(limit)

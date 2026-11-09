@@ -30,15 +30,16 @@ def status(_: Principal = Depends(any_member)) -> PayPalStatusOut:
         if settings.paypal_mode is PayPalMode.FIXTURE
         else DataOrigin.LIVE_SANDBOX
     )
-    try:
-        gateway = get_gateway()
-        gateway.check_credentials()
-        check = "ok"
-    except GatewayNotConfigured as exc:
-        token_error = str(exc)
-    except PayPalError as exc:
-        check = "failed"
-        token_error = f"{exc.kind.value}: {exc.message}"
+    if settings.paypal_mode is PayPalMode.SANDBOX:
+        try:
+            gateway = get_gateway()
+            gateway.check_credentials()
+            check = "ok"
+        except GatewayNotConfigured as exc:
+            token_error = str(exc)
+        except PayPalError as exc:
+            check = "failed"
+            token_error = f"{exc.kind.value}: {exc.message}"
     return PayPalStatusOut(
         mode=settings.paypal_mode.value,
         credentials_configured=settings.paypal_credentials_configured,

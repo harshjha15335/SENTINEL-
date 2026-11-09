@@ -13,11 +13,11 @@ import argparse
 import os
 import sys
 
-from sqlalchemy import select
+from sqlalchemy import delete, select
 
 from app.auth.passwords import hash_password
 from app.db.session import get_sessionmaker
-from app.models import Merchant, Product, User
+from app.models import Merchant, Product, User, UserSession
 from app.models.enums import MerchantEnvironment, Role
 
 DEMO_MERCHANT = "Northwind Supply Co. (sandbox)"
@@ -35,7 +35,7 @@ DEMO_PRODUCTS = [
 ]
 
 
-def seed() -> None:
+def seed(*, rotate_passwords: bool = False) -> None:
     users = {
         Role.ADMIN: ("admin@northwind.example", os.environ.get("SENTINEL_SEED_ADMIN_PASSWORD")),
         Role.ANALYST: (
@@ -65,8 +65,11 @@ def seed() -> None:
                         role=role,
                     )
                 )
-            else:
+            elif user.merchant_id != merchant.id or user.role != role:
+                sys.exit("Seed account conflicts with an existing merchant or role")
+            elif rotate_passwords:
                 user.password_hash = hash_password(password)
+                db.execute(delete(UserSession).where(UserSession.user_id == user.id))
         for sku, name, desc, price, cur in DEMO_PRODUCTS:
             exists = db.scalar(
                 select(Product).where(Product.merchant_id == merchant.id, Product.sku == sku)
@@ -114,14 +117,46 @@ def demo_load(seed_value: int, *, if_empty: bool = False) -> None:
 
 def main() -> None:
     parser = argparse.ArgumentParser(prog="sentinel")
-    parser.add_argument("command", choices=["seed", "demo-load"])
+    parser.add_argument("command", choices=["seed", "demo-load", "judge-demo", "check-schema"])
     parser.add_argument("--seed", type=int, default=2026, help="scenario seed for demo-load")
+    parser.add_argument(
+        "--rotate-passwords",
+        action="store_true",
+        help="seed: explicitly replace existing passwords and revoke their sessions",
+    )
     parser.add_argument(
         "--if-empty", action="store_true", help="demo-load: skip when synthetic data exists"
     )
+    parser.add_argument(
+        "--fresh",
+        action="store_true",
+        help="judge-demo: append today's versioned SIMULATED scenario; preserve historical cases",
+    )
     args = parser.parse_args()
+    if args.fresh and args.command != "judge-demo":
+        parser.error("--fresh is supported only for judge-demo")
+    if args.rotate_passwords and args.command != "seed":
+        parser.error("--rotate-passwords is supported only for seed")
     if args.command == "seed":
-        seed()
+        seed(rotate_passwords=args.rotate_passwords)
+    elif args.command == "check-schema":
+        from sqlalchemy import text
+
+        from app.services.readiness import expected_revision
+
+        with get_sessionmaker()() as db:
+            versions = set(db.scalars(text("select version_num from alembic_version")))
+            if versions != {expected_revision()}:
+                sys.exit("Application schema does not match the reviewed migration head")
+        print("Application schema matches reviewed head")
+    elif args.command == "judge-demo":
+        import json
+
+        from app.services.demo.judge import prepare
+
+        password = os.environ.get("SENTINEL_JUDGE_PASSWORD", "")
+        with get_sessionmaker()() as db:
+            print(json.dumps(prepare(db, password=password, fresh=args.fresh)))
     elif args.command == "demo-load":
         demo_load(args.seed, if_empty=args.if_empty)
 

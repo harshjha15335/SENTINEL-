@@ -50,3 +50,4 @@ def configure_logging(level: str) -> None:
     root.setLevel(level)
     # httpx logs full URLs at INFO; keep it quiet so query strings never leak.
     logging.getLogger("httpx").setLevel(logging.WARNING)
+    logging.getLogger("httpx2").setLevel(logging.WARNING)

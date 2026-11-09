@@ -1,17 +1,34 @@
+Latest release candidate: [Operational finalization](docs/RELEASE_FINALIZATION.md). AI budget/SDK and hosted TLS/proxy controls are locally tested; Supabase remains healthy. External PayPal/OpenAI verification and authorized public hosting remain pending.
+
+Previous verified status: [Post-restoration verification](docs/POST_RESTORATION_REVIEW.md),7 November2026. Supabase is ACTIVE_HEALTHY, real RPC and bridge polling work, and required readiness returns200. PayPal OAuth, real AI and public hosting remain unverified or blocked.
+
+Previous external release review: [7 November 2026 status and owner actions](docs/PUBLIC_RELEASE_REVIEW.md). Supabase project is INACTIVE; public release remains blocked. Render and OpenAI/gpt-6.1-terra are selected proposals, not verified deployments or paid-use authorization.
+
+Previous release verification: [Final release report](SENTINEL_FINAL_RELEASE_REPORT.md) and [deployment requirements](docs/FINAL_DEPLOYMENT.md), 6 November 2026. Local tests pass; genuine bridge/OAuth/AI and continuous public hosting remain blocked or unverified.
+
 # SENTINEL · AI Payment Trust & Recovery
 
 SENTINEL helps merchants who take payments with PayPal go from a suspicious payment to an
-explainable, evidence-backed decision. It records genuine PayPal sandbox payments and events,
-scores risk with an explainable model, will investigate with grounded AI tools, and routes any
+explainable, evidence-backed decision. It records PayPal sandbox payments and events, scores risk
+with an explainable model, investigates cases with grounded, read-only AI tools, and routes any
 financial action through human approval.
 
-> **Status (2026-10-11):** Payments, verified webhooks, the transaction workspace, the risk model
-> with SHAP explanations, and the review queue are built and tested. The risk model is trained on
-> synthetic data only. No live PayPal sandbox payment has run yet because sandbox credentials
-> have not been configured. The investigation agent, evidence, graph, disputes and policy lab
-> are not built yet. See [`docs/IMPLEMENTATION_STATUS.md`](docs/IMPLEMENTATION_STATUS.md).
+> **Development status (6 November 2026):** the recovered branch now includes a guarded
+> refund ledger/executor, dispute preparation, validation-only Policy Lab, scoped risk
+> monitoring, payer-reference network exploration and a refreshed private judge scenario.
+> Financial execution is disabled by default; dispute submission is disabled. The existing
+> investigation/evidence/approval system is extended, not replaced.
+>
+> The Python application is still local. The Supabase bridge is blocked by proxy CONNECT
+> denial, sandbox OAuth returns `401 invalid_client`, and real AI remains unverified.
+> Readiness correctly remains 503 while the required bridge is unhealthy. Fixture status
+> never claims successful provider OAuth. Synthetic benchmark precision remains 28.2%.
+>
+> [Technical completion report](docs/NEXT_PHASE_REPORT.md) · [Setup](docs/NEXT_PHASE_SETUP.md) · [Runbook](docs/NEXT_PHASE_RUNBOOK.md) · [Judge guide](docs/NEXT_PHASE_DEMO.md)
 
-## Launch from GitHub
+## Historical demo launch options
+
+Public `main` and images built from it do not contain the recovered local branch (`feature/reliability-next-phase`, not yet published). These links are not deployments of the Session 8 implementation. The old free Render blueprint is not a continuous hosting recommendation; use the review-only proposal and readiness checklist after authorization.
 
 | Option | What you get | Needs |
 |---|---|---|
@@ -21,9 +38,15 @@ financial action through human approval.
 | `docker run ghcr.io/harshjha15335/sentinel:main` | The same image CI tests, published from `main` | Docker and a PostgreSQL URL |
 
 Every option that runs the server is in **demo mode**:
+| [![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/harshjha15335/SENTINEL-) | A public HTTPS URL that redeploys on every push to `main` | A Render account; verify current limits and pricing |
+| `docker run ghcr.io/harshjha15335/sentinel:main` | The same image CI tests, published from `main` | Docker and a PostgreSQL URL |
+
+The historical launch configurations are intended to run in **demo mode**:
 - PayPal runs in fixture mode, so every payment it creates is labelled **Simulated**.
 - The **Synthetic demo** scenario is loaded.
 - Sign-in passwords are generated, never committed.
+- Investigations produce the labelled deterministic summary unless `SENTINEL_AI_PROVIDER` and
+  `SENTINEL_AI_API_KEY` are set.
 
 Details, and how to switch a deployment to the PayPal sandbox, are in [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md).
 
@@ -63,6 +86,13 @@ with the passwords you seeded.
   `SENTINEL_PAYPAL_WEBHOOK_ID`. Details: [`docs/PAYPAL_INTEGRATION.md`](docs/PAYPAL_INTEGRATION.md).
 - `SENTINEL_PAYPAL_MODE=fixture` runs fully offline. Orders and captures are created locally and
   every one is labelled **Simulated**; nothing reaches PayPal.
+
+### Investigation agent (optional)
+Set `SENTINEL_AI_PROVIDER=anthropic` (or `openai`), `SENTINEL_AI_API_KEY` and optionally
+`SENTINEL_AI_MODEL`. Without them, "Generate deterministic summary" produces a rule-based summary
+from stored records, labelled "Deterministic summary — AI provider unavailable". Evidence files are
+stored under `apps/api/var/storage` (or in PostgreSQL with `SENTINEL_STORAGE_BACKEND=database`).
+Design: [`docs/AGENT_DESIGN.md`](docs/AGENT_DESIGN.md).
 
 ## Tests
 See [`docs/TESTING.md`](docs/TESTING.md) for commands and the latest recorded results.

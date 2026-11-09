@@ -15,7 +15,14 @@ Requires-Dist: httpx==0.28.1
 Requires-Dist: argon2-cffi==25.1.0
 Requires-Dist: cryptography==50.0.2
 Requires-Dist: email-validator==2.3.0
+Requires-Dist: numpy==2.5.4
+Requires-Dist: xgboost-cpu==3.4.1
 Provides-Extra: dev
 Requires-Dist: pytest==9.1.1; extra == "dev"
 Requires-Dist: ruff==0.17.0; extra == "dev"
 Requires-Dist: mypy==2.4.0; extra == "dev"
+Provides-Extra: ml
+Requires-Dist: pandas==3.0.6; extra == "ml"
+Requires-Dist: scikit-learn==1.9.1; extra == "ml"
+Requires-Dist: scipy==1.18.1; extra == "ml"
+Requires-Dist: shap==0.53.0; extra == "ml"

@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/Button";
 import { OriginBadge } from "@/components/ui/OriginBadge";
 import { RiskBadge } from "@/components/ui/RiskBadge";
 import { EmptyState, ErrorState, Skeleton } from "@/components/ui/States";
+import { CapacityWarning } from "@/features/risk/CapacityWarning";
 import type { Case, CasePriority, CaseStatus, DataOrigin } from "@/lib/api";
 import { formatDateTime, formatMoney, humanize } from "@/lib/format";
 
@@ -52,6 +53,9 @@ export function CasesPage() {
         title="Review queue"
         description="Payments the risk model placed in the high band, plus cases analysts opened by hand. Highest priority and earliest due first."
       />
+      <div className="mb-3">
+        <CapacityWarning compact />
+      </div>
       <div className="mb-3 flex flex-wrap items-center gap-2">
         <div role="tablist" aria-label="Case status" className="flex rounded-md border border-line-strong bg-sunken p-0.5">
           {TABS.map((t) => (

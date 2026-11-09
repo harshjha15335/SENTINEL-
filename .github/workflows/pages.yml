@@ -5,8 +5,6 @@ name: Pages
 # filled by the synthetic demo loader (SYNTHETIC_DEMO). Nothing here talks to PayPal.
 # The full app (API + database) is the container image; see docs/DEPLOYMENT.md.
 on:
-  push:
-    branches: [main]
   workflow_dispatch:
 
 permissions:

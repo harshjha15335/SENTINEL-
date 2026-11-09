@@ -2,6 +2,7 @@
 
 from enum import StrEnum
 from functools import lru_cache
+from uuid import UUID
 
 from pydantic import Field, SecretStr, field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -19,11 +20,29 @@ class PayPalMode(StrEnum):
     FIXTURE = "fixture"
 
 
+class AIProvider(StrEnum):
+    """Which LLM provider the investigation agent uses. NONE means deterministic summaries only."""
+
+    NONE = "none"
+    ANTHROPIC = "anthropic"
+    OPENAI = "openai"
+    GOOGLE = "google"
+
+
+class StorageBackend(StrEnum):
+    """Where evidence files and generated packets are stored. Never a public static directory."""
+
+    LOCAL = "local"
+    DATABASE = "database"
+
+
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_prefix="SENTINEL_", env_file=".env", extra="ignore")
 
     environment: str = "development"
+    hosted_deployment: bool = False
     database_url: str = "postgresql+psycopg://sentinel:sentinel@127.0.0.1:5432/sentinel"
+    database_ssl_root_cert: str | None = None
     cors_origins: list[str] = Field(default_factory=lambda: ["http://localhost:5173"])
     cookie_secure: bool = False
     session_ttl_minutes: int = 8 * 60
@@ -34,6 +53,37 @@ class Settings(BaseSettings):
     paypal_client_secret: SecretStr | None = None
     paypal_webhook_id: str | None = None
     paypal_timeout_seconds: float = 20.0
+    refund_execution_enabled: bool = False
+
+    # Investigation agent. Without a provider and key, only deterministic summaries are produced.
+    ai_provider: AIProvider = AIProvider.NONE
+    ai_model: str | None = None
+    ai_api_key: SecretStr | None = None
+    ai_timeout_seconds: float = Field(default=90.0, gt=0, allow_inf_nan=False)
+    ai_request_limit: int = Field(default=12, ge=1)
+    ai_tool_calls_limit: int = Field(default=24, ge=1)
+    ai_total_tokens_limit: int = Field(default=120_000, ge=1)
+    ai_sdk_max_retries: int = Field(default=0, ge=0, le=2)
+    ai_max_output_tokens: int = Field(default=2048, ge=1)
+    # Local serialized input bounds include instructions, history and tool/output schemas.
+    # Bytes are a model-independent context safeguard, not an exact token estimate.
+    ai_max_input_bytes: int = Field(default=64_000, ge=1)
+    ai_total_input_bytes_limit: int = Field(default=256_000, ge=1)
+    investigation_stale_seconds: int = 600
+
+    # Local-only deterministic webhook ingress. Never enabled in production.
+    allow_webhook_fixtures: bool = False
+    require_workers_ready: bool = False
+    # Global inbox aggregates are visible only to this installation operator's merchant.
+    # Tenant administrators otherwise see their own application queues only.
+    operations_inbox_merchant_id: UUID | None = None
+    webhook_fixture_key: SecretStr | None = None
+
+    # Evidence uploads and generated packets.
+    storage_backend: StorageBackend = StorageBackend.LOCAL
+    storage_dir: str = "var/storage"
+    evidence_max_bytes: int = 10 * 1024 * 1024
+    evidence_max_text_chars: int = 50_000
 
     # Built web app (apps/web/dist). When set, the API also serves the UI from the same
     # origin, which is how the single-container deployment runs.
@@ -51,8 +101,43 @@ class Settings(BaseSettings):
                 return "postgresql+psycopg://" + value[len(prefix) :]
         return value
 
+    @field_validator("paypal_client_id")
+    @classmethod
+    def _paypal_client_id_shape(cls, value: str | None) -> str | None:
+        if value is None:
+            return None
+        value = value.strip()
+        if not value or any(char.isspace() for char in value):
+            raise ValueError("PayPal client ID must be nonempty without embedded whitespace")
+        return value
+
+    @field_validator("paypal_client_secret")
+    @classmethod
+    def _paypal_secret_shape(cls, value: SecretStr | None) -> SecretStr | None:
+        if value is None:
+            return None
+        normalized = value.get_secret_value().strip()
+        if not normalized or any(char.isspace() for char in normalized):
+            raise ValueError("PayPal secret must be nonempty without embedded whitespace")
+        return SecretStr(normalized)
+
     @model_validator(mode="after")
     def _no_partial_paypal_credentials(self) -> "Settings":
+        if self.hosted_deployment and (
+            self.environment != "production"
+            or not self.cookie_secure
+            or self.storage_backend is not StorageBackend.DATABASE
+            or not self.require_workers_ready
+            or any(not origin.startswith("https://") for origin in self.cors_origins)
+        ):
+            raise ValueError(
+                "Hosted deployment requires production, secure cookies, database storage, "
+                "worker readiness and HTTPS-only CORS origins (or an empty list)"
+            )
+        if self.allow_webhook_fixtures and (
+            self.environment == "production" or not self.webhook_fixture_key
+        ):
+            raise ValueError("Webhook fixtures require a key and a non-production environment")
         has_id = bool(self.paypal_client_id)
         has_secret = self.paypal_client_secret is not None and bool(
             self.paypal_client_secret.get_secret_value()
@@ -62,6 +147,14 @@ class Settings(BaseSettings):
                 "SENTINEL_PAYPAL_CLIENT_ID and SENTINEL_PAYPAL_CLIENT_SECRET must be set together"
             )
         return self
+
+    @property
+    def ai_configured(self) -> bool:
+        return (
+            self.ai_provider is not AIProvider.NONE
+            and self.ai_api_key is not None
+            and bool(self.ai_api_key.get_secret_value())
+        )
 
     @property
     def paypal_credentials_configured(self) -> bool:

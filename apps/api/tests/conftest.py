@@ -1,4 +1,5 @@
 import os
+import tempfile
 
 os.environ.setdefault(
     "SENTINEL_DATABASE_URL",
@@ -8,6 +9,12 @@ os.environ["SENTINEL_PAYPAL_MODE"] = "fixture"
 os.environ.pop("SENTINEL_PAYPAL_CLIENT_ID", None)
 os.environ.pop("SENTINEL_PAYPAL_CLIENT_SECRET", None)
 os.environ["SENTINEL_LOGIN_RATE_LIMIT_ATTEMPTS"] = "5"
+# Investigations: never reach a real AI provider from unit tests; store files in a temp dir.
+os.environ.pop("SENTINEL_AI_PROVIDER", None)
+os.environ.pop("SENTINEL_AI_API_KEY", None)
+os.environ.pop("SENTINEL_AI_MODEL", None)
+os.environ["SENTINEL_STORAGE_BACKEND"] = "local"
+os.environ["SENTINEL_STORAGE_DIR"] = tempfile.mkdtemp(prefix="sentinel-test-")
 
 from collections.abc import Iterator
 from dataclasses import dataclass
@@ -29,8 +36,22 @@ PASSWORD = "correct horse battery staple"
 API_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
+def require_disposable_database(url: str) -> None:
+    """Reject user/hosted databases before destructive test migrations or truncation."""
+    from sqlalchemy.engine import make_url
+
+    parsed = make_url(url)
+    if (
+        parsed.host not in ("127.0.0.1", "localhost")
+        or not parsed.database
+        or not parsed.database.endswith("_test")
+    ):
+        raise RuntimeError("Destructive API tests require a loopback database ending in _test")
+
+
 @pytest.fixture(scope="session", autouse=True)
 def _migrated_database() -> Iterator[None]:
+    require_disposable_database(get_settings().database_url)
     cfg = Config(os.path.join(API_DIR, "alembic.ini"))
     cfg.set_main_option("script_location", os.path.join(API_DIR, "alembic"))
     cfg.attributes["database_url"] = get_settings().database_url
@@ -48,7 +69,11 @@ def _clean_tables() -> Iterator[None]:
     with get_engine().begin() as conn:
         conn.execute(
             text(
-                "TRUNCATE case_notes, cases, risk_assessments, audit_events, payment_events, "
+                "TRUNCATE refund_requests, dispute_drafts, disputes, policy_drafts, "
+                "worker_health, risk_scoring_jobs, stored_blobs, "
+                "approval_decisions, action_executions, "
+                "approval_requests, evidence_packets, evidence_artifacts, investigation_runs, "
+                "case_notes, cases, risk_assessments, audit_events, payment_events, "
                 "raw_payloads, transactions, products, user_sessions, users, merchants "
                 "RESTART IDENTITY CASCADE"
             )

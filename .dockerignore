@@ -15,3 +15,7 @@
 .pgdata
 docs/research
 ml
+.devcontainer/demo-credentials.txt
+apps/api/var
+**/*.dump
+supabase/.temp

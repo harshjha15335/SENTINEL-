@@ -81,3 +81,70 @@ class CasePriority(StrEnum):
 class CaseSource(StrEnum):
     RISK_MODEL = "RISK_MODEL"
     MANUAL = "MANUAL"
+
+
+class InvestigationStatus(StrEnum):
+    QUEUED = "QUEUED"
+    RUNNING = "RUNNING"
+    COMPLETED = "COMPLETED"
+    FAILED = "FAILED"
+
+
+class InvestigationMode(StrEnum):
+    """How the findings were produced. Only AI_AGENT output is model-generated analysis."""
+
+    AI_AGENT = "AI_AGENT"
+    DETERMINISTIC = "DETERMINISTIC"
+
+
+class InvestigationErrorCategory(StrEnum):
+    PROVIDER_UNAVAILABLE = "PROVIDER_UNAVAILABLE"
+    PROVIDER_TIMEOUT = "PROVIDER_TIMEOUT"
+    PROVIDER_ERROR = "PROVIDER_ERROR"
+    INVALID_OUTPUT = "INVALID_OUTPUT"
+    UNSUPPORTED_ASSERTION = "UNSUPPORTED_ASSERTION"
+    BUDGET_EXCEEDED = "BUDGET_EXCEEDED"
+    ABANDONED = "ABANDONED"
+    INTERNAL = "INTERNAL"
+
+
+class EvidenceCategory(StrEnum):
+    """What the merchant says a document is. Declared by the uploader, never verified."""
+
+    INVOICE = "INVOICE"
+    SHIPPING_PROOF = "SHIPPING_PROOF"
+    DELIVERY_CONFIRMATION = "DELIVERY_CONFIRMATION"
+    CUSTOMER_COMMUNICATION = "CUSTOMER_COMMUNICATION"
+    REFUND_POLICY = "REFUND_POLICY"
+    OTHER = "OTHER"
+
+
+class ExtractionStatus(StrEnum):
+    EXTRACTED = "EXTRACTED"
+    NO_TEXT = "NO_TEXT"
+    NOT_SUPPORTED = "NOT_SUPPORTED"
+    FAILED = "FAILED"
+
+
+class ApprovalActionType(StrEnum):
+    MANUAL_REVIEW = "MANUAL_REVIEW"
+    EVIDENCE_PACKET_INTERNAL = "EVIDENCE_PACKET_INTERNAL"
+    PREPARE_REFUND = "PREPARE_REFUND"
+
+
+class ApprovalStatus(StrEnum):
+    PENDING = "PENDING"
+    APPROVED = "APPROVED"
+    REJECTED = "REJECTED"
+
+
+class ApprovalDecisionValue(StrEnum):
+    APPROVED = "APPROVED"
+    REJECTED = "REJECTED"
+
+
+class ExecutionStatus(StrEnum):
+    """What happened after approval. Financial actions stay NOT_EXECUTED until Phase 5."""
+
+    COMPLETED_INTERNAL = "COMPLETED_INTERNAL"
+    NOT_EXECUTED = "NOT_EXECUTED"

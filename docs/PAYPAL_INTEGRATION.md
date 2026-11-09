@@ -1,5 +1,13 @@
 # PayPal Integration
 
+## Latest next-phase implementation — 6 November 2026
+
+The new [technical report](NEXT_PHASE_REPORT.md) supersedes older feature-status and environment observations below. Guarded refunds, dispute preparation, validation-only Policy Lab, scoped monitoring/network views and a refreshed judge scenario are now implemented locally. Actual hosting, genuine PayPal/AI and remote bridge access remain separately blocked/unverified. See [setup](NEXT_PHASE_SETUP.md), [runbook](NEXT_PHASE_RUNBOOK.md), [architecture](NEXT_PHASE_ARCHITECTURE.md) and [demo](NEXT_PHASE_DEMO.md). Earlier dated inventories remain historical.
+
+## Session 8 operational status — 22 October 2026
+
+The current recovered branch adds supervised Supabase HTTP ingestion, durable scoring, exact-schema readiness, an administrator operations page and a private read-only judge scenario. The receiver is public; the Python application is still workspace-local. Certificate-host reachability now works; sandbox OAuth authentication failed. Real PayPal payments remain deliberately untested, and the real-AI test remains credential-gated. See [SESSION_8_REPORT.md](SESSION_8_REPORT.md), [HOSTING_READINESS.md](HOSTING_READINESS.md) and [PROVIDER_VERIFICATION.md](PROVIDER_VERIFICATION.md) for current evidence. Older dated results below are historical, not current deployment claims.
+
 ## What is real today
 | Capability | Code | Verified how |
 |---|---|---|
@@ -11,8 +19,7 @@
 | Webhook signature verification | `services/webhooks.py` | Tests with a generated RSA cert: valid, tampered, reformatted JSON, simulator id, foreign cert host |
 | Buyer approval UI | `CheckoutPage.tsx` (v6 `PayPalProvider` + `PayPalOneTimePaymentButton`) | Type-checked and built; renders only with a real client id |
 
-**No request has been made to PayPal's sandbox in this session** because no credentials were
-provided. Nothing in the repository claims otherwise.
+The historical mock results below do not prove provider access. A Session 8 sandbox OAuth check failed authentication; no order, capture or refund was attempted. See PROVIDER_VERIFICATION.md.
 
 ## Credential dependency (exact)
 1. Create a sandbox REST app at developer.paypal.com → Apps & Credentials (Sandbox).
@@ -37,3 +44,7 @@ provided. Nothing in the repository claims otherwise.
 Capability detection via `list_disputes`: a `PERMISSION` error marks disputes unavailable for the
 account and the UI switches to a clearly labelled simulated fixture. Sandbox dispute creation may
 require buyer-side flows or account enablement; this is documented, not assumed.
+
+## Current callback registration
+
+The registered Supabase callback URL is `https://cfslzvvdjxstpupkqbpw.supabase.co/functions/v1/paypal-webhook`. Python verifies forwarded receipts using the same registered webhook ID. Do not register a made-up backend domain or replace this URL with the private bridge destination. Edge-secret configuration and Python runtime bindings are separate.

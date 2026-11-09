@@ -3,7 +3,12 @@
 # the SYNTHETIC_DEMO scenario once, then serve the API (and the web app if SENTINEL_WEB_DIST).
 set -eu
 
-alembic upgrade head
+# Only the reviewed target is eligible for automatic upgrade. Set false to require an
+# operator-managed migration, e.g. on an established production database.
+case "${SENTINEL_AUTO_MIGRATE:-true}" in
+  1|true|TRUE|yes) alembic upgrade "${SENTINEL_MIGRATION_TARGET:-d105a4143283}" ;;
+esac
+python -m app.cli check-schema
 
 if [ -n "${SENTINEL_SEED_ADMIN_PASSWORD:-}" ]; then
   python -m app.cli seed
@@ -15,6 +20,6 @@ case "${SENTINEL_DEMO_AUTOLOAD:-false}" in
   1|true|TRUE|yes) python -m app.cli demo-load --if-empty ;;
 esac
 
-# --proxy-headers so the login rate limit sees the client address behind the host's proxy.
-exec uvicorn app.main:app --host 0.0.0.0 --port "${PORT:-8000}" \
-  --proxy-headers --forwarded-allow-ips "${SENTINEL_FORWARDED_ALLOW_IPS:-*}"
+# Supervise the API, durable event/scoring worker and configured inbox bridge.
+export PORT="${PORT:-8000}"
+exec python -m app.workers.supervisor
