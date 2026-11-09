@@ -9,7 +9,7 @@ import { Machine } from "./Machine";
 import { EvidenceTape } from "./Tape";
 import { storyStages } from "./fixtures";
 import {
-  evidencePath,
+  evidenceGeometry,
   mix,
   placement,
   segment,
@@ -67,9 +67,6 @@ function DesktopStory() {
       const placementNode = scene.querySelector("[data-machine-placement]");
       const machine = scene.querySelector<SVGElement>("[data-machine-art]");
       const paths = scene.querySelectorAll<SVGPathElement>("[data-strip-path]");
-      const lengthPath = scene.querySelector<SVGPathElement>(
-        "[data-strip-length]",
-      );
       const marks = scene.querySelector<SVGPathElement>("[data-strip-marks]");
       const nodes = scene.querySelectorAll<SVGElement>("[data-path-node]");
       const risk = scene.querySelector<SVGElement>("[data-risk-visual]");
@@ -81,6 +78,9 @@ function DesktopStory() {
       const stages = scene.querySelectorAll<HTMLElement>("[data-story-stage]");
       const chips = scene.querySelectorAll("[data-chapter]");
       const status = scene.querySelector("[data-machine-status]");
+      const pin = scene.querySelector<HTMLElement>(".v2-spatial-pin");
+      let width = pin?.clientWidth ?? window.innerWidth,
+        height = pin?.clientHeight ?? window.innerHeight;
       const render = (p: number) => {
         const t = updateTransport(scene, p),
           m = placement(p);
@@ -90,9 +90,9 @@ function DesktopStory() {
         );
         if (machine)
           machine.style.opacity = String(1 - smooth(segment(p, 0.77, 0.91)));
-        const d = evidencePath(p, m.exitX, m.exitY);
-        paths.forEach((path) => path.setAttribute("d", d));
-        const total = lengthPath?.getTotalLength() ?? 1;
+        const geometry = evidenceGeometry(p, m.exitX, m.exitY);
+        paths.forEach((path) => path.setAttribute("d", geometry.path));
+        const total = geometry.length;
         const visible = smooth(segment(p, 0.2, 0.55));
         paths.forEach((path) => {
           path.style.strokeDasharray =
@@ -108,27 +108,11 @@ function DesktopStory() {
         }
         nodes.forEach((node, i) => {
           const at = Number(node.dataset.at ?? 0);
-          const point = lengthPath?.getPointAtLength(total * at);
-          const before = lengthPath?.getPointAtLength(
-            Math.max(0, total * at - 2),
+          const point = geometry.frameAt(at);
+          node.setAttribute(
+            "transform",
+            `translate(${point.x} ${point.y}) rotate(${point.angle})`,
           );
-          const after = lengthPath?.getPointAtLength(
-            Math.min(total, total * at + 2),
-          );
-          if (point && before && after) {
-            const angle = Math.max(
-              -13,
-              Math.min(
-                13,
-                (Math.atan2(after.y - before.y, after.x - before.x) * 180) /
-                  Math.PI,
-              ),
-            );
-            node.setAttribute(
-              "transform",
-              `translate(${point.x} ${point.y}) rotate(${angle})`,
-            );
-          }
           const appear = smooth(segment(visible, at - 0.04, at + 0.06));
           node.style.opacity = String(
             appear * (1 - smooth(segment(p, 0.67 + i * 0.02, 0.77 + i * 0.02))),
@@ -148,12 +132,8 @@ function DesktopStory() {
         );
         const assembly = smooth(segment(p, 0.65, 0.99));
         if (frame) {
-          const dx = scene.clientWidth * 0.18 * (1 - assembly),
-            dy =
-              (scene.querySelector<HTMLElement>(".v2-spatial-pin")
-                ?.clientHeight ?? window.innerHeight) *
-              0.13 *
-              (1 - assembly);
+          const dx = width * 0.18 * (1 - assembly),
+            dy = height * 0.13 * (1 - assembly);
           frame.style.transform = `translate(${dx}px,${dy}px) scale(${mix(0.38, 1, assembly)})`;
           frame.style.opacity = String(smooth(segment(p, 0.66, 0.76)));
           frame.style.borderRadius = `${18 * (1 - assembly)}px`;
@@ -224,7 +204,11 @@ function DesktopStory() {
         scrub: true,
         invalidateOnRefresh: true,
         onUpdate: (self) => render(self.progress),
-        onRefresh: (self) => render(self.progress),
+        onRefresh: (self) => {
+          width = pin?.clientWidth ?? window.innerWidth;
+          height = pin?.clientHeight ?? window.innerHeight;
+          render(self.progress);
+        },
       });
       let active = true;
       void document.fonts.ready.then(() => {

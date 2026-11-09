@@ -60,7 +60,7 @@ export function placement(p: number) {
   };
 }
 /** One physical strip remains connected to the moving output port as it straightens into a dossier. */
-export function evidencePath(p: number, exitX: number, exitY: number) {
+export function evidenceGeometry(p: number, exitX: number, exitY: number) {
   const t = smooth(segment(p, 0.63, 0.88));
   const loose = [
     [exitX + 110, exitY + 25],
@@ -105,5 +105,63 @@ export function evidencePath(p: number, exitX: number, exitY: number) {
       .slice(i, i + 3)
       .map((pt) => pt.map((v) => v.toFixed(2)).join(" "))
       .join(" ")}`;
-  return d;
+  const start = [exitX, exitY];
+  function at(segmentIndex: number, u: number) {
+    const a =
+      segmentIndex === 0 ? start : (points[segmentIndex * 3 - 1] ?? start);
+    const b = points[segmentIndex * 3] ?? start,
+      c = points[segmentIndex * 3 + 1] ?? start,
+      e = points[segmentIndex * 3 + 2] ?? start;
+    const q = 1 - u;
+    return {
+      x:
+        q * q * q * (a[0] ?? 0) +
+        3 * q * q * u * (b[0] ?? 0) +
+        3 * q * u * u * (c[0] ?? 0) +
+        u * u * u * (e[0] ?? 0),
+      y:
+        q * q * q * (a[1] ?? 0) +
+        3 * q * q * u * (b[1] ?? 0) +
+        3 * q * u * u * (c[1] ?? 0) +
+        u * u * u * (e[1] ?? 0),
+    };
+  }
+  let length = 0,
+    previous = { x: exitX, y: exitY };
+  const samples: { length: number; segment: number; u: number }[] = [];
+  for (let curve = 0; curve < 5; curve++)
+    for (let step = 1; step <= 16; step++) {
+      const u = step / 16,
+        point = at(curve, u);
+      length += Math.hypot(point.x - previous.x, point.y - previous.y);
+      samples.push({ length, segment: curve, u });
+      previous = point;
+    }
+  return {
+    path: d,
+    length,
+    frameAt: (fraction: number) => {
+      const wanted = length * clamp(fraction);
+      const i = samples.findIndex((s) => s.length >= wanted);
+      const sample = samples[i] ?? samples[samples.length - 1];
+      if (!sample) return { x: exitX, y: exitY, angle: 0 };
+      const prior = i > 0 ? (samples[i - 1]?.length ?? 0) : 0;
+      const u =
+        sample.u - (1 - clamp((wanted - prior) / (sample.length - prior))) / 16;
+      const point = at(sample.segment, u),
+        before = at(sample.segment, Math.max(0, u - 0.001)),
+        after = at(sample.segment, Math.min(1, u + 0.001));
+      return {
+        ...point,
+        angle: Math.max(
+          -13,
+          Math.min(
+            13,
+            (Math.atan2(after.y - before.y, after.x - before.x) * 180) /
+              Math.PI,
+          ),
+        ),
+      };
+    },
+  };
 }
