@@ -19,7 +19,7 @@ A visitor operates an original Evidence Reel using scroll and can open the deter
 | Static/hash production build | PASS | VITE_STATIC_DEMO=true VITE_ROUTER=hash; no preview emitted |
 | Backend regression | 262 PASS, 1 SKIP | Dedicated loopback PostgreSQL 16 database; real-provider integration skipped |
 | ML tests | 7 PASS | Existing models/artifacts unchanged |
-| V2 Chromium browser suite | 14 PASS | Final browser log; includes two actual local API integration flows |
+| V2 Chromium browser suite | 14 PASS | Final browser log; includes two actual local API integration flows. After the final scale-axis correction, the two affected scene/resize tests passed again (reveal-review-browser.log) |
 | Existing selected browser flows | 10 PASS, 2 SKIP | Desktop/mobile fixture checkout, reviews, auth boundary, admin operations, evidence/packet/independent approval; prepared judge scenario absent |
 | Production exclusion smoke check | PASS | No preview root, no preview requests/assets in normal or static output; existing login behavior retained |
 | Desktop visual preservation | Exact PNG match | Baseline vs V2 existing Command Center at 1440×900 |
@@ -53,12 +53,12 @@ After reducing scroll work:
 
 | Run | LCP ms | CLS | Median / p95 frame interval ms | Frames >50ms | Scroll long tasks >=50ms |
 |---|---|---|---|---|---|
-| 1 | 1712 | 0.000080 | 16.7 / 16.7 | 0 | 0 |
-| 2 | 1752 | 0.000080 | 16.7 / 16.8 | 0 | 0 |
-| 3 | 2512 | 0.000080 | 16.7 / 33.4 | 2 | 0 |
+| 1 | 2016 | 0.000080 | 16.7 / 16.8 | 0 | 0 |
+| 2 | 1912 | 0.000080 | 16.7 / 16.8 | 0 | 0 |
+| 3 | 1856 | 0.000080 | 16.7 / 16.8 | 1 | 0 |
 
-Initial measurements under concurrent browser activity showed LCP 2608–3752ms and p95 frame intervals up to 83.3ms. Code and executor contention both changed between runs, so the improvement is not a controlled attribution solely to optimization. Retain performance-initial.json and performance.json. No sustained 60 FPS or field p75 claim; no real-user INP data. LCP<=2.5s, CLS<=.1 and INP<=200ms remain objectives; run 3 narrowly misses the LCP objective. Cold module/font evaluation still produces initial long tasks. Further production profiling belongs to Phase 2.
+Initial measurements under concurrent browser activity showed LCP 2608–3752ms and p95 frame intervals up to 83.3ms. Code and executor contention both changed between runs, so the improvement is not a controlled attribution solely to optimization. Retain performance-initial.json and performance.json. No sustained 60 FPS or field p75 claim; no real-user INP data. LCP<=2.5s, CLS<=.1 and INP<=200ms remain objectives; these three final development runs meet the LCP/CLS objectives, while earlier runs exceeded the LCP objective. This is not production or field verification. Cold module/font evaluation still produces initial long tasks. Further production profiling belongs to Phase 2.
 
 ## Review artifacts and limitations
 
-See 00-handoff for paths/commands. Sources and checkpoints are in Git; screenshots/videos/bundles are internal local review artifacts outside public assets. Phase 2 still needs full application migration, the final product-workspace transformation, remaining marketing sections, cross-browser checks and final security/accessibility/performance review. Gate 1 design/route approval and Gate 2 deployment approval are both PENDING. No push, remote merge, publication or deployment was performed by this implementation task.
+See 00-handoff for paths/commands. Prototype source checkpoint: `2a1705e9712770c16e2e2b1b81d658d42d258dea`. Sources and checkpoints are in Git; screenshots/videos/bundles are internal local review artifacts outside public assets. Phase 2 still needs full application migration, the final product-workspace transformation, remaining marketing sections, cross-browser checks and final security/accessibility/performance review. Gate 1 design/route approval and Gate 2 deployment approval are both PENDING. No push, remote merge, publication or deployment was performed by this implementation task.

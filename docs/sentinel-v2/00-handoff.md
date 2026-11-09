@@ -17,8 +17,8 @@ Neither readiness nor the user's merge of main constitutes design, route migrati
 - Earlier discovery baseline: `ac044cd3b114ff82b8e5ff4ef3e650e541973499`; verified ancestor of main. Isolated initial prototype files were retained during fast-forward to approved main.
 - Original selected worktree was clean before our changes; no unrelated dirty files were incorporated.
 - Baseline ref: `backup/sentinel-v2-main-410109c`.
-- Prototype SHA: TO_BE_RECORDED_AFTER_CHECKPOINT.
-- Current working-tree status: local checkpoint will contain Phase 1 work; verify with `git status --short --branch` in any subsequent session.
+- Prototype SHA: `2a1705e9712770c16e2e2b1b81d658d42d258dea`.
+- Current working-tree status: Phase 1 source is locally committed; verify with `git status --short --branch` in any subsequent session.
 - Baseline recovery bundle: `/workspace/sentinel-v2-artifacts/baseline/main-410109c.bundle`; `git bundle verify` succeeded, full history included.
 
 Safe recovery without discarding the prototype: `git worktree add /workspace/SENTINEL-v2-baseline backup/sentinel-v2-main-410109c`. For another machine, clone the verified baseline bundle into a new directory. Do not reset/clean/overwrite an existing working tree. Prototype source is separately checkpointed on the redesign branch; an additional final bundle is retained outside the repository.
@@ -88,4 +88,4 @@ A subsequent session must verify source SHA and artifact availability rather tha
 - Public `/` vs protected `/app` migration and compatibility aliases: PENDING, see route plan.
 - Full legacy UI migration: NOT AUTHORIZED until explicit Gate 1 approval.
 
-Known limits: cross-browser downloads blocked, no physical-device or manual screen-reader check, genuine providers unverified, one lab LCP run slightly above objective, prototype reveal still needs Phase 2 polish. These do not authorize deletion of unverified existing screens. The final full-rebuild/deployment verdict remains NOT READY — BLOCKERS REMAIN.
+Known limits: cross-browser downloads blocked, no physical-device or manual screen-reader check, genuine providers unverified, startup timing varies and production/field performance is not established, prototype reveal still needs Phase 2 polish. These do not authorize deletion of unverified existing screens. The final full-rebuild/deployment verdict remains NOT READY — BLOCKERS REMAIN.
