@@ -212,7 +212,7 @@
   justify-content: space-between;
   padding: 13px 0;
   border-bottom: 1px solid var(--border);
-  font-size: 10px;
+  font-size: 11px;
   letter-spacing: 0.03em;
   color: #6135c9;
 }
@@ -263,7 +263,7 @@
   border-color: #c3acef;
 }
 .v2-example-picker .v2-mono {
-  font-size: 10px;
+  font-size: 11px;
 }
 .v2-dossier {
   border-top: 2px solid var(--foreground);
@@ -316,7 +316,7 @@
   background: #e2f0e9;
   color: var(--success);
   font:
-    10px "IBM Plex Mono",
+    11px "IBM Plex Mono",
     monospace;
   letter-spacing: 0.02em;
 }
@@ -335,7 +335,7 @@
 .v2-provenance {
   color: var(--warning);
   font-family: "IBM Plex Mono", monospace;
-  font-size: 10px;
+  font-size: 11px;
 }
 .v2-record-status time {
   width: 100%;
@@ -370,13 +370,13 @@
 }
 .v2-tabs span {
   font:
-    10px "IBM Plex Mono",
+    11px "IBM Plex Mono",
     monospace;
   margin-left: 8px;
   color: var(--text-secondary);
 }
 .v2-section-label {
-  font-size: 10px;
+  font-size: 11px;
   letter-spacing: 0.05em;
   display: flex;
   justify-content: space-between;
@@ -428,7 +428,7 @@
   gap: 20px;
   justify-content: space-between;
   color: var(--text-secondary);
-  font-size: 9px;
+  font-size: 11px;
   margin: 25px 0;
 }
 .v2-dossier-foot > span:last-child {
@@ -728,7 +728,7 @@
 }
 .v2-section-heading > span {
   font:
-    10px "IBM Plex Mono",
+    11px "IBM Plex Mono",
     monospace;
   color: var(--text-secondary);
 }
@@ -764,7 +764,7 @@
 .v2-queue-row small {
   display: block;
   font:
-    8px "IBM Plex Mono",
+    11px "IBM Plex Mono",
     monospace;
   margin-top: 7px;
   color: var(--success);
@@ -806,7 +806,7 @@
 .v2-activity time,
 .v2-activity li > span {
   font:
-    10px "IBM Plex Mono",
+    11px "IBM Plex Mono",
     monospace;
   color: var(--accent);
   padding-top: 3px;
@@ -822,7 +822,7 @@
 @media (max-width: 1200px) {
   .v2-global-nav {
     gap: 13px;
-    font-size: 10px;
+    font-size: 11px;
   }
   .v2-global-header {
     gap: 20px;
@@ -884,11 +884,11 @@
     padding: 0 22px 50px;
   }
   .v2-workspace-top {
-    font-size: 10px;
+    font-size: 11px;
   }
   .v2-notice {
     display: block;
-    font-size: 9px;
+    font-size: 11px;
     line-height: 1.8;
   }
   .v2-notice span:last-child {
@@ -908,7 +908,7 @@
     margin-bottom: 25px;
   }
   .v2-example-picker button {
-    font-size: 10px;
+    font-size: 11px;
     padding: 9px 11px;
     gap: 8px;
   }
@@ -949,7 +949,7 @@
     gap: 24px 17px;
   }
   .v2-fact-grid dd {
-    font-size: 10px;
+    font-size: 11px;
   }
   .v2-tabs {
     margin-bottom: 25px;
@@ -958,7 +958,7 @@
     font-size: 12px;
   }
   .v2-dossier-foot {
-    font-size: 8px;
+    font-size: 11px;
   }
   .v2-search {
     flex-wrap: wrap;
@@ -1058,7 +1058,7 @@
 }
 .v2-evidence-ledger time {
   font:
-    10px "IBM Plex Mono",
+    11px "IBM Plex Mono",
     monospace;
   color: var(--text-secondary);
 }
@@ -1084,7 +1084,7 @@
   grid-column: 1;
   grid-row: 1;
   margin-bottom: 12px;
-  font-size: 9px;
+  font-size: 11px;
 }
 .v2-risk-band {
   grid-column: 1;
@@ -1105,7 +1105,7 @@
   grid-column: 1;
   grid-row: 5;
   margin: 8px 0 0;
-  font-size: 9px;
+  font-size: 11px;
 }
 .v2-risk > h3 {
   grid-column: 2;
@@ -1183,6 +1183,50 @@
     font-size: 12px;
   }
   .v2-evidence-ledger time {
-    font-size: 9px;
+    font-size: 11px;
+  }
+}
+.v2-global-nav a,
+.v2-mobile-menu a,
+.v2-account,
+.v2-workspace-top > a {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+.v2-workspace-top > span svg {
+  display: inline;
+  vertical-align: middle;
+}
+.v2-eyebrow,
+.v2-fine,
+.v2-section-label,
+.v2-notice,
+.v2-queue-row small,
+.v2-section-heading > span,
+.v2-workspace-top {
+  font-size: 11px;
+}
+.v2-dossier-foot {
+  font-size: 11px;
+  flex-wrap: wrap;
+}
+.v2-risk > .v2-fine,
+.v2-risk > .v2-section-label,
+.v2-evidence-ledger time {
+  font-size: 11px;
+}
+@media (max-width: 650px) {
+  .v2-notice,
+  .v2-fact-grid dd,
+  .v2-workspace-top,
+  .v2-queue-row small {
+    font-size: 11px;
+  }
+  .v2-example-picker {
+    flex-wrap: wrap;
+  }
+  .v2-record-status {
+    max-width: 100%;
   }
 }

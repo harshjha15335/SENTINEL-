@@ -379,10 +379,18 @@ export function Workspace({
           >
             Transactions
           </Link>
-          <Link to="/cases">Investigations ↗</Link>
-          <Link to="/model">Risk Intelligence ↗</Link>
-          <Link to="/policy">Policy Lab ↗</Link>
-          <Link to="/monitoring">Monitoring ↗</Link>
+          <Link to="/cases">
+            Investigations <ArrowUpRight size={13} aria-hidden="true" />
+          </Link>
+          <Link to="/model">
+            Risk Intelligence <ArrowUpRight size={13} aria-hidden="true" />
+          </Link>
+          <Link to="/policy">
+            Policy Lab <ArrowUpRight size={13} aria-hidden="true" />
+          </Link>
+          <Link to="/monitoring">
+            Monitoring <ArrowUpRight size={13} aria-hidden="true" />
+          </Link>
         </nav>
         <details className="v2-mobile-menu">
           <summary>Menu</summary>
@@ -390,11 +398,21 @@ export function Workspace({
             <Link to="/__v2-preview/command-center">Command Center</Link>
             <Link to="/__v2-preview/workspace">Transactions</Link>
             <Link to="/__v2-preview/dossier">Demo dossier</Link>
-            <Link to="/cases">Investigations ↗</Link>
-            <Link to="/model">Risk Intelligence ↗</Link>
-            <Link to="/policy">Policy Lab ↗</Link>
-            <Link to="/monitoring">Monitoring ↗</Link>
-            <Link to="/settings">Account ↗</Link>
+            <Link to="/cases">
+              Investigations <ArrowUpRight size={13} aria-hidden="true" />
+            </Link>
+            <Link to="/model">
+              Risk Intelligence <ArrowUpRight size={13} aria-hidden="true" />
+            </Link>
+            <Link to="/policy">
+              Policy Lab <ArrowUpRight size={13} aria-hidden="true" />
+            </Link>
+            <Link to="/monitoring">
+              Monitoring <ArrowUpRight size={13} aria-hidden="true" />
+            </Link>
+            <Link to="/settings">
+              Account <ArrowUpRight size={13} aria-hidden="true" />
+            </Link>
             <Link to="/__v2-preview">Follow the money</Link>
           </nav>
         </details>
@@ -403,17 +421,19 @@ export function Workspace({
           to="/settings"
           aria-label="Account settings"
         >
-          Account ↗
+          Account <ArrowUpRight size={13} aria-hidden="true" />
         </Link>
       </header>
       <Content className="v2-workspace-main">
         <div className="v2-workspace-top">
           <Link to="/__v2-preview/dossier">Demo dossier</Link>
           <span>
-            {demo ? "SIMULATED PREVIEW" : "EXISTING MERCHANT SESSION"} · ↗ opens
-            existing application
+            {demo ? "SIMULATED PREVIEW" : "EXISTING MERCHANT SESSION"} ·
+            Arrow-marked links open the existing application
           </span>
-          <Link to="/__v2-preview">Follow the money ↗</Link>
+          <Link to="/__v2-preview">
+            Follow the money <ArrowUpRight size={13} aria-hidden="true" />
+          </Link>
         </div>
         {children}
       </Content>

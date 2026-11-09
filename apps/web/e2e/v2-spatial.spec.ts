@@ -7,7 +7,7 @@ test("shared live dossier layout hands off at the top and history restores the s
   await page.locator(".v2-money-art").waitFor();
   await page.evaluate(() => scrollTo(0, innerHeight * 4));
   const enter = page.locator(".v2-scene-enter").getByRole("link", {
-    name: "Enter SENTINEL",
+    name: "Explore simulated demo",
     exact: true,
   });
   await expect(enter).toBeVisible();
@@ -45,7 +45,7 @@ test("mobile primary action is above the fold and wallet responds without pinnin
   await page.goto("/__v2-preview");
   const cta = page
     .locator(".v2-compact-hero")
-    .getByRole("link", { name: "Enter SENTINEL" });
+    .getByRole("link", { name: "Explore simulated demo" });
   await expect(cta).toBeInViewport();
   await expect(page.locator(".pin-spacer")).toHaveCount(0);
   const initial = await page
@@ -139,4 +139,54 @@ test("command center is labeled simulated and navigation offers implemented dest
     .getByRole("link", { name: "Transactions", exact: true })
     .click();
   await expect(page).toHaveURL(/workspace/);
+});
+test("receipt becomes native dossier header without any workspace text scaling", async ({
+  page,
+}) => {
+  await page.goto("/__v2-preview");
+  await page.locator(".v2-money-art").waitFor();
+  await page.evaluate(() => document.fonts.ready);
+  const sample = async (p: number) => {
+    await page.evaluate((n) => scrollTo(0, n * innerHeight * 4), p);
+    await expect
+      .poll(async () =>
+        Number(await page.locator(".v2-story").getAttribute("data-progress")),
+      )
+      .toBeCloseTo(p, 2);
+  };
+  await sample(0.84);
+  await expect(page.locator("[data-receipt-morph]")).toBeVisible();
+  await expect(page.locator("[data-morph-amount]")).toHaveText("$1,849.00");
+  const state = await page.locator("[data-morph-amount]").evaluate((e) => ({
+    box: e.getBoundingClientRect().toJSON(),
+    font: getComputedStyle(e).fontSize,
+  }));
+  for (const p of [0.84, 0.89, 0.94, 0.999]) {
+    await sample(p);
+    const transforms = await page
+      .locator("[data-dossier-frame]")
+      .evaluate((el) =>
+        [el, ...Array.from(el.querySelectorAll("*"))]
+          .filter(
+            (e) => ["H1", "H2", "P", "SPAN"].includes(e.tagName) || e === el,
+          )
+          .map((e) => getComputedStyle(e).transform),
+      );
+    expect(transforms.every((t) => t === "none")).toBeTruthy();
+  }
+  await sample(0.84);
+  expect(
+    await page.locator("[data-morph-amount]").evaluate((e) => ({
+      box: e.getBoundingClientRect().toJSON(),
+      font: getComputedStyle(e).fontSize,
+    })),
+  ).toEqual(state);
+  await sample(0.89);
+  const carried = await page.locator("[data-morph-amount]").boundingBox(),
+    target = await page
+      .locator("[data-dossier-frame] [data-shared-amount]")
+      .boundingBox();
+  expect(Math.abs((carried?.x ?? 0) - (target?.x ?? 0))).toBeLessThan(1);
+  expect(Math.abs((carried?.y ?? 0) - (target?.y ?? 0))).toBeLessThan(1);
+  await expect(page.locator("[data-note]")).toHaveCount(6);
 });

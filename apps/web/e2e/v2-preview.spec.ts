@@ -81,12 +81,12 @@ test("seven scroll checkpoints, rewind, restored position and clean remount", as
       name: "Money moves. Risk hides. SENTINEL reveals it.",
     }),
   ).toBeInViewport();
-  await page.getByRole("link", { name: "Open the Payment Dossier" }).click();
+  await page.getByRole("link", { name: "Open the simulated dossier" }).click();
   await expect(
     page.getByRole("heading", { name: "Payment dossier." }),
   ).toBeVisible();
   await page
-    .getByRole("link", { name: "Follow the money ↗", exact: true })
+    .getByRole("link", { name: "Follow the money", exact: true })
     .click();
   await page
     .getByRole("button", { name: "Go to Risk analysis", exact: true })

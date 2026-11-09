@@ -56,6 +56,46 @@ export function Wallet() {
         fill="url(#wallet-lining)"
       />
       <path d="M80 106H498L512 285 94 304Z" fill="#2D1D44" />
+      <g data-wallet-interior opacity="0">
+        <path d="M84 109 492 91 507 176 92 196Z" fill="#241933" />
+        <path
+          d="M99 98 251 91 262 169 108 180Z"
+          fill="#CFC2E2"
+          stroke="#9C85B4"
+        />
+        <path
+          d="M106 87 258 82 270 161 116 173Z"
+          fill="#E7DFF0"
+          stroke="#A592BC"
+        />
+        <path
+          d="M114 77 266 73 278 155 124 165Z"
+          fill="#F7F4EE"
+          stroke="#BBAACD"
+        />
+        <path
+          d="m129 101 122-5m-118 16 100-5m-95 17 121-5"
+          stroke="#B7A5CB"
+          strokeWidth="3"
+        />
+        <path
+          d="M295 107 478 98 487 151 303 164Z"
+          fill="#59378D"
+          stroke="#AF8DDD"
+        />
+        <path
+          d="m307 125 169-11m-166 22 168-10"
+          stroke="#C4A5ED"
+          strokeWidth="2"
+        />
+        <path
+          d="M285 90 297 183"
+          stroke="#190F2A"
+          strokeWidth="12"
+          opacity=".6"
+        />
+        <path d="M290 90 302 183" stroke="#AD8CE0" strokeWidth="2" />
+      </g>
       <g data-wallet-fold style={{ transformOrigin: "290px 148px" }}>
         <path
           d="M70 105Q65 72 99 68L477 53Q510 53 516 86L526 189Q527 208 507 212L102 230Q78 232 77 209Z"
@@ -96,6 +136,15 @@ export function Wallet() {
         strokeWidth="2"
         strokeOpacity=".7"
       />
+      <path d="M285 150 309 149 329 339 305 340Z" fill="#30184C" opacity=".4" />
+      <path d="m292 163 18 164" stroke="#BD95F2" strokeWidth="2" opacity=".5" />
+      <path d="M76 185 88 197 100 328 82 311Z" fill="#44216F" opacity=".7" />
+      <path d="M505 161 520 180 536 299 519 313Z" fill="#3E215E" opacity=".6" />
+      <path
+        d="m111 318 177-10m38-2 165-9"
+        stroke="#D6B6FE"
+        strokeOpacity=".35"
+      />
       <path
         d="M448 217 543 213Q558 213 560 229L562 260Q563 275 548 277L454 281Q438 282 437 266L434 236Q433 219 448 217Z"
         fill="#47268B"
@@ -124,14 +173,35 @@ export function Wallet() {
 export function Banknote({ variant = 0 }: { variant?: number }) {
   return (
     <g>
-      <rect
-        x="-150"
-        y="-73"
-        width="300"
-        height="146"
-        rx="9"
+      <path
+        d="M-148-65Q-5-91 151-62L145 78Q0 49-151 78Z"
+        fill="#584271"
+        opacity=".12"
+        transform="translate(5 8)"
+      />
+      <path
+        d="M-148-73Q0-91 150-65L145 72Q0 47-151 73Z"
         fill={variant === 0 ? "#D9D2E6" : "#E9E0FF"}
         stroke="#A89ABA"
+        strokeWidth="2"
+      />
+      <path
+        d="M-146-71Q0-88 147-63M-148 70Q0 45 142 69"
+        stroke="#FFFFFF"
+        strokeOpacity=".7"
+        fill="none"
+        strokeWidth="3"
+      />
+      <path
+        d="M-151 73Q-139 25-148-73"
+        fill="none"
+        stroke="#8A74A8"
+        strokeWidth="4"
+      />
+      <path
+        d="M-61-62Q-44 0-62 59M60-63Q76 0 59 57"
+        fill="none"
+        stroke="#B8A4D1"
         strokeWidth="2"
       />
       <rect
@@ -230,7 +300,7 @@ export function Receipt({ secondary = false }: { secondary?: boolean }) {
         Captured
       </text>
       <text x="-106" y="105" fontSize="11" fill="#7547EB">
-        FOLLOW THE MONEY ↗
+        FOLLOW THE MONEY
       </text>
       <path
         d="M-106 122H-61M-54 122H-33M-26 122H18M25 122H47M54 122H106"

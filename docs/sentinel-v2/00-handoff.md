@@ -1,3 +1,7 @@
+# Current checkpoint — final Gate 1 visual polish
+
+Read [11-gate1-polish.md](11-gate1-polish.md) first. It supersedes the miniature/scaled workspace reveal in the earlier Follow the Money prototype. The preferred direction is accepted subject to review; DESIGN APPROVAL and DEPLOYMENT APPROVAL remain PENDING. Phase 2 has not begun.
+
 # Current direction — Follow the Money
 
 The user rejected the reel and graphite/lime identity. Read [09-money-trail-reset.md](09-money-trail-reset.md) and [10-money-trail-qa.md](10-money-trail-qa.md) for the executed verification and review limits. Document 09 covers the replacement wallet narrative, ivory/purple identity, horizontal navigation, casefile layout and explicit prototype scope. Earlier descriptions below are historical and superseded for visual direction.

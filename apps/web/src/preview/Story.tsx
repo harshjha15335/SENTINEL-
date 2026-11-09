@@ -4,6 +4,7 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { ArrowUpRight, ArrowDown } from "lucide-react";
 import { useRef, useSyncExternalStore } from "react";
 import { Link } from "react-router-dom";
+import { ReceiptMorph, receiptMorph } from "./ReceiptMorph";
 import { DemoDossier } from "./Dossier";
 import { storyStages } from "./fixtures";
 import { chapters, ease, phase, mix, moneyScene } from "./money-scene";
@@ -39,7 +40,7 @@ function StoryNav() {
       <nav aria-label="Preview navigation">
         <button onClick={skip}>Skip story</button>
         <Link to="/__v2-preview/dossier" className="v2-nav-cta">
-          Enter SENTINEL <ArrowUpRight size={16} />
+          Explore simulated demo <ArrowUpRight size={16} />
         </Link>
       </nav>
     </header>
@@ -71,6 +72,8 @@ function DesktopStory() {
       const pin = el.querySelector<HTMLElement>(".v2-story-pin");
       let width = pin?.clientWidth ?? innerWidth,
         height = pin?.clientHeight ?? innerHeight;
+      const morph = frame ? receiptMorph(el, frame) : null;
+      const interior = el.querySelector<SVGElement>("[data-wallet-interior]");
       const render = (progress: number) => {
         const s = moneyScene(progress),
           p = s.p,
@@ -85,6 +88,7 @@ function DesktopStory() {
           );
           wallet.style.opacity = String(w.opacity);
         }
+        if (interior) interior.style.opacity = String(s.open);
         if (fold)
           fold.style.transform = `translateY(${-68 * s.open}px) scaleY(${1 - 0.75 * s.open}) rotate(${-7 * s.open}deg)`;
         if (receipt) {
@@ -94,20 +98,31 @@ function DesktopStory() {
           );
           receipt.style.opacity = String(r.opacity);
         }
+        const notePaths = [
+          { x: 790, y: 220, s: 0.82, r: -27 },
+          { x: 1280, y: 625, s: 0.72, r: 24 },
+          { x: 1010, y: 160, s: 0.5, r: 12 },
+          { x: 815, y: 660, s: 0.54, r: -18 },
+          { x: 1235, y: 360, s: 0.46, r: 34 },
+          { x: 1080, y: 715, s: 0.63, r: -12 },
+        ];
         notes.forEach((n, i) => {
-          const a = ease(phase(p, 0.12 + i * 0.025, 0.36 + i * 0.025)),
-            travel = ease(phase(p, 0.28, 0.66));
+          const spec = notePaths[i] ?? { x: 1100, y: 400, s: 0.5, r: 0 },
+            release = ease(phase(p, 0.12 + i * 0.014, 0.33 + i * 0.014)),
+            travel = ease(phase(p, 0.35, 0.65));
           const x =
-              mix(1020, i === 0 ? 830 : 1250, a) +
-              Math.sin(travel * Math.PI) * (i === 0 ? -120 : 40),
-            y = mix(440, i === 0 ? 210 : 640, a) - travel * 280;
+            mix(1040, spec.x, release) + (i % 2 === 0 ? -100 : 90) * travel;
+          const y =
+            mix(390, spec.y, release) -
+            Math.sin(release * Math.PI) * 130 -
+            travel * (i % 2 === 0 ? 140 : 80);
           n.setAttribute(
             "transform",
-            `translate(${x} ${y}) rotate(${mix(-8, i === 0 ? -24 : 22, a) + travel * 60}) scale(${mix(0.08, i === 0 ? 0.75 : 0.63, a)})`,
+            `translate(${x} ${y}) rotate(${mix(-8, spec.r, release) + travel * 40}) skewX(${Math.sin(release * Math.PI) * mix(-10, 10, i / 5)}) scale(${mix(0.12, spec.s, release)},${mix(0.12, spec.s * (0.78 + 0.16 * Math.cos(release * Math.PI)), release)})`,
           );
           n.style.opacity = String(
-            ease(phase(p, 0.13 + i * 0.025, 0.2 + i * 0.025)) *
-              (1 - ease(phase(p, 0.44, 0.65))),
+            ease(phase(p, 0.13 + i * 0.014, 0.19 + i * 0.014)) *
+              (1 - ease(phase(p, 0.47 + i * 0.01, 0.66 + i * 0.01))),
           );
         });
         if (secondary) {
@@ -163,16 +178,7 @@ function DesktopStory() {
           n.style.visibility = a > 0 ? "visible" : "hidden";
           n.inert = i !== s.stage;
         });
-        if (frame) {
-          // Match the persistent receipt's normalized bounds before growing to the live shell.
-          const scale = Math.min(width / 1440, height / 900);
-          const x = (width - 1440 * scale) / 2 + 904 * scale,
-            y = (height - 900 * scale) / 2 + 274 * scale;
-          frame.style.transform = `translate(${x * (1 - s.assemble)}px,${y * (1 - s.assemble)}px) scale(${mix((262 * scale) / width, 1, s.assemble)},${mix((322 * scale) / height, 1, s.assemble)})`;
-          frame.style.opacity = String(ease(phase(p, 0.76, 0.81)));
-          frame.style.visibility = p > 0.75 ? "visible" : "hidden";
-          frame.style.borderRadius = `${32 * (1 - s.assemble)}px`;
-        }
+        morph?.render(p, width, height);
         if (footer) {
           footer.style.opacity = String(1 - ease(phase(p, 0.77, 0.88)));
           footer.inert = p > 0.88;
@@ -206,6 +212,7 @@ function DesktopStory() {
         onRefresh: (self) => {
           width = pin?.clientWidth ?? innerWidth;
           height = pin?.clientHeight ?? innerHeight;
+          morph?.refresh();
           render(self.progress);
         },
       });
@@ -274,12 +281,11 @@ function DesktopStory() {
                 strokeWidth="2"
                 strokeDasharray="4 10"
               />
-              <g data-note>
-                <Banknote />
-              </g>
-              <g data-note>
-                <Banknote variant={1} />
-              </g>
+              {Array.from({ length: 6 }, (_, i) => (
+                <g key={i} data-note>
+                  <Banknote variant={i % 2} />
+                </g>
+              ))}
               <g data-secondary-receipt>
                 <Receipt secondary />
               </g>
@@ -388,9 +394,15 @@ function DesktopStory() {
                   {i === 0 && (
                     <>
                       <Link className="v2-button" to="/__v2-preview/dossier">
-                        Enter SENTINEL <ArrowUpRight size={18} />
+                        Explore simulated demo <ArrowUpRight size={18} />
                       </Link>
                       <small>Explore an interactive, simulated payment.</small>
+                      <Link
+                        className="v2-auth-link"
+                        to="/__v2-preview/workspace"
+                      >
+                        Open authenticated workspace <ArrowUpRight size={15} />
+                      </Link>
                     </>
                   )}
                 </section>
@@ -404,10 +416,11 @@ function DesktopStory() {
             >
               <DemoDossier embedded />
             </div>
+            <ReceiptMorph />
             <div className="v2-scene-enter" inert>
               <span>FROM PAYMENT TO PERSPECTIVE.</span>
               <Link className="v2-button" to="/__v2-preview/dossier">
-                Enter SENTINEL <ArrowUpRight size={18} />
+                Explore simulated demo <ArrowUpRight size={18} />
               </Link>
             </div>
             <footer className="v2-scene-footer">
@@ -449,12 +462,14 @@ function CompactStory() {
       const mm = gsap.matchMedia();
       mm.add("(prefers-reduced-motion: no-preference)", () => {
         const fold = el.querySelector<SVGElement>("[data-wallet-fold]");
+        const interior = el.querySelector<SVGElement>("[data-wallet-interior]");
         const t = ScrollTrigger.create({
           id: "sentinel-mobile-money",
           trigger: el.querySelector(".v2-compact-hero"),
           start: "top top",
           end: "bottom top",
           onUpdate: (s) => {
+            if (interior) interior.style.opacity = String(s.progress);
             if (fold)
               fold.style.transform = `translateY(${-68 * s.progress}px) scaleY(${1 - 0.75 * s.progress})`;
             el.dataset.progress = s.progress.toFixed(4);
@@ -479,7 +494,10 @@ function CompactStory() {
           </h1>
           <p>Not every story ends well.</p>
           <Link className="v2-button" to="/__v2-preview/dossier">
-            Enter SENTINEL <ArrowUpRight size={18} />
+            Explore simulated demo <ArrowUpRight size={18} />
+          </Link>
+          <Link className="v2-auth-link" to="/__v2-preview/workspace">
+            Open authenticated workspace <ArrowUpRight size={15} />
           </Link>
           <div className="v2-compact-wallet">
             <Wallet />
@@ -548,10 +566,10 @@ function StoryAfter() {
           happens next.
         </p>
         <Link className="v2-button" to="/__v2-preview/dossier">
-          Open the Payment Dossier <ArrowUpRight size={18} />
+          Open the simulated dossier <ArrowUpRight size={18} />
         </Link>
         <Link className="v2-text-link" to="/__v2-preview/workspace">
-          Inspect authorized records <ArrowUpRight size={15} />
+          Open authenticated workspace <ArrowUpRight size={15} />
         </Link>
       </div>
     </section>

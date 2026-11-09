@@ -32,7 +32,7 @@ export function moneyScene(progress: number) {
       y: mix(430, 230, release) + 210 * journey,
       angle: mix(-18, 0, isolate),
       scale: mix(0.15, 1, release),
-      opacity: ease(phase(p, 0.13, 0.19)) * (1 - ease(phase(p, 0.78, 0.82))),
+      opacity: ease(phase(p, 0.13, 0.19)) * (1 - ease(phase(p, 0.755, 0.76))),
     },
     stage: chapters.reduce<number>((last, b, i) => (p >= b ? i : last), 0),
     field: ease(phase(p, 0.53, 0.61)) * (1 - ease(phase(p, 0.75, 0.84))),
