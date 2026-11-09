@@ -37,6 +37,11 @@ const PolicyLabPage = lazy(() => import("@/features/policy/PolicyLabPage").then(
 const MonitoringPage = lazy(() => import("@/features/monitoring/MonitoringPage").then(m => ({ default: m.MonitoringPage })));
 const NetworkPage = lazy(() => import("@/features/network/NetworkPage").then(m => ({ default: m.NetworkPage })));
 
+// V2 is excluded from every production build, including Pages and hash-router builds.
+const V2Preview = import.meta.env.DEV && import.meta.env.VITE_STATIC_DEMO !== "true"
+  ? lazy(() => import("@/preview/Preview"))
+  : null;
+
 const fallback = <Skeleton className="h-64" />;
 
 function makeClient(): QueryClient {
@@ -81,6 +86,7 @@ export function App() {
 export function AppRoutes() {
   return (
     <Routes>
+      {V2Preview && <Route path="/__v2-preview/*" element={<Suspense fallback={<main>Loading design preview…</main>}><V2Preview /></Suspense>} />}
       <Route path="/login" element={<LoginPage />} />
       <Route element={<AppShell />}>
         <Route index element={<DashboardPage />} />
