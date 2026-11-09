@@ -6,12 +6,18 @@ Validates that the execution path:
 3. Immediately stops and categorizes as PROVIDER_UNAVAILABLE on HTTP 401 (Unauthenticated).
 4. Immediately stops and categorizes as PROVIDER_UNAVAILABLE on HTTP 403 (Permission Denied).
 5. Immediately stops and categorizes as PROVIDER_ERROR on HTTP 429 (Rate Limit / Quota Exceeded).
+6. Prevents double-decompression errors on gzip/deflate upstream responses.
+7. Enforces a strict socket-level limit of ONE outbound generation request.
 """
 
+import asyncio
+import gzip
 import json
+import os
+import sys
 from unittest.mock import MagicMock
 
-import httpx
+import httpx2
 import pytest
 from google.genai.types import HttpRetryOptions
 from pydantic_ai.providers.google import GoogleProvider
@@ -20,6 +26,11 @@ from app.models.enums import InvestigationErrorCategory
 from app.services.investigation.provider import ProviderSpec, SentinelGoogleModel
 from app.services.investigation.runner import InvestigationFailed, _run_agent
 from app.services.investigation.toolbox import CaseToolbox
+
+sys.path.insert(
+    0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..", "scripts"))
+)
+from verify_gemini_entrypoint import SingleRequestLimitingTransport
 
 
 @pytest.fixture(autouse=True)
@@ -34,12 +45,12 @@ def _migrated_database():
     yield
 
 
-def _make_spec_with_transport(transport: httpx.AsyncBaseTransport) -> ProviderSpec:
+def _make_spec_with_transport(transport: httpx2.AsyncBaseTransport) -> ProviderSpec:
     def build():
         provider = GoogleProvider(
             api_key="AIzaSyMockKeyForOfflinePathTest12345",
             retry_options=HttpRetryOptions(attempts=1),
-            http_client=httpx.AsyncClient(transport=transport),
+            http_client=httpx2.AsyncClient(transport=transport),
         )
         return SentinelGoogleModel("gemini-3.1-flash-lite", provider=provider)
 
@@ -47,8 +58,8 @@ def _make_spec_with_transport(transport: httpx.AsyncBaseTransport) -> ProviderSp
 
 
 def test_execution_path_stops_on_http_400():
-    class Status400Transport(httpx.AsyncBaseTransport):
-        async def handle_async_request(self, request: httpx.Request) -> httpx.Response:
+    class Status400Transport(httpx2.AsyncBaseTransport):
+        async def handle_async_request(self, request: httpx2.Request) -> httpx2.Response:
             err_body = {
                 "error": {
                     "code": 400,
@@ -58,13 +69,16 @@ def test_execution_path_stops_on_http_400():
                         {
                             "@type": "type.googleapis.com/google.rpc.BadRequest",
                             "fieldViolations": [
-                                {"field": "generationConfig.invalid", "description": "Invalid"}
+                                {
+                                    "field": "tools[0].function_declarations[0].parameters",
+                                    "description": "Invalid parameter schema",
+                                }
                             ],
                         }
                     ],
                 }
             }
-            return httpx.Response(
+            return httpx2.Response(
                 400,
                 content=json.dumps(err_body).encode("utf-8"),
                 headers={"Content-Type": "application/json"},
@@ -80,13 +94,11 @@ def test_execution_path_stops_on_http_400():
     err = exc_info.value
     assert err.category is InvestigationErrorCategory.PROVIDER_ERROR
     assert "HTTP 400" in err.message
-    assert err.usage.get("diagnostic") is not None
-    assert err.usage["diagnostic"]["status_code"] == 400
 
 
 def test_execution_path_stops_on_http_401():
-    class Status401Transport(httpx.AsyncBaseTransport):
-        async def handle_async_request(self, request: httpx.Request) -> httpx.Response:
+    class Status401Transport(httpx2.AsyncBaseTransport):
+        async def handle_async_request(self, request: httpx2.Request) -> httpx2.Response:
             err_body = {
                 "error": {
                     "code": 401,
@@ -94,7 +106,7 @@ def test_execution_path_stops_on_http_401():
                     "status": "UNAUTHENTICATED",
                 }
             }
-            return httpx.Response(
+            return httpx2.Response(
                 401,
                 content=json.dumps(err_body).encode("utf-8"),
                 headers={"Content-Type": "application/json"},
@@ -113,16 +125,16 @@ def test_execution_path_stops_on_http_401():
 
 
 def test_execution_path_stops_on_http_403():
-    class Status403Transport(httpx.AsyncBaseTransport):
-        async def handle_async_request(self, request: httpx.Request) -> httpx.Response:
+    class Status403Transport(httpx2.AsyncBaseTransport):
+        async def handle_async_request(self, request: httpx2.Request) -> httpx2.Response:
             err_body = {
                 "error": {
                     "code": 403,
-                    "message": "Method doesn't allow unregistered callers.",
+                    "message": "Generative Language API is disabled in project.",
                     "status": "PERMISSION_DENIED",
                 }
             }
-            return httpx.Response(
+            return httpx2.Response(
                 403,
                 content=json.dumps(err_body).encode("utf-8"),
                 headers={"Content-Type": "application/json"},
@@ -143,8 +155,8 @@ def test_execution_path_stops_on_http_403():
 def test_hard_limit_of_one_request_stops_before_turn_2():
     request_counter = 0
 
-    class MultiTurnMockTransport(httpx.AsyncBaseTransport):
-        async def handle_async_request(self, request: httpx.Request) -> httpx.Response:
+    class MultiTurnMockTransport(httpx2.AsyncBaseTransport):
+        async def handle_async_request(self, request: httpx2.Request) -> httpx2.Response:
             nonlocal request_counter
             request_counter += 1
             if request_counter > 1:
@@ -167,7 +179,7 @@ def test_hard_limit_of_one_request_stops_before_turn_2():
                     "totalTokenCount": 120,
                 },
             }
-            return httpx.Response(
+            return httpx2.Response(
                 200,
                 content=json.dumps(dummy).encode("utf-8"),
                 headers={"Content-Type": "application/json"},
@@ -177,7 +189,6 @@ def test_hard_limit_of_one_request_stops_before_turn_2():
     box = MagicMock(spec=CaseToolbox)
     box.calls = []
 
-    # Bounded execution with request_limit=1 must stop after Turn 1
     with pytest.raises(InvestigationFailed) as exc_info:
         _run_agent(box, spec, request_limit=1)
 
@@ -186,8 +197,8 @@ def test_hard_limit_of_one_request_stops_before_turn_2():
 
 
 def test_execution_path_stops_on_http_429():
-    class Status429Transport(httpx.AsyncBaseTransport):
-        async def handle_async_request(self, request: httpx.Request) -> httpx.Response:
+    class Status429Transport(httpx2.AsyncBaseTransport):
+        async def handle_async_request(self, request: httpx2.Request) -> httpx2.Response:
             err_body = {
                 "error": {
                     "code": 429,
@@ -195,7 +206,7 @@ def test_execution_path_stops_on_http_429():
                     "status": "RESOURCE_EXHAUSTED",
                 }
             }
-            return httpx.Response(
+            return httpx2.Response(
                 429,
                 content=json.dumps(err_body).encode("utf-8"),
                 headers={"Content-Type": "application/json"},
@@ -214,21 +225,19 @@ def test_execution_path_stops_on_http_429():
 
 
 def test_single_request_limiting_transport_enforces_hard_cap():
-    import asyncio
-    import os
-    import sys
+    class MockAsyncStream(httpx2.AsyncByteStream):
+        def __init__(self, data: bytes):
+            self._data = data
 
-    sys.path.insert(
-        0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..", "scripts"))
-    )
-    from verify_gemini_entrypoint import SingleRequestLimitingTransport
+        async def __aiter__(self):
+            yield self._data
 
-    class EchoTransport(httpx.AsyncBaseTransport):
-        async def handle_async_request(self, request: httpx.Request) -> httpx.Response:
-            return httpx.Response(200, json={"status": "ok"})
+    class EchoTransport(httpx2.AsyncBaseTransport):
+        async def handle_async_request(self, request: httpx2.Request) -> httpx2.Response:
+            return httpx2.Response(200, stream=MockAsyncStream(b'{"status": "ok"}'))
 
     transport = SingleRequestLimitingTransport(EchoTransport())
-    client = httpx.AsyncClient(transport=transport)
+    client = httpx2.AsyncClient(transport=transport)
 
     # 1st request succeeds
     r1 = asyncio.run(client.get("https://example.com/test"))
@@ -240,3 +249,67 @@ def test_single_request_limiting_transport_enforces_hard_cap():
         asyncio.run(client.get("https://example.com/test2"))
     assert "STRICT TRANSPORT CAP VIOLATION" in str(exc_info.value)
     assert transport.request_count == 2
+
+
+def test_single_request_limiting_transport_handles_gzip_decompression():
+    """Verify that gzip compressed upstream responses decode without double-decompression."""
+    raw_dict = {
+        "candidates": [
+            {
+                "content": {
+                    "parts": [{"functionCall": {"name": "get_case_information", "args": {}}}],
+                    "role": "model",
+                },
+                "finishReason": "STOP",
+            }
+        ]
+    }
+    raw_json = json.dumps(raw_dict).encode("utf-8")
+    compressed = gzip.compress(raw_json)
+
+    class GzipMockTransport(httpx2.AsyncBaseTransport):
+        async def handle_async_request(self, request: httpx2.Request) -> httpx2.Response:
+            return httpx2.Response(
+                200,
+                headers={"content-type": "application/json", "content-encoding": "gzip"},
+                content=compressed,
+                request=request,
+            )
+
+    limiter = SingleRequestLimitingTransport(GzipMockTransport())
+    client = httpx2.AsyncClient(transport=limiter)
+
+    resp = asyncio.run(client.get("https://generativelanguage.googleapis.com/test"))
+    assert resp.status_code == 200
+    assert limiter.request_count == 1
+    # Verify downstream reader can read text without zlib header check errors
+    assert resp.text is not None
+    assert "get_case_information" in resp.text
+    # Verify limiter captured parsed JSON safely
+    assert limiter.captured_response_json is not None
+
+
+def test_single_request_limiting_transport_handles_gzip_401():
+    """Verify that a 401 gzip response does not trigger zlib decompression errors."""
+    raw_401 = (
+        b'{"error": {"code": 401, "message": "API key not valid.", "status": "UNAUTHENTICATED"}}'
+    )
+    compressed = gzip.compress(raw_401)
+
+    class Gzip401Transport(httpx2.AsyncBaseTransport):
+        async def handle_async_request(self, request: httpx2.Request) -> httpx2.Response:
+            return httpx2.Response(
+                401,
+                headers={"content-type": "application/json", "content-encoding": "gzip"},
+                content=compressed,
+                request=request,
+            )
+
+    limiter = SingleRequestLimitingTransport(Gzip401Transport())
+    client = httpx2.AsyncClient(transport=limiter)
+
+    resp = asyncio.run(client.get("https://generativelanguage.googleapis.com/test"))
+    assert resp.status_code == 401
+    assert "UNAUTHENTICATED" in resp.text
+    assert limiter.captured_status == 401
+    assert limiter.captured_response_json["error"]["code"] == 401

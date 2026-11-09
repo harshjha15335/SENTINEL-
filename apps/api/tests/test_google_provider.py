@@ -5,7 +5,7 @@ import contextlib
 import json
 from unittest.mock import MagicMock
 
-import httpx
+import httpx2
 import pytest
 from google.genai.types import HttpRetryOptions
 from pydantic_ai.models.google import GoogleModel
@@ -20,6 +20,16 @@ from app.services.investigation.provider import (
 )
 from app.services.investigation.schemas import InvestigationFindings
 from app.services.investigation.toolbox import CaseToolbox
+
+
+@pytest.fixture(autouse=True)
+def _clean_tables():
+    yield
+
+
+@pytest.fixture(scope="module", autouse=True)
+def _migrated_database():
+    yield
 
 
 @pytest.mark.parametrize("retries", [0, 1, 2])
@@ -68,8 +78,8 @@ def test_sentinel_google_schema_transformer_inlines_defs():
 def test_sentinel_google_model_wire_serialization_no_contradiction():
     captured = []
 
-    class MockTransport(httpx.AsyncBaseTransport):
-        async def handle_async_request(self, request: httpx.Request) -> httpx.Response:
+    class MockTransport(httpx2.AsyncBaseTransport):
+        async def handle_async_request(self, request: httpx2.Request) -> httpx2.Response:
             captured.append(json.loads(request.read().decode("utf-8")))
             dummy = {
                 "candidates": [
@@ -89,7 +99,7 @@ def test_sentinel_google_model_wire_serialization_no_contradiction():
                     "totalTokenCount": 20,
                 },
             }
-            return httpx.Response(
+            return httpx2.Response(
                 status_code=200,
                 content=json.dumps(dummy).encode("utf-8"),
                 headers={"Content-Type": "application/json"},
@@ -98,7 +108,7 @@ def test_sentinel_google_model_wire_serialization_no_contradiction():
     provider = GoogleProvider(
         api_key="AIzaSyMockKeyForTesting1234567890",
         retry_options=HttpRetryOptions(attempts=1),
-        http_client=httpx.AsyncClient(transport=MockTransport()),
+        http_client=httpx2.AsyncClient(transport=MockTransport()),
     )
     model = SentinelGoogleModel("gemini-3.1-flash-lite", provider=provider)
     box = MagicMock(spec=CaseToolbox)

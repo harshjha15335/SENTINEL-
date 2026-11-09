@@ -24,9 +24,7 @@ sys.path.insert(
     0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "apps", "api"))
 )
 
-import httpx
-from pydantic import SecretStr
-
+import httpx2
 from app.core.config import AIProvider, Settings
 from app.models.enums import DataOrigin, InvestigationErrorCategory
 from app.services.investigation.agent import USER_PROMPT, AgentDeps, build_agent
@@ -38,25 +36,32 @@ from app.services.investigation.provider import (
 )
 from app.services.investigation.runner import InvestigationFailed
 from app.services.investigation.toolbox import CaseToolbox
+from pydantic import SecretStr
 
 
-class SingleRequestLimitingTransport(httpx.AsyncBaseTransport):
+class SingleRequestLimitingTransport(httpx2.AsyncBaseTransport):
     """Hard transport-level interceptor enforcing strictly ONE HTTP request.
 
     If any subsequent request is attempted (retries or turn 2), it is immediately
     blocked at the socket boundary with a RuntimeError.
+
+    Decompression Safety:
+    When decoding gzip/deflate compressed upstream responses, the raw stream is
+    decompressed once into plaintext bytes, and downstream headers are sanitized
+    (removing 'content-encoding' and 'content-length') to eliminate double-decompression
+    failures in downstream HTTP clients and SDK parsers.
     """
 
-    def __init__(self, wrapped: httpx.AsyncBaseTransport):
+    def __init__(self, wrapped: httpx2.AsyncBaseTransport):
         self.wrapped = wrapped
         self.request_count = 0
-        self.captured_request: httpx.Request | None = None
-        self.captured_response: httpx.Response | None = None
+        self.captured_request: httpx2.Request | None = None
+        self.captured_response: httpx2.Response | None = None
         self.captured_response_body: bytes = b""
         self.captured_response_json: dict[str, Any] | None = None
         self.captured_status: int | None = None
 
-    async def handle_async_request(self, request: httpx.Request) -> httpx.Response:
+    async def handle_async_request(self, request: httpx2.Request) -> httpx2.Response:
         self.request_count += 1
         if self.request_count > 1:
             raise RuntimeError(
@@ -67,6 +72,8 @@ class SingleRequestLimitingTransport(httpx.AsyncBaseTransport):
         response = await self.wrapped.handle_async_request(request)
         self.captured_response = response
         self.captured_status = response.status_code
+
+        # Read response body safely (handles initial decompression)
         try:
             body = await response.aread()
             self.captured_response_body = body
@@ -77,10 +84,18 @@ class SingleRequestLimitingTransport(httpx.AsyncBaseTransport):
                 )
         except (json.JSONDecodeError, UnicodeDecodeError):
             pass
+        except Exception:  # noqa: BLE001
+            self.captured_response_json = None
 
-        return httpx.Response(
+        # Sanitize headers: body is now uncompressed plaintext, so strip content-encoding
+        # and content-length to prevent double decompression downstream.
+        clean_headers = dict(response.headers)
+        clean_headers.pop("content-encoding", None)
+        clean_headers.pop("content-length", None)
+
+        return httpx2.Response(
             status_code=response.status_code,
-            headers=response.headers,
+            headers=clean_headers,
             content=self.captured_response_body,
             request=request,
         )
@@ -89,15 +104,15 @@ class SingleRequestLimitingTransport(httpx.AsyncBaseTransport):
 def build_live_spec_with_single_request_cap(
     raw_key: str,
     model_name: str = "gemini-3.1-flash-lite",
-    mock_transport: httpx.AsyncBaseTransport | None = None,
+    mock_transport: httpx2.AsyncBaseTransport | None = None,
 ) -> tuple[ProviderSpec, SingleRequestLimitingTransport]:
     """Build ProviderSpec strictly capped at ONE HTTP request with retries disabled."""
     from google.genai.types import HttpRetryOptions
     from pydantic_ai.providers.google import GoogleProvider
 
-    underlying_transport = mock_transport or httpx.AsyncHTTPTransport(retries=0)
+    underlying_transport = mock_transport or httpx2.AsyncHTTPTransport(retries=0)
     limiting_transport = SingleRequestLimitingTransport(underlying_transport)
-    client = httpx.AsyncClient(transport=limiting_transport)
+    client = httpx2.AsyncClient(transport=limiting_transport)
 
     provider = GoogleProvider(
         api_key=raw_key,
@@ -217,8 +232,10 @@ def verify_offline_wire_schema() -> tuple[bool, str]:
 
     captured: list[dict[str, Any]] = []
 
-    class MockTransport(httpx.AsyncBaseTransport):
-        async def handle_async_request(self, request: httpx.Request) -> httpx.Response:
+    class MockTransport(httpx2.AsyncBaseTransport):
+        async def handle_async_request(
+            self, request: httpx2.Request
+        ) -> httpx2.Response:
             captured.append(json.loads(request.read().decode("utf-8")))
             dummy = {
                 "candidates": [
@@ -243,7 +260,7 @@ def verify_offline_wire_schema() -> tuple[bool, str]:
                     "totalTokenCount": 20,
                 },
             }
-            return httpx.Response(
+            return httpx2.Response(
                 200,
                 content=json.dumps(dummy).encode("utf-8"),
                 headers={"Content-Type": "application/json"},
@@ -252,7 +269,7 @@ def verify_offline_wire_schema() -> tuple[bool, str]:
     provider = GoogleProvider(
         api_key="AIzaSyMockKeyForVerificationOfflineOnly123456",
         retry_options=HttpRetryOptions(attempts=1),
-        http_client=httpx.AsyncClient(transport=MockTransport()),
+        http_client=httpx2.AsyncClient(transport=MockTransport()),
     )
     model = SentinelGoogleModel("gemini-3.1-flash-lite", provider=provider)
     box = MagicMock(spec=CaseToolbox)
@@ -371,7 +388,6 @@ def run_controlled_live_test(case_id: str, raw_key: str) -> int:
         )
 
         error_category: str | None = None
-        is_http_400_resolved = False
         tool_calls: list[str] = []
         token_usage: dict[str, int] = {}
 
@@ -390,11 +406,13 @@ def run_controlled_live_test(case_id: str, raw_key: str) -> int:
                     "[RESULT] Turn 1 successfully completed and stopped by request_limit=1 boundary."
                 )
             else:
+                diag = exc.usage.get("diagnostic", {})
+                diag_cat = f" ({diag.get('category')})" if diag.get("category") else ""
                 print(
-                    f"[RESULT] Investigation stopped with category: {error_category} ({exc.message})"
+                    f"[RESULT] Investigation stopped with category: {error_category}{diag_cat} — {exc.message}"
                 )
         except Exception as exc:  # noqa: BLE001
-            error_category = f"UNEXPECTED_EXCEPTION: {exc}"
+            error_category = f"UNEXPECTED_EXCEPTION: {type(exc).__name__}: {exc}"
             print(f"[RESULT] Unexpected exception: {exc}")
 
         # 3. Analyze Transport Capture
@@ -402,22 +420,72 @@ def run_controlled_live_test(case_id: str, raw_key: str) -> int:
         resp_status = limiting_transport.captured_status
         resp_json = limiting_transport.captured_response_json
 
+        if resp_status == 200 and resp_json:
+            candidates = resp_json.get("candidates", [])
+            if candidates:
+                parts = candidates[0].get("content", {}).get("parts", [])
+                for part in parts:
+                    fc = part.get("functionCall")
+                    if fc:
+                        tool_calls.append(fc.get("name", "unknown"))
+            usage_meta = resp_json.get("usageMetadata", {})
+            token_usage = {
+                "prompt_tokens": usage_meta.get("promptTokenCount", 0),
+                "candidates_tokens": usage_meta.get("candidatesTokenCount", 0),
+                "total_tokens": usage_meta.get("totalTokenCount", 0),
+            }
+
+        # Accurate evaluation of Original HTTP 400 issue:
         if resp_status == 200:
-            is_http_400_resolved = True
-            if resp_json:
-                candidates = resp_json.get("candidates", [])
-                if candidates:
-                    parts = candidates[0].get("content", {}).get("parts", [])
-                    for part in parts:
-                        fc = part.get("functionCall")
-                        if fc:
-                            tool_calls.append(fc.get("name", "unknown"))
-                usage_meta = resp_json.get("usageMetadata", {})
-                token_usage = {
-                    "prompt_tokens": usage_meta.get("promptTokenCount", 0),
-                    "candidates_tokens": usage_meta.get("candidatesTokenCount", 0),
-                    "total_tokens": usage_meta.get("totalTokenCount", 0),
-                }
+            http_400_evaluation = (
+                "YES - RESOLVED (Wire schema accepted with HTTP 200 OK)"
+            )
+        elif resp_status == 400:
+            http_400_evaluation = "NO - REPRODUCED (Google rejected request with HTTP 400 INVALID_ARGUMENT)"
+        elif resp_status in (401, 403):
+            http_400_evaluation = f"NOT EVALUATED (Request halted at HTTP {resp_status} authentication boundary before schema acceptance)"
+        elif resp_status == 429:
+            http_400_evaluation = (
+                "NOT EVALUATED (Request halted at HTTP 429 quota boundary)"
+            )
+        else:
+            http_400_evaluation = (
+                f"NOT EVALUATED (Request halted at HTTP {resp_status})"
+            )
+
+        # Accurate evaluation of Tool Calls:
+        if resp_status == 200:
+            if tool_calls:
+                tool_calls_str = str(tool_calls)
+            else:
+                tool_calls_str = "None (Model responded with direct text)"
+        else:
+            tool_calls_str = (
+                "NOT OBSERVED (Request halted before model response generation)"
+            )
+
+        # Accurate evaluation of Additional Turns:
+        if resp_status == 200:
+            if tool_calls:
+                additional_turns_str = "YES (Turn 1 returned tool calls; multi-turn execution required to complete investigation)"
+            else:
+                additional_turns_str = "NO (Turn 1 provided direct findings)"
+        else:
+            additional_turns_str = "N/A (Turn 1 did not complete successfully)"
+
+        # Accurate evaluation of Next Action:
+        if resp_status == 200:
+            next_action_str = "Code ready for owner-authorized multi-turn evaluation"
+        elif resp_status == 401:
+            next_action_str = "Verify API key in Google AI Studio (ensure key is active and enabled for Generative Language API) and retest"
+        elif resp_status == 403:
+            next_action_str = "Enable Generative Language API in Google Cloud project or remove API key restrictions"
+        elif resp_status == 400:
+            next_action_str = (
+                "Inspect field violation diagnostics and refine tool schema"
+            )
+        else:
+            next_action_str = "Inspect network connectivity and provider error message"
 
         # 4. Print the 10 Required Items
         print("\n" + "=" * 70)
@@ -431,27 +499,19 @@ def run_controlled_live_test(case_id: str, raw_key: str) -> int:
         print(
             f"4. Provider Error Category:               {error_category if error_category else 'None (Success)'}"
         )
-        print(
-            f"5. Original HTTP 400 Issue Resolved:     {'YES - RESOLVED' if is_http_400_resolved else 'NO'}"
-        )
-        print(
-            f"6. Returned Tool Calls:                   {tool_calls if tool_calls else 'None'}"
-        )
+        print(f"5. Original HTTP 400 Issue Resolved:     {http_400_evaluation}")
+        print(f"6. Returned Tool Calls:                   {tool_calls_str}")
         print(
             f"7. Token Usage:                           {token_usage if token_usage else 'N/A'}"
         )
-        print(
-            "8. Additional Turns Required:             YES (Turn 1 requested tool calls; stopped by 1-request boundary)"
-        )
+        print(f"8. Additional Turns Required:             {additional_turns_str}")
         print(
             "9. Backend & Database Health:             HEALTHY (Database and models intact, no data modified)"
         )
-        print(
-            "10. Exact Next Action:                    Code ready for full multi-turn evaluation if authorized"
-        )
+        print(f"10. Exact Next Action:                    {next_action_str}")
         print("=" * 70)
 
-        return 0 if is_http_400_resolved else 1
+        return 0 if resp_status == 200 else 1
 
 
 def main() -> int:

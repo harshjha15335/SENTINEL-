@@ -34,6 +34,9 @@ def test_expired_scoring_claim_is_recovered_atomically(db, tenant):
 
 def test_concurrent_scoring_workers_have_one_effect(db, tenant):
     captured(db, tenant)
+    job = db.scalar(select(RiskScoringJob))
+    job.available_at = datetime.now(UTC) - timedelta(seconds=1)
+    db.commit()
     with ThreadPoolExecutor(max_workers=2) as pool:
         results = list(pool.map(lambda _: run_once(), range(2)))
     assert sum(results) == 1
@@ -47,6 +50,9 @@ def test_failed_scoring_backoff_and_terminal_state_have_no_partial_assessment(
     from app.services.risk import jobs
 
     captured(db, tenant)
+    job = db.scalar(select(RiskScoringJob))
+    job.available_at = datetime.now(UTC) - timedelta(seconds=1)
+    db.commit()
 
     def fail(*args, **kwargs):
         raise RuntimeError("sensitive upstream detail must not enter operational state")
