@@ -1,5 +1,9 @@
 # Implementation Status
 
+## SENTINEL V2 frontend reconstruction — 10 November 2026
+
+Gate 1 was explicitly approved. The complete operational frontend and public Follow the Money homepage have been reconstructed locally; `/app` is the authenticated entry, with compatible legacy deep links. See [Phase 2 report](sentinel-v2/13-phase2-reconstruction.md). Backend, ML, database and API contracts remain unchanged. Final delivery evidence records test counts and review limits. Deployment/Gate 2 remains PENDING; no push, merge or deployment occurred.
+
 ## Latest next-phase implementation — 6 November 2026
 
 The new [technical report](NEXT_PHASE_REPORT.md) supersedes older feature-status and environment observations below. Guarded refunds, dispute preparation, validation-only Policy Lab, scoped monitoring/network views and a refreshed judge scenario are now implemented locally. Actual hosting, genuine PayPal/AI and remote bridge access remain separately blocked/unverified. See [setup](NEXT_PHASE_SETUP.md), [runbook](NEXT_PHASE_RUNBOOK.md), [architecture](NEXT_PHASE_ARCHITECTURE.md) and [demo](NEXT_PHASE_DEMO.md). Earlier dated inventories remain historical.

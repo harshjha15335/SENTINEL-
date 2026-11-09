@@ -1,28 +1,13 @@
 import {
   ArrowUpRight,
   Check,
-  ChevronRight,
   FileText,
   Fingerprint,
-  Search,
   ShieldCheck,
 } from "lucide-react";
 import { useState } from "react";
-import { Link, useLocation, useSearchParams } from "react-router-dom";
-import { useMe } from "@/features/auth/session";
-import { useCases } from "@/features/cases/useCases";
-import { useAssessment } from "@/features/risk/useRisk";
-import {
-  useTransaction,
-  useTransactions,
-} from "@/features/transactions/useTransactions";
-import {
-  ApiError,
-  type DataOrigin,
-  type TransactionStatus,
-  type RiskAssessment,
-  type TransactionDetail,
-} from "@/lib/api";
+import { Link, useSearchParams } from "react-router-dom";
+import type { RiskAssessment, TransactionDetail } from "@/lib/api";
 import { formatMoney, humanize } from "@/lib/format";
 import { examples, fixtureTransaction, FIXTURE_VERSION } from "./fixtures";
 
@@ -68,292 +53,6 @@ export function DemoDossier({ embedded = false }: { embedded?: boolean }) {
   );
 }
 
-export function AuthorizedWorkspace() {
-  const me = useMe();
-  const location = useLocation();
-  if (me.isPending)
-    return (
-      <Workspace>
-        <p role="status">Checking your existing session…</p>
-      </Workspace>
-    );
-  if (me.isError)
-    return (
-      <Workspace>
-        <QueryError error={me.error} retry={() => void me.refetch()} />
-      </Workspace>
-    );
-  if (!me.data)
-    return (
-      <Workspace>
-        <section className="v2-state">
-          <ShieldCheck />
-          <h1>Sign in to inspect real records.</h1>
-          <p>
-            This preview uses the existing session and merchant permissions.
-          </p>
-          <Link
-            className="v2-button"
-            to="/login"
-            state={{ from: location.pathname + location.search }}
-          >
-            Sign in <ArrowUpRight size={16} />
-          </Link>
-        </section>
-      </Workspace>
-    );
-  return (
-    <Workspace>
-      <div className="v2-notice">
-        AUTHORIZED READ-ONLY PREVIEW{" "}
-        <span>Existing merchant session · {me.data.role} · no mutations</span>
-      </div>
-      <LiveBrowser />
-    </Workspace>
-  );
-}
-function LiveBrowser() {
-  const [params, setParams] = useSearchParams();
-  const [search, setSearch] = useState(params.get("q") ?? "");
-  const page = Math.max(0, Number(params.get("page")) || 0);
-  const [descending, setDescending] = useState(false);
-  const status = (params.get("status") ?? "") as TransactionStatus | "";
-  const origin = (params.get("origin") ?? "") as DataOrigin | "";
-  const q = useTransactions({
-    page,
-    pageSize: 10,
-    q: params.get("q") ?? "",
-    status,
-    origin,
-  });
-  const changeFilter = (key: string, value: string) => {
-    const next = new URLSearchParams(params);
-    next.set(key, value);
-    next.delete("page");
-    next.delete("id");
-    setParams(next);
-  };
-  const items = q.data
-    ? [...q.data.items].sort((a, b) =>
-        descending
-          ? b.amount_minor - a.amount_minor
-          : a.amount_minor - b.amount_minor,
-      )
-    : [];
-  const id = params.get("id");
-  return (
-    <>
-      <div className="v2-workspace-intro">
-        <div>
-          <p className="v2-eyebrow">YOUR MERCHANT WORKSPACE</p>
-          <h1>
-            Explore your transactions<span>.</span>
-          </h1>
-        </div>
-      </div>
-      <form
-        className="v2-search"
-        role="search"
-        onSubmit={(e) => {
-          e.preventDefault();
-          const next = new URLSearchParams(params);
-          next.set("q", search);
-          next.delete("page");
-          next.delete("id");
-          setParams(next);
-        }}
-      >
-        <Search size={18} />
-        <label className="v2-sr" htmlFor="preview-search">
-          Search order or capture ID
-        </label>
-        <input
-          id="preview-search"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          placeholder="Search order or capture ID"
-        />
-        <label className="v2-sr" htmlFor="preview-status">
-          Payment status
-        </label>
-        <select
-          id="preview-status"
-          value={status}
-          onChange={(e) => changeFilter("status", e.target.value)}
-        >
-          <option value="">All statuses</option>
-          {[
-            "ORDER_CREATED",
-            "CAPTURE_PENDING",
-            "CAPTURED",
-            "CAPTURE_DECLINED",
-            "CAPTURE_FAILED",
-            "REFUNDED",
-            "PARTIALLY_REFUNDED",
-          ].map((v) => (
-            <option key={v}>{v}</option>
-          ))}
-        </select>
-        <label className="v2-sr" htmlFor="preview-origin">
-          Data origin
-        </label>
-        <select
-          id="preview-origin"
-          value={origin}
-          onChange={(e) => changeFilter("origin", e.target.value)}
-        >
-          <option value="">All origins</option>
-          {[
-            "SIMULATED",
-            "SYNTHETIC_DEMO",
-            "MERCHANT_PROVIDED",
-            "LIVE_SANDBOX",
-          ].map((v) => (
-            <option key={v}>{v}</option>
-          ))}
-        </select>
-        <button className="v2-button" type="submit">
-          Search
-        </button>
-      </form>
-      {q.isPending && <p role="status">Loading transaction records…</p>}
-      {q.isError && (
-        <QueryError error={q.error} retry={() => void q.refetch()} />
-      )}
-      {q.data?.items.length === 0 && (
-        <p className="v2-state">No transactions match this search.</p>
-      )}
-      {q.data && (
-        <div className="v2-list-tools">
-          <span>
-            {q.data.total} records · page {page + 1}
-            {q.isFetching ? " · Updating…" : ""}
-          </span>
-          <button onClick={() => setDescending(!descending)}>
-            Amount {descending ? "descending" : "ascending"} · current page
-          </button>
-        </div>
-      )}
-      {q.data && (
-        <div className="v2-live-list" aria-label="Transaction results">
-          {items.map((t) => (
-            <button
-              aria-pressed={id === t.id}
-              key={t.id}
-              onClick={() => {
-                const next = new URLSearchParams(params);
-                next.set("id", t.id);
-                setParams(next);
-              }}
-            >
-              <span>{t.paypal_order_id ?? t.id}</span>
-              <span>{formatMoney(t.amount_minor, t.currency)}</span>
-              <span>{humanize(t.data_origin)}</span>
-              <ChevronRight size={16} />
-            </button>
-          ))}
-        </div>
-      )}
-      {q.data && (
-        <div className="v2-list-tools">
-          <button
-            disabled={page === 0 || q.isFetching}
-            onClick={() => {
-              const next = new URLSearchParams(params);
-              next.set("page", String(page - 1));
-              setParams(next);
-            }}
-          >
-            Previous page
-          </button>
-          <button
-            disabled={(page + 1) * 10 >= q.data.total || q.isFetching}
-            onClick={() => {
-              const next = new URLSearchParams(params);
-              next.set("page", String(page + 1));
-              setParams(next);
-            }}
-          >
-            Next page
-          </button>
-        </div>
-      )}
-      {id && <LiveDossier key={id} id={id} />}
-    </>
-  );
-}
-function LiveDossier({ id }: { id: string }) {
-  const t = useTransaction(id);
-  const risk = useAssessment(id);
-  const cases = useCases({ transactionId: id, page: 0, pageSize: 10 });
-  const sessionExpired = [t.error, risk.error, cases.error].some(
-    (e) => e instanceof ApiError && e.status === 401,
-  );
-  if (sessionExpired)
-    return (
-      <p role="alert" className="v2-state">
-        Your session expired.{" "}
-        <Link
-          to="/login"
-          state={{
-            from: `/__v2-preview/workspace?id=${encodeURIComponent(id)}`,
-          }}
-        >
-          Sign in again
-        </Link>
-        .
-      </p>
-    );
-  if (t.isPending) return <p role="status">Opening payment dossier…</p>;
-  if (t.isError)
-    return <QueryError error={t.error} retry={() => void t.refetch()} />;
-  return (
-    <>
-      <Dossier t={t.data} assessment={risk.data} riskLoading={risk.isPending} />
-      {risk.isError && (
-        <QueryError error={risk.error} retry={() => void risk.refetch()} />
-      )}
-      <section className="v2-associated">
-        <h2>Associated investigations</h2>
-        {cases.isPending && <p role="status">Loading associated cases…</p>}
-        {cases.isError && (
-          <QueryError error={cases.error} retry={() => void cases.refetch()} />
-        )}
-        {cases.data?.items.length === 0 && (
-          <p>No case is associated with this payment.</p>
-        )}
-        {cases.data?.items.map((c) => (
-          <Link className="v2-case-link" to={`/cases/${c.id}`} key={c.id}>
-            <FileText size={18} />
-            <span>{c.title}</span>
-            <span>{humanize(c.status)}</span>
-            <ArrowUpRight size={18} />
-          </Link>
-        ))}
-        <p className="v2-fine">
-          Case links open the operational investigation workspace.
-        </p>
-      </section>
-    </>
-  );
-}
-export function QueryError({
-  error,
-  retry,
-}: {
-  error: Error;
-  retry: () => void;
-}) {
-  return (
-    <div role="alert" className="v2-state">
-      <h2>Unable to load this record.</h2>
-      <p>{error.message}</p>
-      <button className="v2-button" onClick={retry}>
-        Try again
-      </button>
-    </div>
-  );
-}
 export function Workspace({
   children,
   demo = false,
@@ -370,7 +69,7 @@ export function Workspace({
         <Link className="v2-wordmark" to="/">
           <span className="v2-brand-icon">S</span>SENTINEL
         </Link>
-        <nav className="v2-global-nav" aria-label="Prototype workspace">
+        <nav className="v2-global-nav" aria-label="Demo workspace">
           <Link to="/app">Command Center</Link>
           <Link
             to="/app/transactions"
@@ -378,16 +77,16 @@ export function Workspace({
           >
             Transactions
           </Link>
-          <Link to="/cases">
+          <Link to="/app/cases">
             Investigations <ArrowUpRight size={13} aria-hidden="true" />
           </Link>
-          <Link to="/model">
+          <Link to="/app/model">
             Risk Intelligence <ArrowUpRight size={13} aria-hidden="true" />
           </Link>
-          <Link to="/policy">
+          <Link to="/app/policy">
             Policy Lab <ArrowUpRight size={13} aria-hidden="true" />
           </Link>
-          <Link to="/monitoring">
+          <Link to="/app/monitoring">
             Monitoring <ArrowUpRight size={13} aria-hidden="true" />
           </Link>
         </nav>
@@ -397,19 +96,19 @@ export function Workspace({
             <Link to="/app">Command Center</Link>
             <Link to="/app/transactions">Transactions</Link>
             <Link to="/demo-payment">Demo dossier</Link>
-            <Link to="/cases">
+            <Link to="/app/cases">
               Investigations <ArrowUpRight size={13} aria-hidden="true" />
             </Link>
-            <Link to="/model">
+            <Link to="/app/model">
               Risk Intelligence <ArrowUpRight size={13} aria-hidden="true" />
             </Link>
-            <Link to="/policy">
+            <Link to="/app/policy">
               Policy Lab <ArrowUpRight size={13} aria-hidden="true" />
             </Link>
-            <Link to="/monitoring">
+            <Link to="/app/monitoring">
               Monitoring <ArrowUpRight size={13} aria-hidden="true" />
             </Link>
-            <Link to="/settings">
+            <Link to="/app/settings">
               Account <ArrowUpRight size={13} aria-hidden="true" />
             </Link>
             <Link to="/">Follow the money</Link>
@@ -417,7 +116,7 @@ export function Workspace({
         </details>
         <Link
           className="v2-account"
-          to="/settings"
+          to="/app/settings"
           aria-label="Account settings"
         >
           Account <ArrowUpRight size={13} aria-hidden="true" />
@@ -427,7 +126,7 @@ export function Workspace({
         <div className="v2-workspace-top">
           <Link to="/demo-payment">Demo dossier</Link>
           <span>
-            {demo ? "SIMULATED PREVIEW" : "EXISTING MERCHANT SESSION"} ·
+            {demo ? "SIMULATED DEMONSTRATION" : "EXISTING MERCHANT SESSION"} ·
             Arrow-marked links open the operational workspace
           </span>
           <Link to="/">

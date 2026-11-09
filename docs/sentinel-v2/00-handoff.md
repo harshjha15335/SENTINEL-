@@ -1,3 +1,7 @@
+# Current reconstruction — Phase 2
+
+See [13-phase2-reconstruction.md](13-phase2-reconstruction.md) for production routes, functionality preservation, verification and legacy removal. Gate 1 is APPROVED. Deployment/Gate 2 is PENDING. Older sections below are historical.
+
 # Current authority — Gate 1 APPROVED, Phase 2 authorized
 
 Read [12-phase2-authorization.md](12-phase2-authorization.md). User approval on 10 November 2026 supersedes historical design-PENDING markers below. DESIGN APPROVAL: APPROVED. DEPLOYMENT APPROVAL: PENDING. Complete frontend reconstruction is authorized; publication is not.

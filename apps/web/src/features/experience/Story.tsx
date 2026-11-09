@@ -397,7 +397,7 @@ function DesktopStory() {
                         Explore simulated demo <ArrowUpRight size={18} />
                       </Link>
                       <small>Explore an interactive, simulated payment.</small>
-                      <Link className="v2-auth-link" to="/app/transactions">
+                      <Link className="v2-auth-link" to="/app">
                         Open authenticated workspace <ArrowUpRight size={15} />
                       </Link>
                     </>
@@ -493,7 +493,7 @@ function CompactStory() {
           <Link className="v2-button" to="/demo-payment">
             Explore simulated demo <ArrowUpRight size={18} />
           </Link>
-          <Link className="v2-auth-link" to="/app/transactions">
+          <Link className="v2-auth-link" to="/app">
             Open authenticated workspace <ArrowUpRight size={15} />
           </Link>
           <div className="v2-compact-wallet">
@@ -565,7 +565,7 @@ function StoryAfter() {
         <Link className="v2-button" to="/demo-payment">
           Open the simulated dossier <ArrowUpRight size={18} />
         </Link>
-        <Link className="v2-text-link" to="/app/transactions">
+        <Link className="v2-text-link" to="/app">
           Open authenticated workspace <ArrowUpRight size={15} />
         </Link>
       </div>
@@ -576,7 +576,7 @@ function StoryFooter() {
   return (
     <footer className="v2-final-footer">
       <span>SENTINEL — FOLLOW THE MONEY</span>
-      <span>LOCAL DESIGN PROTOTYPE · APPROVAL PENDING</span>
+      <span>FINANCIAL INTELLIGENCE · HUMAN JUDGMENT</span>
     </footer>
   );
 }

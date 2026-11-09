@@ -177,8 +177,11 @@ export function TransactionsPage() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search order or capture ID"
-            className="h-9 w-full rounded-md border border-line-strong bg-sunken pr-3 pl-9 text-sm placeholder:text-fg-subtle focus:border-accent focus:outline-none"
+            className="h-9 w-full rounded-md border border-line-strong bg-sunken pr-20 pl-9 text-sm placeholder:text-fg-subtle focus:border-accent focus:outline-none"
           />
+          <button type="submit" className="workspace-search-submit">
+            Search
+          </button>
         </form>
         <Select
           label="Status"

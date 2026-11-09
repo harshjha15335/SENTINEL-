@@ -1,11 +1,22 @@
 import { Link } from "react-router-dom";
-
-import { EmptyState } from "@/components/ui/States";
-
 export function NotFoundPage() {
   return (
-    <EmptyState title="Page not found" action={<Link to="/" className="text-sm text-accent hover:underline">Back to Command Center</Link>}>
-      The address does not match any SENTINEL screen.
-    </EmptyState>
+    <section className="workspace-not-found">
+      <p className="workspace-kicker">404 / END OF THIS TRAIL</p>
+      <h1>
+        That page has moved
+        <br />
+        out of sight.
+      </h1>
+      <p>The address does not match a SENTINEL workspace.</p>
+      <div>
+        <Link className="command-review-button" to="/app">
+          Back to Command Center
+        </Link>
+        <Link to="/" className="text-accent">
+          Follow the Money homepage
+        </Link>
+      </div>
+    </section>
   );
 }

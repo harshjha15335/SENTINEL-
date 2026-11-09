@@ -3,7 +3,7 @@ import { expect, test } from "@playwright/test";
 test("shared live dossier layout hands off at the top and history restores the story", async ({
   page,
 }) => {
-  await page.goto("/__v2-preview");
+  await page.goto("/");
   await page.locator(".v2-money-art").waitFor();
   await page.evaluate(() => scrollTo(0, innerHeight * 4));
   const enter = page.locator(".v2-scene-enter").getByRole("link", {
@@ -16,7 +16,7 @@ test("shared live dossier layout hands off at the top and history restores the s
     .boundingBox();
   expect(before).not.toBeNull();
   await enter.click();
-  await expect(page).toHaveURL(/\/__v2-preview\/dossier$/);
+  await expect(page).toHaveURL(/\/demo-payment$/);
   await expect.poll(() => page.evaluate(() => scrollY)).toBe(0);
   await expect(
     page.getByRole("heading", { name: "Payment dossier.", exact: true }),
@@ -32,7 +32,7 @@ test("shared live dossier layout hands off at the top and history restores the s
   await expect(page.locator(".v2-story")).toHaveAttribute("data-stage", "6");
   await page.goForward();
   await expect.poll(() => page.evaluate(() => scrollY)).toBe(150);
-  await page.goto("/__v2-preview/dossier");
+  await page.goto("/demo-payment");
   await expect(
     page.getByRole("heading", { name: "Payment dossier.", exact: true }),
   ).toBeInViewport();
@@ -42,7 +42,7 @@ test("mobile primary action is above the fold and wallet responds without pinnin
   page,
 }) => {
   await page.setViewportSize({ width: 390, height: 844 });
-  await page.goto("/__v2-preview");
+  await page.goto("/");
   const cta = page
     .locator(".v2-compact-hero")
     .getByRole("link", { name: "Explore simulated demo" });
@@ -68,7 +68,7 @@ test("mobile primary action is above the fold and wallet responds without pinnin
 test("wallet, main payment and field advance continuously and reverse exactly", async ({
   page,
 }) => {
-  await page.goto("/__v2-preview");
+  await page.goto("/");
   await page.locator(".v2-money-art").waitFor();
   const sample = async (p: number) => {
     await page.evaluate((n) => scrollTo(0, n * innerHeight * 4), p);
@@ -114,36 +114,34 @@ test("wallet, main payment and field advance continuously and reverse exactly", 
   await page.reload();
   await expect(page.locator(".pin-spacer")).toHaveCount(1);
 });
-test("command center is labeled simulated and navigation offers implemented destinations", async ({
+test("public demonstration navigation remains distinct from authenticated workspaces", async ({
   page,
 }) => {
-  await page.goto("/__v2-preview/command-center");
+  await page.goto("/demo-payment");
   await expect(
-    page.getByRole("heading", { name: "Know what needs attention." }),
+    page.getByRole("heading", { name: "Payment dossier." }),
   ).toBeVisible();
   await expect(
-    page.getByText("INTERACTIVE COMPOSITION PROTOTYPE / SIMULATED"),
+    page.getByText("SIMULATED / PUBLIC-SAFE DEMONSTRATION"),
   ).toBeVisible();
   const audit = await new AxeBuilder({ page })
     .withTags(["wcag2a", "wcag2aa", "wcag21aa", "wcag22aa"])
     .analyze();
   expect(audit.violations).toEqual([]);
-  await page.getByRole("link", { name: "Review the payment" }).click();
-  await expect(
-    page.getByRole("article", { name: "Payment dossier" }),
-  ).toBeVisible();
   await page.setViewportSize({ width: 390, height: 844 });
-  await page.getByText("Menu", { exact: true }).click();
+  await page.locator(".v2-mobile-menu summary").click();
   await page
     .getByRole("navigation", { name: "Mobile workspace" })
     .getByRole("link", { name: "Transactions", exact: true })
     .click();
-  await expect(page).toHaveURL(/workspace/);
+  await expect(
+    page.getByRole("heading", { name: "Sign in to your workspace" }),
+  ).toBeVisible();
 });
 test("receipt becomes native dossier header without any workspace text scaling", async ({
   page,
 }) => {
-  await page.goto("/__v2-preview");
+  await page.goto("/");
   await page.locator(".v2-money-art").waitFor();
   await page.evaluate(() => document.fonts.ready);
   const sample = async (p: number) => {

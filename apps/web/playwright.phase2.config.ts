@@ -13,7 +13,7 @@ export default defineConfig({
   fullyParallel: false,
   reporter: [["list"]],
   use: {
-    baseURL: "http://127.0.0.1:5175",
+    baseURL: process.env.SENTINEL_WEB_URL ?? "http://127.0.0.1:5175",
     trace: "retain-on-failure",
     screenshot: "only-on-failure",
     launchOptions: { executablePath: "/usr/bin/chromium" },

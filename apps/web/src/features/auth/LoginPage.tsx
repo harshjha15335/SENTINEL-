@@ -9,6 +9,9 @@ import { ErrorState } from "@/components/ui/States";
 
 import { useLogin, useMe } from "./session";
 
+// Keep validation compatible with the existing CSP without probing dynamic code generation.
+z.config({ jitless: true });
+
 const schema = z.object({
   email: z.email("Enter a valid email address"),
   password: z.string().min(1, "Enter your password"),

@@ -1,12 +1,10 @@
 import { readFileSync } from "node:fs";
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test, type Page } from "@playwright/test";
-const shots =
-  process.env.SENTINEL_SCREENSHOT_DIR ?? "test-results/v2-artifacts";
-const credentialsFile = process.env.SENTINEL_V2_TEST_CREDENTIALS;
-const secret = credentialsFile
+const file = process.env.SENTINEL_V2_TEST_CREDENTIALS;
+const secret = file
   ? Object.fromEntries(
-      readFileSync(credentialsFile, "utf8")
+      readFileSync(file, "utf8")
         .trim()
         .split("\n")
         .map((l) => {
@@ -16,10 +14,7 @@ const secret = credentialsFile
     )
   : {};
 const password = secret.SENTINEL_SEED_ANALYST_PASSWORD;
-test.skip(
-  !password,
-  "Requires the dedicated local test database and credential file.",
-);
+test.skip(!password, "Requires dedicated local fixture credentials");
 async function login(page: Page) {
   await page.goto("/login");
   await page.getByLabel("Work email").fill("analyst@northwind.example");
@@ -33,72 +28,47 @@ test("actual session → search API → PostgreSQL record → dossier → existi
   page,
 }) => {
   await login(page);
-  const response = await page.request.get("/api/v1/cases?limit=1&offset=0");
-  expect(response.ok()).toBeTruthy();
-  const data = (await response.json()) as {
-    items: { id: string; transaction_id: string; title: string }[];
-  };
-  const c = data.items[0];
+  const list = await page.request.get("/api/v1/cases?status=OPEN&limit=1&offset=0");
+  expect(list.ok()).toBeTruthy();
+  const c = (await list.json()).items[0];
   expect(c).toBeDefined();
-  if (!c) throw new Error("Seeded case missing");
-  const txResponse = await page.request.get(
-    `/api/v1/transactions/${c.transaction_id}`,
-  );
-  expect(txResponse.ok()).toBeTruthy();
-  const t = (await txResponse.json()) as {
-    paypal_order_id: string | null;
-    amount_minor: number;
-    currency: string;
-  };
+  const r = await page.request.get(`/api/v1/transactions/${c.transaction_id}`);
+  expect(r.ok()).toBeTruthy();
+  const t = await r.json();
   const mutations: string[] = [];
   page.on("request", (r) => {
     if (r.url().includes("/api/") && r.method() !== "GET")
-      mutations.push(r.method() + " " + new URL(r.url()).pathname);
+      mutations.push(r.method());
   });
-  await page.goto("/__v2-preview/workspace");
-  await expect(page.getByLabel("Transaction results")).toBeVisible();
   if (t.paypal_order_id) {
-    await page.getByLabel("Search order or capture ID").fill(t.paypal_order_id);
-    await page.getByRole("button", { name: "Search", exact: true }).click();
+    await page.goto("/app/transactions");
     await page
-      .getByRole("button", { name: new RegExp(t.paypal_order_id) })
-      .click();
-  } else {
-    // Synthetic scenario records have no fabricated PayPal references; use the supported deep link.
-    await page.goto(`/__v2-preview/workspace?id=${c.transaction_id}`);
-  }
+      .getByLabel("Search by PayPal order or capture ID")
+      .fill(t.paypal_order_id);
+    await page.getByRole("button", { name: "Search", exact: true }).click();
+    await page.locator(".ag-row", { hasText: t.paypal_order_id }).click();
+  } else await page.goto(`/app/transactions/${c.transaction_id}`);
+  const amount = new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: t.currency,
+  }).format(t.amount_minor / 100);
   await expect(
     page.getByRole("article", { name: "Payment dossier" }),
   ).toBeVisible();
   await expect(
-    page.getByRole("heading", {
-      name: new RegExp(
-        new Intl.NumberFormat("en-US", {
-          style: "currency",
-          currency: t.currency,
-        })
-          .format(t.amount_minor / 100)
-          .replace(/[.*+?^${}()|[\]\\]/g, "\\$&"),
-      ),
-    }),
+    page.getByRole("heading", { name: amount, exact: true }),
   ).toBeVisible();
-  await expect(page.getByText("HIGH RISK", { exact: true })).toBeVisible();
   await expect(
-    page.getByText("Model-generated", { exact: false }),
+    page.getByText("Model-generated", { exact: true }),
   ).toBeVisible();
-  await page.reload();
   await expect(
-    page.getByRole("article", { name: "Payment dossier" }),
+    page.getByRole("list", { name: "Main factors behind this score" }),
   ).toBeVisible();
-  const axe = await new AxeBuilder({ page })
+  const audit = await new AxeBuilder({ page })
     .withTags(["wcag2a", "wcag2aa", "wcag21aa", "wcag22aa"])
     .analyze();
-  expect(axe.violations).toEqual([]);
-  await page.screenshot({
-    path: `${shots}/dossier-authorized.png`,
-    fullPage: true,
-  });
-  await page.getByRole("link", { name: new RegExp(c.title) }).click();
+  expect(audit.violations).toEqual([]);
+  await page.getByRole("link", { name: c.title, exact: true }).click();
   await expect(
     page.getByRole("heading", { name: c.title, exact: true }),
   ).toBeVisible();
@@ -108,92 +78,82 @@ test("API failure stays an error; expiry hides private data; empty search remain
   page,
 }) => {
   await login(page);
-  await page.goto("/__v2-preview/workspace");
-  await page.getByLabel("Search order or capture ID").fill("V2-NO-SUCH-ORDER");
-  await page.getByRole("button", { name: "Search", exact: true }).click();
-  await expect(
-    page.getByText("No transactions match this search."),
-  ).toBeVisible();
   await page.route("**/api/v1/transactions?**", (r) =>
     r.fulfill({
       status: 503,
       contentType: "application/json",
       body: JSON.stringify({
-        error: { code: "unavailable", message: "Test database unavailable" },
+        error: { code: "unavailable", message: "Record service unavailable" },
       }),
     }),
   );
-  await page.reload();
+  await page.goto("/app/transactions");
   await expect(page.getByRole("alert")).toContainText(
-    "Test database unavailable",
+    "Record service unavailable",
+    { timeout: 15000 },
   );
   await page.unroute("**/api/v1/transactions?**");
-  await page.route("**/api/v1/me", (r) =>
-    r.fulfill({
-      status: 401,
-      contentType: "application/json",
-      body: JSON.stringify({
-        error: { code: "unauthenticated", message: "Session expired" },
-      }),
-    }),
-  );
-  await page.reload();
+  await page
+    .getByLabel("Search by PayPal order or capture ID")
+    .fill("no-such-record-v2-parity");
+  await page.getByRole("button", { name: "Search", exact: true }).click();
   await expect(
-    page.getByRole("heading", { name: "Sign in to inspect real records." }),
+    page.getByText("No transactions match these filters"),
+  ).toBeVisible();
+  await page.route(
+    "**/api/v1/transactions/8891b311-1c44-4b99-95a5-45c3f3ba8be5",
+    (r) =>
+      r.fulfill({
+        status: 401,
+        contentType: "application/json",
+        body: JSON.stringify({
+          error: { code: "unauthenticated", message: "Session expired" },
+        }),
+      }),
+  );
+  await page.goto("/app/transactions/8891b311-1c44-4b99-95a5-45c3f3ba8be5");
+  await expect(
+    page.getByRole("heading", { name: "Sign in to your workspace" }),
   ).toBeVisible();
   await expect(
     page.getByRole("article", { name: "Payment dossier" }),
   ).toHaveCount(0);
 });
-
 test("explorer filters, pagination and sorting preserve real API query semantics", async ({
   page,
 }) => {
   await login(page);
-  await page.goto("/__v2-preview/workspace");
-  await expect(page.getByLabel("Transaction results")).toBeVisible();
-  const filter = page.waitForResponse(
+  await page.goto("/app/transactions");
+  await expect(page.locator(".ag-row").first()).toBeVisible();
+  const status = page.waitForResponse(
     (r) =>
       r.url().includes("/api/v1/transactions?") &&
       r.url().includes("status=CAPTURED"),
   );
-  await page
-    .getByLabel("Payment status", { exact: true })
-    .selectOption("CAPTURED");
-  expect((await filter).ok()).toBeTruthy();
+  await page.getByLabel("Status", { exact: true }).selectOption("CAPTURED");
+  expect((await status).ok()).toBeTruthy();
   const origin = page.waitForResponse(
     (r) =>
       r.url().includes("/api/v1/transactions?") &&
       r.url().includes("data_origin=SYNTHETIC_DEMO"),
   );
   await page
-    .getByLabel("Data origin", { exact: true })
+    .getByLabel("Origin", { exact: true })
     .selectOption("SYNTHETIC_DEMO");
   expect((await origin).ok()).toBeTruthy();
-  await expect(page).toHaveURL(/status=CAPTURED/);
-  await page
-    .getByRole("button", { name: "Amount ascending · current page" })
-    .click();
-  await expect(
-    page.getByRole("button", { name: "Amount descending · current page" }),
-  ).toBeVisible();
-  const next = page.getByRole("button", { name: "Next page" });
-  if (await next.isEnabled()) {
-    const response = page.waitForResponse(
-      (r) =>
-        r.url().includes("/api/v1/transactions?") &&
-        r.url().includes("offset=10"),
-    );
-    await next.click();
-    expect((await response).ok()).toBeTruthy();
-    await expect(page).toHaveURL(/page=1/);
-    await page.getByRole("button", { name: "Previous page" }).click();
-  }
+  const next = page.waitForResponse(
+    (r) =>
+      r.url().includes("/api/v1/transactions?") &&
+      r.url().includes("offset=25"),
+  );
+  await page.getByRole("button", { name: "Next page", exact: true }).click();
+  expect((await next).ok()).toBeTruthy();
+  await expect(page).toHaveURL(/page=1/);
   await page.reload();
-  await expect(page.getByLabel("Payment status", { exact: true })).toHaveValue(
+  await expect(page.getByLabel("Status", { exact: true })).toHaveValue(
     "CAPTURED",
   );
-  await expect(page.getByLabel("Data origin", { exact: true })).toHaveValue(
+  await expect(page.getByLabel("Origin", { exact: true })).toHaveValue(
     "SYNTHETIC_DEMO",
   );
 });

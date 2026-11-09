@@ -129,6 +129,7 @@ export function CasesPage() {
           <div
             className="space-y-2 p-4"
             aria-busy="true"
+            role="status"
             aria-label="Loading cases"
           >
             {Array.from({ length: 5 }, (_, i) => (

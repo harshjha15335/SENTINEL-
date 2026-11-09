@@ -1,4 +1,4 @@
-import "./preview.css";
+import "./experience.css";
 import { AppNavigation } from "@/components/layout/AppNavigation";
 import { DemoDossier } from "./Dossier";
 import { MoneyStory } from "./Story";

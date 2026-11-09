@@ -302,6 +302,7 @@ function DashboardSkeleton() {
     <div
       className="command-loading-layout"
       aria-busy="true"
+      role="status"
       aria-label="Loading dashboard"
     >
       <Skeleton className="h-40 lg:col-span-2" />

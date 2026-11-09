@@ -71,7 +71,7 @@ function timeline(t: TransactionDetail): TimelineItem[] {
 
 function Detail({ t }: { t: TransactionDetail }) {
   return (
-    <>
+    <article aria-label="Payment dossier">
       <div className="casefile-record-heading">
         <p className="workspace-kicker">PAYMENT DOSSIER / {t.id.slice(0, 8)}</p>
         <PageHeader
@@ -154,7 +154,7 @@ function Detail({ t }: { t: TransactionDetail }) {
           </ol>
         </Panel>
       </div>
-    </>
+    </article>
   );
 }
 

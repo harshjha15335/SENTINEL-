@@ -405,20 +405,6 @@ button {
 .casefile-record-heading h1 {
   font-size: clamp(38px, 4.5vw, 66px);
 }
-.case-workbench {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(300px, 0.43fr);
-  gap: 50px;
-}
-.case-workbench > div {
-  display: flex;
-  flex-direction: column;
-  gap: 22px;
-}
-.case-workbench > div:last-child {
-  padding: 0 0 0 25px;
-  border-left: 1px solid #ded7e5;
-}
 .workspace-auth {
   min-height: 100dvh;
   display: grid;
@@ -495,13 +481,8 @@ button {
   .workspace-global-header {
     min-height: 74px;
   }
-  .workspace-columns,
-  .case-workbench {
+  .workspace-columns {
     grid-template-columns: 1fr;
-  }
-  .case-workbench > div:last-child {
-    border: 0;
-    padding: 0;
   }
   .workspace-auth {
     grid-template-columns: 1fr 1fr;
@@ -522,25 +503,29 @@ button {
   }
   .workspace-account-bar {
     padding: 17px 22px 0;
-    align-items: flex-start;
+    flex-direction: column;
+    gap: 12px;
   }
   .workspace-merchant {
     display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 7px;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 7px 12px;
   }
   .workspace-account {
+    width: 100%;
+    justify-content: space-between;
     gap: 10px;
   }
   .workspace-account span {
-    font-size: 11px;
-    max-width: 160px;
-    display: block;
+    font-size: 12px;
+    max-width: none;
+    display: flex;
   }
   .workspace-account small {
-    display: block;
-    margin-top: 4px;
+    display: inline;
+    margin-top: 0;
   }
   .workspace-gateway {
     font-size: 10px;
@@ -980,4 +965,46 @@ button {
     font-size: 12px;
     padding: 14px 0;
   }
+}
+.experience-loading {
+  min-height: 100svh;
+  padding: 35px 5vw;
+  background: #f7f4ee;
+  color: #201a2b;
+}
+.experience-loading > p {
+  font-size: 13px;
+  color: #686273;
+  margin-top: 25px;
+}
+.workspace-not-found {
+  padding: 10vh 6vw;
+  min-height: 65vh;
+}
+.workspace-not-found h1 {
+  font-size: clamp(40px, 6vw, 80px);
+  line-height: 1.05;
+  letter-spacing: -0.06em;
+}
+.workspace-not-found > p:not(.workspace-kicker) {
+  margin: 30px 0;
+  color: #686273;
+}
+.workspace-not-found > div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 25px;
+  align-items: center;
+}
+.workspace-search-submit {
+  position: absolute;
+  right: 4px;
+  top: 4px;
+  bottom: 4px;
+  border: 0;
+  background: #e9e0ff;
+  color: #6135c9;
+  border-radius: 20px;
+  padding: 0 13px;
+  font-size: 12px;
 }

@@ -14,7 +14,7 @@ const results = {
   viewport: "1440x900",
   cpu: "unthrottled shared cloud executor",
   network: "localhost, no throttling",
-  url: "development-only preview /__v2-preview",
+  url: "production homepage /",
   runs: [],
 };
 for (let i = 0; i < 3; i++) {
@@ -36,7 +36,7 @@ for (let i = 0; i < 3; i++) {
     }).observe({ type: "longtask", buffered: true });
   });
   const page = await context.newPage();
-  await page.goto("http://127.0.0.1:5175/__v2-preview");
+  await page.goto("http://127.0.0.1:4175/");
   await page.locator(".v2-story").waitFor();
   await page.evaluate(() => document.fonts.ready);
   await page.waitForTimeout(300);

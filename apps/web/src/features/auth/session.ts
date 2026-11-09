@@ -22,7 +22,8 @@ export function useMe() {
 export function useLogin() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (body: { email: string; password: string }) => api<Session>("/auth/login", { method: "POST", body }),
+    mutationFn: (body: { email: string; password: string }) =>
+      api<Session>("/auth/login", { method: "POST", body }),
     onSuccess: (session) => {
       qc.clear();
       qc.setQueryData(meKey, session.user);
@@ -34,9 +35,13 @@ export function useLogout() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: () => api<undefined>("/auth/logout", { method: "POST" }),
-    onSettled: () => {
-      qc.clear();
+    onSettled: async () => {
+      // Keep the active session observer attached while removing private data.
+      await qc.cancelQueries();
       qc.setQueryData(meKey, null);
+      qc.removeQueries({
+        predicate: (query) => query.queryKey[0] !== meKey[0],
+      });
     },
   });
 }

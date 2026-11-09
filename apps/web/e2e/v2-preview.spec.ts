@@ -36,7 +36,7 @@ test("seven scroll checkpoints, rewind, restored position and clean remount", as
   page.on("request", (r) => {
     if (r.url().includes("/api/")) apiCalls.push(r.url());
   });
-  await page.goto("/__v2-preview");
+  await page.goto("/");
   await expect(
     page.getByRole("heading", {
       name: "Every payment has a story.",
@@ -103,7 +103,7 @@ test("dossier examples, timeline and browser history stay deterministic", async 
   page.on("request", (r) => {
     if (r.url().includes("/api/")) apiCalls.push(r.url());
   });
-  await page.goto("/__v2-preview/dossier");
+  await page.goto("/demo-payment");
   await expect(
     page.getByRole("heading", { name: "$1,849.00 USD" }),
   ).toBeVisible();
@@ -139,9 +139,11 @@ for (const [width, height] of [
   [390, 844],
   [360, 800],
 ]) {
-  test(`responsive reel and dossier ${width}x${height}`, async ({ page }) => {
+  test(`responsive money story and dossier ${width}x${height}`, async ({
+    page,
+  }) => {
     await page.setViewportSize({ width: width ?? 390, height: height ?? 844 });
-    await page.goto("/__v2-preview");
+    await page.goto("/");
     await expect(page.locator(".v2-wallet")).toBeVisible();
     expect(
       await page.evaluate(
@@ -156,7 +158,7 @@ for (const [width, height] of [
       ).toBeVisible();
     if (width === 390)
       await page.screenshot({ path: `${shots}/reel-mobile.png` });
-    await page.goto("/__v2-preview/dossier");
+    await page.goto("/demo-payment");
     await expect(
       page.getByRole("heading", { name: "Payment dossier." }),
     ).toBeVisible();
@@ -178,7 +180,7 @@ test("reduced motion exposes all narrative content and keyboard skip", async ({
   page,
 }) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
-  await page.goto("/__v2-preview");
+  await page.goto("/");
   await expect(page.locator("[data-story-stage]")).toHaveCount(7);
   for (const el of await page.locator("[data-story-stage]").all())
     await expect(el).toBeVisible();
@@ -188,7 +190,7 @@ test("reduced motion exposes all narrative content and keyboard skip", async ({
   await page.keyboard.press("Enter");
   await expect(page.locator("#v2-after-story")).toBeFocused();
 });
-test("unauthorized preview loads only the existing session check", async ({
+test("unauthorized operational entry loads only the existing session check", async ({
   page,
 }) => {
   const calls: string[] = [];
@@ -204,9 +206,9 @@ test("unauthorized preview loads only the existing session check", async ({
   page.on("request", (r) => {
     if (r.url().includes("/api/")) calls.push(new URL(r.url()).pathname);
   });
-  await page.goto("/__v2-preview/workspace");
+  await page.goto("/app/transactions");
   await expect(
-    page.getByRole("heading", { name: "Sign in to inspect real records." }),
+    page.getByRole("heading", { name: "Sign in to your workspace" }),
   ).toBeVisible();
   expect(calls).toEqual(["/api/v1/me"]);
   await audit(page);
@@ -215,7 +217,7 @@ test("unauthorized preview loads only the existing session check", async ({
 test("resize through mobile and back releases pin and preserves readable content", async ({
   page,
 }) => {
-  await page.goto("/__v2-preview");
+  await page.goto("/");
   await page
     .getByRole("button", { name: "Go to Risk analysis", exact: true })
     .click();

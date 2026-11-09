@@ -6,7 +6,14 @@ import {
   QueryClientProvider,
 } from "@tanstack/react-query";
 import { lazy, Suspense, useState } from "react";
-import { BrowserRouter, HashRouter, Route, Routes } from "react-router-dom";
+import {
+  BrowserRouter,
+  HashRouter,
+  Route,
+  Routes,
+  Navigate,
+  useLocation,
+} from "react-router-dom";
 
 import { AppShell } from "@/components/layout/AppShell";
 import { Skeleton } from "@/components/ui/States";
@@ -88,11 +95,24 @@ const NetworkPage = lazy(() =>
   })),
 );
 
-// V2 is excluded from every production build, including Pages and hash-router builds.
-const V2Preview =
-  import.meta.env.DEV && import.meta.env.VITE_STATIC_DEMO !== "true"
-    ? lazy(() => import("@/preview/Preview"))
-    : null;
+const MarketingHome = lazy(() =>
+  import("@/features/experience/Experience").then((m) => ({
+    default: m.MarketingHome,
+  })),
+);
+const PublicDemoPayment = lazy(() =>
+  import("@/features/experience/Experience").then((m) => ({
+    default: m.PublicDemoPayment,
+  })),
+);
+const publicFallback = (
+  <main className="experience-loading" role="status">
+    <div className="workspace-brand">
+      <span>S</span>SENTINEL
+    </div>
+    <p>Opening Follow the Money…</p>
+  </main>
+);
 
 const fallback = <Skeleton className="h-64" />;
 
@@ -140,16 +160,22 @@ export function App() {
 export function AppRoutes() {
   return (
     <Routes>
-      {V2Preview && (
-        <Route
-          path="/__v2-preview/*"
-          element={
-            <Suspense fallback={<main>Loading design preview…</main>}>
-              <V2Preview />
-            </Suspense>
-          }
-        />
-      )}
+      <Route
+        path="/"
+        element={
+          <Suspense fallback={publicFallback}>
+            <MarketingHome />
+          </Suspense>
+        }
+      />
+      <Route
+        path="/demo-payment"
+        element={
+          <Suspense fallback={publicFallback}>
+            <PublicDemoPayment />
+          </Suspense>
+        }
+      />
       <Route path="/login" element={<LoginPage />} />
       <Route path="/app" element={<AppShell />}>
         <Route index element={<DashboardPage />} />
@@ -260,115 +286,42 @@ export function AppRoutes() {
         <Route path="settings" element={<SettingsPage />} />
         <Route path="*" element={<NotFoundPage />} />
       </Route>
-      <Route element={<AppShell />}>
-        <Route index element={<DashboardPage />} />
-        <Route
-          path="transactions"
-          element={
-            <Suspense fallback={fallback}>
-              <TransactionsPage />
-            </Suspense>
-          }
-        />
-        <Route
-          path="transactions/:id"
-          element={
-            <Suspense fallback={fallback}>
-              <TransactionDetailPage />
-            </Suspense>
-          }
-        />
-        <Route
-          path="cases"
-          element={
-            <Suspense fallback={fallback}>
-              <CasesPage />
-            </Suspense>
-          }
-        />
-        <Route
-          path="cases/:id"
-          element={
-            <Suspense fallback={fallback}>
-              <CaseDetailPage />
-            </Suspense>
-          }
-        />
-        <Route
-          path="model"
-          element={
-            <Suspense fallback={fallback}>
-              <ModelPage />
-            </Suspense>
-          }
-        />
-        <Route
-          path="checkout"
-          element={
-            <Suspense fallback={fallback}>
-              <CheckoutPage />
-            </Suspense>
-          }
-        />
-        <Route
-          path="demo"
-          element={
-            <Suspense fallback={fallback}>
-              <DemoGuidePage />
-            </Suspense>
-          }
-        />
-        <Route
-          path="operations"
-          element={
-            <Suspense fallback={fallback}>
-              <OperationsPage />
-            </Suspense>
-          }
-        />
-        <Route
-          path="refunds"
-          element={
-            <Suspense fallback={fallback}>
-              <RefundsPage />
-            </Suspense>
-          }
-        />
-        <Route
-          path="disputes"
-          element={
-            <Suspense fallback={fallback}>
-              <DisputesPage />
-            </Suspense>
-          }
-        />
-        <Route
-          path="policy"
-          element={
-            <Suspense fallback={fallback}>
-              <PolicyLabPage />
-            </Suspense>
-          }
-        />
-        <Route
-          path="monitoring"
-          element={
-            <Suspense fallback={fallback}>
-              <MonitoringPage />
-            </Suspense>
-          }
-        />
-        <Route
-          path="network"
-          element={
-            <Suspense fallback={fallback}>
-              <NetworkPage />
-            </Suspense>
-          }
-        />
-        <Route path="settings" element={<SettingsPage />} />
-        <Route path="*" element={<NotFoundPage />} />
-      </Route>
+      {[
+        "transactions",
+        "cases",
+        "model",
+        "checkout",
+        "demo",
+        "operations",
+        "refunds",
+        "disputes",
+        "policy",
+        "monitoring",
+        "network",
+        "settings",
+      ].map((path) => (
+        <Route key={path} path={`/${path}/*`} element={<LegacyRedirect />} />
+      ))}
+      <Route
+        path="*"
+        element={
+          <main>
+            <NotFoundPage />
+          </main>
+        }
+      />
     </Routes>
+  );
+}
+
+/** Compatibility retains the entire deep link; API routes are not rewritten. */
+function LegacyRedirect() {
+  const location = useLocation();
+  return (
+    <Navigate
+      to={`/app${location.pathname}${location.search}${location.hash}`}
+      replace
+      state={location.state}
+    />
   );
 }
