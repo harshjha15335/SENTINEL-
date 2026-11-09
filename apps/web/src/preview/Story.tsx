@@ -55,10 +55,11 @@ function DesktopStory() {
         fold = el.querySelector<SVGElement>("[data-wallet-fold]"),
         receipt = el.querySelector<SVGElement>("[data-hero-receipt]"),
         notes = el.querySelectorAll<SVGElement>("[data-note]"),
+        secondary = el.querySelector<SVGElement>("[data-secondary-receipt]"),
         field = el.querySelector<SVGElement>("[data-field]"),
         signals = el.querySelectorAll<SVGElement>("[data-signal]"),
         trail = el.querySelector<SVGElement>("[data-money-path]"),
-        accent = el.querySelector("[data-receipt-accent]"),
+        accent = el.querySelector("[data-hero-receipt] [data-receipt-accent]"),
         copy = el.querySelector<HTMLElement>(".v2-scene-copy"),
         frame = el.querySelector<HTMLElement>("[data-dossier-frame]"),
         enter = el.querySelector<HTMLElement>(".v2-scene-enter"),
@@ -109,6 +110,17 @@ function DesktopStory() {
               (1 - ease(phase(p, 0.44, 0.65))),
           );
         });
+        if (secondary) {
+          const a = ease(phase(p, 0.17, 0.39)),
+            exit = ease(phase(p, 0.43, 0.62));
+          secondary.setAttribute(
+            "transform",
+            `translate(${mix(1040, 1280, a) + 230 * exit} ${430 - 260 * Math.sin(a * Math.PI) + 150 * a - 70 * exit}) rotate(${mix(-8, 18, a) + 25 * exit}) scale(${mix(0.08, 0.62, a)})`,
+          );
+          secondary.style.opacity = String(
+            ease(phase(p, 0.17, 0.23)) * (1 - exit),
+          );
+        }
         if (trail) {
           trail.style.opacity = String(
             ease(phase(p, 0.23, 0.34)) * (1 - ease(phase(p, 0.6, 0.75))),
@@ -262,6 +274,9 @@ function DesktopStory() {
               </g>
               <g data-note>
                 <Banknote variant={1} />
+              </g>
+              <g data-secondary-receipt>
+                <Receipt secondary />
               </g>
               <g data-field>
                 <rect

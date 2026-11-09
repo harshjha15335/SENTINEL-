@@ -169,7 +169,7 @@ export function Banknote({ variant = 0 }: { variant?: number }) {
     </g>
   );
 }
-export function Receipt() {
+export function Receipt({ secondary = false }: { secondary?: boolean }) {
   return (
     <g>
       <path
@@ -197,7 +197,7 @@ export function Receipt() {
         SENTINEL
       </text>
       <text x="-106" y="-97" fontSize="10" fill="#686273">
-        PAYMENT / DEMO-0148
+        PAYMENT / {secondary ? "DEMO-0149" : "DEMO-0148"}
       </text>
       <text
         x="-106"
@@ -207,7 +207,7 @@ export function Receipt() {
         fontSize="35"
         fill="#201A2B"
       >
-        $1,849.00
+        {secondary ? "$249.00" : "$1,849.00"}
       </text>
       <text x="-106" y="-20" fontSize="11" fill="#686273">
         USD · SIMULATED

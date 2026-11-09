@@ -75,6 +75,7 @@
   height: 100%;
   font-family: "IBM Plex Mono", monospace;
 }
+.v2-money-art [data-secondary-receipt],
 .v2-money-art [data-hero-receipt],
 .v2-money-art [data-note],
 .v2-money-art [data-field],

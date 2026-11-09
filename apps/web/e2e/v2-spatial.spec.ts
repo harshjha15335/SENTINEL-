@@ -92,6 +92,16 @@ test("wallet, main payment and field advance continuously and reverse exactly", 
     opened = await sample(0.2);
   expect(Number(opened.open)).toBeGreaterThan(0);
   expect(opened.receipt).not.toEqual(start.receipt);
+  await expect(page.locator("[data-secondary-receipt]")).toContainText(
+    "$249.00",
+  );
+  await sample(0.5);
+  await expect(
+    page.locator("[data-hero-receipt] [data-receipt-accent]"),
+  ).toHaveAttribute("fill", "#FF865C");
+  await expect(
+    page.locator("[data-secondary-receipt] [data-receipt-accent]"),
+  ).toHaveAttribute("fill", "#7547EB");
   const mid = await sample(0.65);
   expect(mid.field).toContain("opacity: 1");
   await sample(0.99);
