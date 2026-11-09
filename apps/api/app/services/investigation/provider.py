@@ -66,6 +66,21 @@ def resolve_provider(settings: Settings | None = None) -> ProviderSpec | None:
             return AnthropicModel(model_name, provider=provider)
 
         return ProviderSpec("anthropic", model_name, build_anthropic)
+    if settings.ai_provider is AIProvider.GOOGLE:
+
+        def build_google() -> Model:
+            from google.genai.types import HttpRetryOptions
+            from pydantic_ai.models.google import GoogleModel
+            from pydantic_ai.providers.google import GoogleProvider
+
+            # Google counts attempts including the initial call, unlike OpenAI retries.
+            provider = GoogleProvider(
+                api_key=key,
+                retry_options=HttpRetryOptions(attempts=1 + settings.ai_sdk_max_retries),
+            )
+            return GoogleModel(model_name, provider=provider)
+
+        return ProviderSpec("google", model_name, build_google)
     if settings.ai_provider is AIProvider.OPENAI:
 
         def build_openai() -> Model:

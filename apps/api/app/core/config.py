@@ -26,6 +26,7 @@ class AIProvider(StrEnum):
     NONE = "none"
     ANTHROPIC = "anthropic"
     OPENAI = "openai"
+    GOOGLE = "google"
 
 
 class StorageBackend(StrEnum):

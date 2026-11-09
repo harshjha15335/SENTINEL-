@@ -52,9 +52,9 @@ services:
         sync: false
       # Owner-selected provider/model. API availability and paid usage are unverified.
       - key: SENTINEL_AI_PROVIDER
-        value: openai
+        value: google
       - key: SENTINEL_AI_MODEL
-        value: gpt-6.1-terra
+        value: gemini-3.1-flash-lite
       - key: SENTINEL_AI_API_KEY
         sync: false
       - key: SENTINEL_AI_SDK_MAX_RETRIES
