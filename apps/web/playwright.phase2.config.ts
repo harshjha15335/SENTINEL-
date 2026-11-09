@@ -1,4 +1,7 @@
+import { existsSync } from "node:fs";
 import { defineConfig, devices } from "@playwright/test";
+const executablePath = process.env.PLAYWRIGHT_CHROMIUM_PATH ??
+  (existsSync("/usr/bin/chromium") ? "/usr/bin/chromium" : undefined);
 export default defineConfig({
   testDir: "./e2e",
   testMatch: [
@@ -16,7 +19,7 @@ export default defineConfig({
     baseURL: process.env.SENTINEL_WEB_URL ?? "http://127.0.0.1:5175",
     trace: "retain-on-failure",
     screenshot: "only-on-failure",
-    launchOptions: { executablePath: "/usr/bin/chromium" },
+    launchOptions: executablePath ? { executablePath } : {},
   },
   projects: [
     {
