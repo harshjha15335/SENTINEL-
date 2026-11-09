@@ -52,8 +52,8 @@ export function EvidenceStory() {
           const setProgress = gsap.quickSetter(progress, "scaleX");
           const setCaseOpacity = gsap.quickSetter(caseReveal, "opacity");
           const setCaseY = gsap.quickSetter(caseReveal, "y", "px");
-          const setScale = gsap.quickSetter(machine, "scale");
-          const setY = gsap.quickSetter(machine, "y", "px");
+          const setScaleX = gsap.quickSetter(machine, "scaleX");
+          const setScaleY = gsap.quickSetter(machine, "scaleY");
           let previousIndex = -1;
           const render = (p: number) => {
             // Constant apparent spool radius; tape distance is shared by both reels.
@@ -109,8 +109,9 @@ export function EvidenceStory() {
             setCaseY((1 - reveal) * 35);
             if (caseReveal)
               caseReveal.style.visibility = reveal > 0 ? "visible" : "hidden";
-            setScale(1 - Math.max(0, p - 0.66) * 0.5);
-            setY(Math.max(0, p - 0.66) * -140);
+            const machineScale = 1 - Math.max(0, p - 0.66) * 0.5;
+            setScaleX(machineScale);
+            setScaleY(machineScale);
           };
           const trigger = ScrollTrigger.create({
             id: "sentinel-evidence-reel",
