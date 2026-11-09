@@ -1,4 +1,6 @@
-# Phase 1 QA and approval package
+# Historical Phase 1 QA and approval package
+
+This describes the pre-correction prototype. The latest results and reference comparison are in 08-visual-corrections-review.md.
 
 Prototype verdict: PROTOTYPE READY FOR DESIGN APPROVAL.
 

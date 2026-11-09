@@ -1,6 +1,6 @@
 # SENTINEL V2 — Phase 1 handoff
 
-Verdict: PROTOTYPE READY FOR DESIGN APPROVAL (subject to the recorded QA limitations).
+Verdict: VISUAL CORRECTIONS READY FOR REVIEW. The technical foundation was accepted, but the original visual design was not approved. See 08-visual-corrections-review.md for the current correction pass.
 
 DESIGN APPROVAL: PENDING
 
@@ -17,7 +17,7 @@ Neither readiness nor the user's merge of main constitutes design, route migrati
 - Earlier discovery baseline: `ac044cd3b114ff82b8e5ff4ef3e650e541973499`; verified ancestor of main. Isolated initial prototype files were retained during fast-forward to approved main.
 - Original selected worktree was clean before our changes; no unrelated dirty files were incorporated.
 - Baseline ref: `backup/sentinel-v2-main-410109c`.
-- Prototype SHA: `2a1705e9712770c16e2e2b1b81d658d42d258dea`.
+- Prototype SHA: `4f1954f9cb1d5d8ac53c896b5fdcd5a85be65234`.
 - Current working-tree status: Phase 1 source is locally committed; verify with `git status --short --branch` in any subsequent session.
 - Baseline recovery bundle: `/workspace/sentinel-v2-artifacts/baseline/main-410109c.bundle`; `git bundle verify` succeeded, full history included.
 
@@ -25,7 +25,7 @@ Safe recovery without discarding the prototype: `git worktree add /workspace/SEN
 
 ## What is implemented
 
-1. Evidence Reel: original SVG machine with linked spools/tape/scanner, six deterministic reversible stages, chapter controls, skip-story focus, reload restoration and breakpoint cleanup.
+1. Evidence Reel: original SVG machine with changing wound packs, linked tape/scanner, a continuous outgoing evidence strip, attached signal frames, spatial recession and shared React dossier reveal. Six deterministic reversible stages, chapter controls, skip-story focus, reload restoration and breakpoint cleanup remain.
 2. Demo Payment Dossier: two labeled authored fixtures, selectable examples, overview/timeline, provenance, illustrative factors and scores, responsive app-shell composition.
 3. Authorized records preview: existing session and API hooks; list/search, id deep link, typed dossier, recorded assessment/limitations and links to existing cases. Read-only; original mutations remain in untouched existing screens.
 4. Production isolation: DEV-only lazy import and scoped styles/cache; normal and static/hash production builds emit no preview assets. No new preview polling or providers mount on normal routes.
@@ -84,8 +84,22 @@ A subsequent session must verify source SHA and artifact availability rather tha
 - Evidence Reel design/material treatment: PENDING.
 - Operational shell/dossier composition: PENDING.
 - Representative workflow: transaction context/risk/associated case, implemented; user approval PENDING.
-- Visual adjustments: none approved yet.
+- Visual foundations: the user requested retaining graphite/ivory, Volt Lime and typography. The original stationary storytelling was rejected; the targeted correction is implemented. Overall design approval remains PENDING.
 - Public `/` vs protected `/app` migration and compatibility aliases: PENDING, see route plan.
 - Full legacy UI migration: NOT AUTHORIZED until explicit Gate 1 approval.
 
-Known limits: cross-browser downloads blocked, no physical-device or manual screen-reader check, genuine providers unverified, startup timing varies and production/field performance is not established, prototype reveal still needs Phase 2 polish. These do not authorize deletion of unverified existing screens. The final full-rebuild/deployment verdict remains NOT READY — BLOCKERS REMAIN.
+Known limits: cross-browser downloads blocked, no physical-device or manual screen-reader check, genuine providers unverified, and production/field performance is not established. Local software-rendered motion still has frame-timing limits; the scene remains a stylized SVG interpretation. The real shared-layout reveal is now implemented, but its artistic acceptance is pending. These do not authorize deletion of unverified existing screens. The final full-rebuild/deployment verdict remains NOT READY — BLOCKERS REMAIN.
+
+## Visual correction pass
+
+- Exact pre-correction checkpoint: `53c42953cd9fb99ed0af4ced3238e2c6317873b9`.
+- Recovery ref: `backup/sentinel-v2-before-visual-corrections`; verified bundle at `/workspace/sentinel-v2-revision/before-corrections.bundle`.
+- Current prototype/source checkpoint: `4f1954f9cb1d5d8ac53c896b5fdcd5a85be65234`.
+- The provided 90-second Wispr Flow-labeled reference clip was downloaded and visually studied. The earlier transfer blocker is resolved.
+- New recordings/screenshots/gallery: `/workspace/sentinel-v2-visual-corrections/`.
+- Updated shareable ZIP: `/workspace/shared/downloads/SENTINEL-V2-visual-corrections.zip`.
+- Current verification logs: `/workspace/sentinel-v2-revision/artifacts/`.
+- Read `08-visual-corrections-review.md` and the revised animation contract before continuing. Do not infer Gate 1 approval from this correction request or these test results.
+
+DESIGN APPROVAL: PENDING
+DEPLOYMENT APPROVAL: PENDING
