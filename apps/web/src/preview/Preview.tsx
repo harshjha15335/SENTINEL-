@@ -14,6 +14,7 @@ import { Route, Routes } from "react-router-dom";
 import { ApiError } from "@/lib/api";
 import { meKey } from "@/features/auth/session";
 import { AuthorizedWorkspace, DemoDossier } from "./Dossier";
+import { PreviewNavigation } from "./PreviewNavigation";
 import { EvidenceStory } from "./Story";
 
 /** Development only. Private data uses a separate cache and the unchanged API/session. */
@@ -43,6 +44,7 @@ export default function Preview() {
   return (
     <QueryClientProvider client={client}>
       <div className="v2-preview">
+        <PreviewNavigation />
         <Routes>
           <Route index element={<EvidenceStory />} />
           <Route path="dossier" element={<DemoDossier />} />

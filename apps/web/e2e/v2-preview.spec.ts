@@ -53,7 +53,9 @@ test("six scroll checkpoints, rewind, restored position and clean remount", asyn
   let middle: string | null = null;
   for (const [i, p] of [0, 0.2, 0.4, 0.6, 0.8, 0.999].entries()) {
     await progress(page, p);
-    await expect(page.locator(`[data-story-stage]`).nth(i)).toBeVisible();
+    if (i === 5)
+      await expect(page.locator("[data-dossier-frame]")).toBeVisible();
+    else await expect(page.locator("[data-story-stage]").nth(i)).toBeVisible();
     await page.screenshot({ path: `${shots}/reel-${i}.png` });
     if (p === 0.4)
       middle = await page.locator("[data-reel=left]").getAttribute("transform");

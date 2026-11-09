@@ -3,6 +3,8 @@ export function Machine() {
   return (
     <svg
       className="v2-machine"
+      width="820"
+      height="560"
       viewBox="0 0 820 560"
       role="img"
       aria-labelledby="machine-title machine-desc"
@@ -14,6 +16,30 @@ export function Machine() {
         illustration.
       </desc>
       <defs>
+        <linearGradient id="brushed-steel" x1="0" y1="0" x2=".9" y2="1">
+          <stop stopColor="#e0e0d4" />
+          <stop offset=".16" stopColor="#9ea8a4" />
+          <stop offset=".29" stopColor="#5a6463" />
+          <stop offset=".45" stopColor="#c2c8bf" />
+          <stop offset=".65" stopColor="#697471" />
+          <stop offset=".83" stopColor="#a0aaa1" />
+          <stop offset="1" stopColor="#3e4949" />
+        </linearGradient>
+        <pattern
+          id="brushed-grain"
+          width="3"
+          height="3"
+          patternUnits="userSpaceOnUse"
+        >
+          <path d="M0 1H3" stroke="#ced3c9" strokeWidth=".35" opacity=".035" />
+        </pattern>
+        <radialGradient id="hub-metal">
+          <stop stopColor="#ebebd9" />
+          <stop offset=".3" stopColor="#b4bbb0" />
+          <stop offset=".62" stopColor="#485451" />
+          <stop offset=".72" stopColor="#d3d8c9" />
+          <stop offset="1" stopColor="#606c69" />
+        </radialGradient>
         <linearGradient id="housing" x1="0" y1="0" x2="1" y2="1">
           <stop stopColor="#41494c" />
           <stop offset=".3" stopColor="#252d31" />
@@ -50,7 +76,8 @@ export function Machine() {
           />
         </pattern>
       </defs>
-      <ellipse cx="421" cy="518" rx="309" ry="19" fill="#000" opacity=".45" />
+      <ellipse cx="421" cy="519" rx="317" ry="25" fill="#000" opacity=".16" />
+      <ellipse cx="421" cy="518" rx="285" ry="14" fill="#000" opacity=".55" />
       <g transform="translate(27 20)">
         <path
           d="M70 58L677 36 736 82 736 445 120 483 62 445Z"
@@ -70,7 +97,20 @@ export function Machine() {
           fill="#11191d"
           stroke="#444e51"
         />
-        <path d="M147 135L694 112V293L147 321Z" fill="#141b1f" />
+        <path
+          d="M147 135L694 112V293L147 321Z"
+          fill="#10181a"
+          stroke="#4b5757"
+        />
+        <path d="M132 119L708 95V413L132 447Z" fill="url(#brushed-grain)" />
+        <path
+          d="M120 100L724 74M120 101V472"
+          fill="none"
+          stroke="#bec9c0"
+          opacity=".3"
+        />
+        <path d="M143 148L684 125" stroke="#bdc9bf" opacity=".12" />
+        <path d="M145 156L682 133" stroke="#000" opacity=".3" />
         <text
           x="145"
           y="86"
@@ -98,20 +138,23 @@ export function Machine() {
           <Reel side="right" />
         </g>
         <path
-          d="M266 312L266 347 340 369 459 363 564 331 564 297"
+          data-internal-tape
+          d="M266 314L266 347 340 369 459 363 564 331 564 255"
           fill="none"
           stroke="#070b0d"
           strokeWidth="19"
         />
         <path
-          d="M266 312L266 347 340 369 459 363 564 331 564 297"
+          data-internal-tape
+          d="M266 314L266 347 340 369 459 363 564 331 564 255"
           fill="none"
           stroke="#677066"
           strokeWidth="9"
         />
         <path
           data-tape
-          d="M266 312L266 347 340 369 459 363 564 331 564 297"
+          data-internal-tape
+          d="M266 314L266 347 340 369 459 363 564 331 564 255"
           fill="none"
           stroke="#c6ff4d"
           strokeWidth="3"
@@ -136,6 +179,41 @@ export function Machine() {
             <circle cx={x} cy={y} r="3" fill="#0a1115" />
           </g>
         ))}
+        <path
+          d="M564 331C635 331 677 350 736 360"
+          fill="none"
+          stroke="#0b1213"
+          strokeWidth="16"
+        />
+        <path
+          d="M564 331C635 331 677 350 736 360"
+          fill="none"
+          stroke="#82917c"
+          strokeWidth="10"
+        />
+        <path
+          d="M564 331C635 331 677 350 736 360"
+          fill="none"
+          stroke="#1b2923"
+          strokeWidth="7"
+        />
+        <path
+          d="M564 331C635 331 677 350 736 360"
+          fill="none"
+          stroke="#c6ff4d"
+          strokeWidth="2"
+          strokeDasharray="2 14"
+        />
+        <rect
+          x="719"
+          y="345"
+          width="22"
+          height="30"
+          rx="3"
+          fill="url(#brushed-steel)"
+          stroke="#101718"
+        />
+        <path d="M723 351V370" stroke="#07100e" strokeWidth="6" />
         <g className="v2-scanner">
           <rect
             x="375"
@@ -143,7 +221,7 @@ export function Machine() {
             width="50"
             height="55"
             rx="3"
-            fill="url(#metal)"
+            fill="url(#brushed-steel)"
           />
           <rect x="382" y="339" width="36" height="40" fill="#0e1718" />
           <path d="M383 361H417" stroke="#c6ff4d" strokeWidth="3" />
@@ -268,44 +346,78 @@ export function Machine() {
 }
 function Reel({ side }: { side: string }) {
   return (
-    <g data-reel={side}>
+    <g>
       <circle r="104" fill="#080d10" stroke="#4c565a" strokeWidth="2" />
       <circle r="98" fill="url(#spool)" stroke="#8a9390" />
-      {Array.from({ length: 32 }, (_, i) => (
+      <circle
+        data-wound={side}
+        r={side === "left" ? 92 : 48}
+        fill="#534f3b"
+        stroke="#9a9470"
+        strokeWidth="2"
+      />
+      {[54, 62, 70, 78, 86].map((r) => (
         <circle
-          key={i}
-          r={49 + i * 1.3}
+          key={r}
+          r={r}
           fill="none"
-          stroke="#7a7665"
-          strokeWidth=".4"
+          stroke="#a69d77"
+          strokeWidth=".5"
           opacity=".3"
         />
       ))}
-      <circle r="84" fill="url(#metal)" opacity=".85" />
-      {[0, 120, 240].map((a) => (
-        <path
-          key={a}
-          transform={`rotate(${a})`}
-          d="M-16 -27C-39 -48 -52 -57 -46 -66C-21 -84 12 -81 24 -68L18 -29Z"
-          fill="#121b1e"
-          stroke="#596366"
-          strokeWidth="2"
-        />
-      ))}
-      <circle r="31" fill="#151e22" stroke="#cad0c4" strokeWidth="2" />
-      <circle r="22" fill="url(#metal)" />
-      <circle r="8" fill="#131b1e" stroke="#9aa6a3" />
-      <path d="M0 -98V-89" stroke="#c6ff4d" strokeWidth="3" />
-      {[0, 120, 240].map((a) => (
+      <g data-reel={side}>
+        <defs>
+          <mask
+            id={`flange-${side}`}
+            maskUnits="userSpaceOnUse"
+            x="-105"
+            y="-105"
+            width="210"
+            height="210"
+          >
+            <circle r="84" fill="white" />
+            {[0, 120, 240].map((a) => (
+              <path
+                key={a}
+                transform={`rotate(${a})`}
+                d="M-16 -27C-39 -48 -52 -57 -46 -66C-21 -84 12 -81 24 -68L18 -29Z"
+                fill="black"
+              />
+            ))}
+          </mask>
+        </defs>
         <circle
-          key={a}
-          transform={`rotate(${a})`}
-          cx="0"
-          cy="-16"
-          r="2"
-          fill="#141c20"
+          r="84"
+          fill="url(#brushed-steel)"
+          opacity=".95"
+          mask={`url(#flange-${side})`}
         />
-      ))}
+        {[0, 120, 240].map((a) => (
+          <path
+            key={a}
+            transform={`rotate(${a})`}
+            d="M-16 -27C-39 -48 -52 -57 -46 -66C-21 -84 12 -81 24 -68L18 -29Z"
+            fill="none"
+            stroke="#596366"
+            strokeWidth="2"
+          />
+        ))}
+        <circle r="31" fill="#151e22" stroke="#cad0c4" strokeWidth="2" />
+        <circle r="22" fill="url(#hub-metal)" />
+        <circle r="8" fill="#131b1e" stroke="#9aa6a3" />
+        <path d="M0 -98V-89" stroke="#c6ff4d" strokeWidth="3" />
+        {[0, 120, 240].map((a) => (
+          <circle
+            key={a}
+            transform={`rotate(${a})`}
+            cx="0"
+            cy="-16"
+            r="2"
+            fill="#141c20"
+          />
+        ))}
+      </g>
     </g>
   );
 }

@@ -25,11 +25,11 @@ import {
 import { formatMoney, humanize } from "@/lib/format";
 import { examples, fixtureTransaction, FIXTURE_VERSION } from "./fixtures";
 
-export function DemoDossier() {
+export function DemoDossier({ embedded = false }: { embedded?: boolean }) {
   const [params, setParams] = useSearchParams();
-  const index = params.get("example") === "1" ? 1 : 0;
+  const index = !embedded && params.get("example") === "1" ? 1 : 0;
   return (
-    <Workspace demo>
+    <Workspace demo embedded={embedded}>
       <div className="v2-notice">
         <span className="v2-dot" /> SIMULATED / PUBLIC-SAFE DEMONSTRATION{" "}
         <span>Illustrative scores. No inference or payment execution.</span>
@@ -259,10 +259,13 @@ export function QueryError({
 function Workspace({
   children,
   demo = false,
+  embedded = false,
 }: {
   children: React.ReactNode;
   demo?: boolean;
+  embedded?: boolean;
 }) {
+  const Content = embedded ? "div" : "main";
   return (
     <div className="v2-workspace">
       <aside className="v2-rail">
@@ -296,7 +299,7 @@ function Workspace({
           <small>V2 DESIGN PROTOTYPE / 01</small>
         </div>
       </aside>
-      <main className="v2-workspace-main">
+      <Content className="v2-workspace-main">
         <header className="v2-workspace-top">
           <span>
             SENTINEL <span>/</span> TRANSACTIONS <span>/</span> DOSSIER
@@ -306,7 +309,7 @@ function Workspace({
           </span>
         </header>
         {children}
-      </main>
+      </Content>
     </div>
   );
 }
@@ -328,13 +331,11 @@ function Dossier({
   const [tab, setTab] = useState("overview");
   const factors = example
     ? example.factors.map(([label, value, width]) => ({ label, value, width }))
-    : (assessment?.explanation.contributions
-        .slice(0, 6)
-        .map((c) => ({
-          label: c.label,
-          value: `${c.contribution >= 0 ? "+" : ""}${c.contribution.toFixed(3)} log-odds`,
-          width: Math.min(100, Math.abs(c.contribution) * 35),
-        })) ?? []);
+    : (assessment?.explanation.contributions.slice(0, 6).map((c) => ({
+        label: c.label,
+        value: `${c.contribution >= 0 ? "+" : ""}${c.contribution.toFixed(3)} log-odds`,
+        width: Math.min(100, Math.abs(c.contribution) * 35),
+      })) ?? []);
   return (
     <article className="v2-dossier" aria-label="Payment dossier">
       <header className="v2-dossier-header">
@@ -343,7 +344,7 @@ function Dossier({
             PAYMENT RECORD /{" "}
             {demo ? "DEMO-014" + (8 + (demoIndex ?? 0)) : t.id.slice(0, 8)}
           </p>
-          <h2>
+          <h2 data-shared-amount>
             {formatMoney(t.amount_minor, t.currency)} <span>{t.currency}</span>
           </h2>
           <p>
@@ -499,7 +500,7 @@ function Dossier({
                 ? `${band} RISK`
                 : "NOT SCORED"}
           </p>
-          <div className="v2-score">
+          <div className="v2-score" data-shared-risk>
             {score === undefined ? "—" : Math.round(score * 100)}
             <span>{score === undefined ? "" : "/ 100"}</span>
           </div>

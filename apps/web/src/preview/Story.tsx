@@ -1,372 +1,565 @@
 import { useGSAP } from "@gsap/react";
-import { ArrowDown, ArrowRight, ArrowUpRight, ChevronDown } from "lucide-react";
+import { ArrowDown, ArrowRight, ArrowUpRight } from "lucide-react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { useRef } from "react";
+import { useRef, useSyncExternalStore } from "react";
 import { Link } from "react-router-dom";
+import { DemoDossier } from "./Dossier";
 import { Machine } from "./Machine";
+import { EvidenceTape } from "./Tape";
 import { storyStages } from "./fixtures";
+import {
+  evidencePath,
+  mix,
+  placement,
+  segment,
+  smooth,
+  stageBoundaries,
+  transport,
+} from "./scene";
+import "./story.css";
 
 gsap.registerPlugin(ScrollTrigger, useGSAP);
-const boundaries = [0, 0.14, 0.3, 0.48, 0.66, 0.84];
+const query = "(min-width: 901px) and (prefers-reduced-motion: no-preference)";
+function subscribe(onChange: () => void) {
+  const m = matchMedia(query);
+  m.addEventListener("change", onChange);
+  return () => m.removeEventListener("change", onChange);
+}
+const snapshot = () => matchMedia(query).matches;
 export function EvidenceStory() {
+  const desktop = useSyncExternalStore(subscribe, snapshot, () => false);
+  return desktop ? <DesktopStory /> : <CompactStory />;
+}
+function updateTransport(root: HTMLElement, p: number) {
+  const t = transport(p);
+  root
+    .querySelector('[data-reel="left"]')
+    ?.setAttribute("transform", `rotate(${t.supplyAngle.toFixed(5)})`);
+  root
+    .querySelector('[data-reel="right"]')
+    ?.setAttribute("transform", `rotate(${t.takeupAngle.toFixed(5)})`);
+  root
+    .querySelector('[data-wound="left"]')
+    ?.setAttribute("r", String(t.supply));
+  root
+    .querySelector('[data-wound="right"]')
+    ?.setAttribute("r", String(t.takeup));
+  const internal = `M266 ${222 + t.supply} L266 347 340 369 459 363 564 331 564 ${207 + t.takeup}`;
+  root
+    .querySelectorAll("[data-internal-tape]")
+    .forEach((el) => el.setAttribute("d", internal));
+  root
+    .querySelector("[data-tape]")
+    ?.setAttribute("stroke-dashoffset", String(-t.distance));
+  const diag = root.querySelector<SVGElement>("[data-diagnostic]");
+  if (diag) diag.style.opacity = String(0.15 + t.advance * 0.85);
+  const scan = root.querySelector<SVGElement>("[data-scan]");
+  if (scan) scan.style.opacity = p >= 0.3 && p < 0.84 ? ".9" : "0";
+  return t;
+}
+function DesktopStory() {
   const root = useRef<HTMLDivElement>(null);
   useGSAP(
     () => {
       const scene = root.current;
       if (!scene) return;
-      const mm = gsap.matchMedia();
-      mm.add(
-        "(min-width: 901px) and (prefers-reduced-motion: no-preference)",
-        () => {
-          const stages = gsap.utils.toArray<HTMLElement>(
-            "[data-story-stage]",
-            scene,
-          );
-          const chips = gsap.utils.toArray<HTMLElement>(
-            "[data-chapter]",
-            scene,
-          );
-          const status = scene.querySelector("[data-machine-status]");
-          const reels = scene.querySelectorAll("[data-reel]");
-          const tape = scene.querySelector("[data-tape]");
-          const diagnostic = scene.querySelector("[data-diagnostic]");
-          const scanner = scene.querySelector("[data-scan]");
-          const progress = scene.querySelector("[data-progress]");
-          const caseReveal =
-            scene.querySelector<HTMLElement>("[data-case-reveal]");
-          const machine = scene.querySelector(".v2-machine-wrap");
-          const readouts =
-            scene.querySelectorAll<HTMLElement>("[data-readout]");
-          // Initial values are captured by the GSAP context and reverted on breakpoint/unmount.
-          gsap.set(reels, { rotation: 0, svgOrigin: "0 0" });
-          gsap.set(tape, { strokeDashoffset: 0 });
-          gsap.set(diagnostic, { opacity: 0.15 });
-          gsap.set(scanner, { opacity: 0 });
-          gsap.set(progress, { scaleX: 0, transformOrigin: "left" });
-          gsap.set(caseReveal, { opacity: 0, y: 35 });
-          gsap.set(machine, { scale: 1, y: 0 });
-          const setRotation = gsap.quickSetter(reels, "rotation", "deg");
-          const setTape = gsap.quickSetter(tape, "strokeDashoffset");
-          const setDiagnostic = gsap.quickSetter(diagnostic, "opacity");
-          const setProgress = gsap.quickSetter(progress, "scaleX");
-          const setCaseOpacity = gsap.quickSetter(caseReveal, "opacity");
-          const setCaseY = gsap.quickSetter(caseReveal, "y", "px");
-          const setScaleX = gsap.quickSetter(machine, "scaleX");
-          const setScaleY = gsap.quickSetter(machine, "scaleY");
-          let previousIndex = -1;
-          const render = (p: number) => {
-            // Constant apparent spool radius; tape distance is shared by both reels.
-            const travel = Math.max(0, Math.min(1, (p - 0.14) / 0.7)) * 2000;
-            setRotation(((travel / 78) * 180) / Math.PI);
-            setTape(-travel);
-            setDiagnostic(0.15 + Math.min(1, travel / 80) * 0.85);
-            const index = boundaries.reduce(
-              (last, b, i) => (p >= b ? i : last),
-              0,
-            );
-            const nextBoundary = boundaries[index + 1];
-            const blend =
-              nextBoundary === undefined
-                ? 0
-                : Math.max(0, (p - nextBoundary + 0.025) / 0.025);
-            stages.forEach((el, i) => {
-              const alpha =
-                i === index ? 1 - blend : i === index + 1 ? blend : 0;
-              el.style.opacity = String(alpha);
-              el.style.visibility = alpha > 0 ? "visible" : "hidden";
-              el.inert = i !== index;
-            });
-            if (index !== previousIndex) {
-              previousIndex = index;
-              readouts.forEach((el) => {
-                const visible = Number(el.dataset.readout) === index;
-                el.style.opacity = visible ? "1" : "0";
-                el.style.visibility = visible ? "visible" : "hidden";
-              });
-              chips.forEach((el, i) =>
-                el.setAttribute("aria-current", i === index ? "step" : "false"),
-              );
-              if (scanner instanceof SVGElement)
-                scanner.style.opacity =
-                  index === 2 || index === 3 ? ".85" : "0";
-              if (status)
-                status.textContent =
-                  [
-                    "AWAITING INPUT",
-                    "READING INPUT",
-                    "SIGNAL EXTRACTION",
-                    "RISK / DEMO",
-                    "BUILDING CONTEXT",
-                    "READY FOR REVIEW",
-                  ][index] ?? "";
-            }
-            scene.dataset.progress = p.toFixed(4);
-            scene.dataset.stage = String(index);
-            setProgress(p);
-            const reveal = Math.max(0, Math.min(1, (p - 0.66) / 0.18));
-            setCaseOpacity(reveal);
-            setCaseY((1 - reveal) * 35);
-            if (caseReveal)
-              caseReveal.style.visibility = reveal > 0 ? "visible" : "hidden";
-            const machineScale = 1 - Math.max(0, p - 0.66) * 0.5;
-            setScaleX(machineScale);
-            setScaleY(machineScale);
-          };
-          const trigger = ScrollTrigger.create({
-            id: "sentinel-evidence-reel",
-            trigger: scene.querySelector(".v2-story-track"),
-            start: "top top",
-            end: "+=400%",
-            pin: scene.querySelector(".v2-story-pin"),
-            scrub: true,
-            invalidateOnRefresh: true,
-            onUpdate: (self) => render(self.progress),
-            onRefresh: (self) => render(self.progress),
-          });
-          let active = true;
-          const save = () => {
-            try {
-              sessionStorage.setItem(
-                "sentinel-v2-story-progress",
-                String(trigger.progress),
-              );
-            } catch {
-              /* Storage may be disabled. */
-            }
-          };
-          window.addEventListener("pagehide", save);
-          const navigation = performance.getEntriesByType("navigation")[0] as
-            PerformanceNavigationTiming | undefined;
-          void document.fonts.ready.then(() => {
-            if (!active) return;
-            ScrollTrigger.refresh();
-            if (
-              navigation?.type === "reload" ||
-              navigation?.type === "back_forward"
-            ) {
-              try {
-                const saved = Number(
-                  sessionStorage.getItem("sentinel-v2-story-progress") ?? 0,
-                );
-                if (Number.isFinite(saved)) {
-                  trigger.scroll(
-                    trigger.start +
-                      Math.max(0, Math.min(1, saved)) *
-                        (trigger.end - trigger.start),
-                  );
-                  ScrollTrigger.update();
-                }
-              } catch {
-                /* Normal browser restoration remains available. */
-              }
-            }
-            render(trigger.progress);
-          });
-          render(trigger.progress);
-          return () => {
-            active = false;
-            window.removeEventListener("pagehide", save);
-            scene
-              .querySelectorAll<HTMLElement>("[data-story-stage]")
-              .forEach((el) => {
-                el.style.removeProperty("opacity");
-                el.style.removeProperty("visibility");
-                el.inert = false;
-              });
-          };
-        },
+      const placementNode = scene.querySelector("[data-machine-placement]");
+      const machine = scene.querySelector<SVGElement>("[data-machine-art]");
+      const paths = scene.querySelectorAll<SVGPathElement>("[data-strip-path]");
+      const lengthPath = scene.querySelector<SVGPathElement>(
+        "[data-strip-length]",
       );
-      return () => mm.revert();
+      const marks = scene.querySelector<SVGPathElement>("[data-strip-marks]");
+      const nodes = scene.querySelectorAll<SVGElement>("[data-path-node]");
+      const risk = scene.querySelector<SVGElement>("[data-risk-visual]");
+      const ring = scene.querySelector<SVGElement>("[data-risk-ring]");
+      const frame = scene.querySelector<HTMLElement>("[data-dossier-frame]");
+      const copy = scene.querySelector<HTMLElement>(".v2-scene-copy");
+      const footer = scene.querySelector<HTMLElement>(".v2-scene-footer");
+      const enter = scene.querySelector<HTMLElement>(".v2-scene-enter");
+      const stages = scene.querySelectorAll<HTMLElement>("[data-story-stage]");
+      const chips = scene.querySelectorAll("[data-chapter]");
+      const status = scene.querySelector("[data-machine-status]");
+      const render = (p: number) => {
+        const t = updateTransport(scene, p),
+          m = placement(p);
+        placementNode?.setAttribute(
+          "transform",
+          `translate(${m.x} ${m.y}) scale(${m.scale}) rotate(${m.angle} 410 280)`,
+        );
+        if (machine)
+          machine.style.opacity = String(1 - smooth(segment(p, 0.77, 0.91)));
+        const d = evidencePath(p, m.exitX, m.exitY);
+        paths.forEach((path) => path.setAttribute("d", d));
+        const total = lengthPath?.getTotalLength() ?? 1;
+        const visible = smooth(segment(p, 0.2, 0.55));
+        paths.forEach((path) => {
+          path.style.strokeDasharray =
+            path === marks ? "2 17" : `${visible * total} ${total + 1}`;
+          path.style.strokeDashoffset =
+            path === marks ? String(-t.distance) : "0";
+          path.style.opacity = String(path === marks ? visible : 0.95);
+        });
+        // The data markings move within the growing physical strip, not independently of it.
+        if (marks) {
+          marks.style.clipPath = `inset(0 0 0 0)`;
+          marks.style.opacity = String(visible * 0.7);
+        }
+        nodes.forEach((node, i) => {
+          const at = Number(node.dataset.at ?? 0);
+          const point = lengthPath?.getPointAtLength(total * at);
+          const before = lengthPath?.getPointAtLength(
+            Math.max(0, total * at - 2),
+          );
+          const after = lengthPath?.getPointAtLength(
+            Math.min(total, total * at + 2),
+          );
+          if (point && before && after) {
+            const angle = Math.max(
+              -13,
+              Math.min(
+                13,
+                (Math.atan2(after.y - before.y, after.x - before.x) * 180) /
+                  Math.PI,
+              ),
+            );
+            node.setAttribute(
+              "transform",
+              `translate(${point.x} ${point.y}) rotate(${angle})`,
+            );
+          }
+          const appear = smooth(segment(visible, at - 0.04, at + 0.06));
+          node.style.opacity = String(
+            appear * (1 - smooth(segment(p, 0.67 + i * 0.02, 0.77 + i * 0.02))),
+          );
+        });
+        if (risk) {
+          const a = smooth(segment(p, 0.53, 0.64));
+          risk.style.opacity = String(a * (1 - smooth(segment(p, 0.76, 0.91))));
+          risk.setAttribute(
+            "transform",
+            `translate(1120 610) scale(${mix(0.72, 1, a)})`,
+          );
+        }
+        ring?.setAttribute(
+          "stroke-dashoffset",
+          String(628.319 * (1 - 0.87 * smooth(segment(p, 0.53, 0.65)))),
+        );
+        const assembly = smooth(segment(p, 0.65, 0.99));
+        if (frame) {
+          const dx = scene.clientWidth * 0.18 * (1 - assembly),
+            dy =
+              (scene.querySelector<HTMLElement>(".v2-spatial-pin")
+                ?.clientHeight ?? window.innerHeight) *
+              0.13 *
+              (1 - assembly);
+          frame.style.transform = `translate(${dx}px,${dy}px) scale(${mix(0.38, 1, assembly)})`;
+          frame.style.opacity = String(smooth(segment(p, 0.66, 0.76)));
+          frame.style.borderRadius = `${18 * (1 - assembly)}px`;
+          frame.style.visibility = p > 0.65 ? "visible" : "hidden";
+        }
+        const fade = 1 - smooth(segment(p, 0.64, 0.76));
+        if (copy) {
+          copy.style.opacity = String(fade);
+          copy.inert = p > 0.8;
+          copy.style.visibility = fade > 0 ? "visible" : "hidden";
+        }
+        const index = stageBoundaries.reduce<number>(
+          (last, b, i) => (p >= b ? i : last),
+          0,
+        );
+        const next = stageBoundaries[index + 1];
+        const blend = next === undefined ? 0 : segment(p, next - 0.025, next);
+        stages.forEach((el, i) => {
+          const alpha = i === index ? 1 - blend : i === index + 1 ? blend : 0;
+          el.style.opacity = String(alpha);
+          el.style.visibility = alpha > 0 ? "visible" : "hidden";
+          el.inert = i !== index;
+        });
+        chips.forEach((el, i) =>
+          el.setAttribute("aria-current", i === index ? "step" : "false"),
+        );
+        if (footer) {
+          footer.style.opacity = String(1 - segment(p, 0.85, 0.94));
+          footer.inert = p > 0.94;
+        }
+        if (enter) {
+          const show = p >= 0.96;
+          enter.style.opacity = show ? "1" : "0";
+          enter.style.visibility = show ? "visible" : "hidden";
+          enter.inert = !show;
+          if (show && footer?.contains(document.activeElement)) {
+            enter
+              .querySelector<HTMLAnchorElement>("a")
+              ?.focus({ preventScroll: true });
+          }
+        }
+        if (status)
+          status.textContent =
+            [
+              "AWAITING INPUT",
+              "READING INPUT",
+              "EVIDENCE OUTPUT",
+              "RISK / DEMO",
+              "CASE CONTEXT",
+              "WORKSPACE READY",
+            ][index] ?? "";
+        scene.dataset.progress = p.toFixed(4);
+        scene.dataset.stage = String(index);
+        scene.dataset.tapeDistance = t.distance.toFixed(3);
+        const bar = scene.querySelector<HTMLElement>("[data-progress]");
+        if (bar) bar.style.transform = `scaleX(${p})`;
+        // At the end the physical strip dissolves into the actual, shared HTML workspace.
+        const strip = scene.querySelector<SVGElement>("[data-evidence-strip]");
+        if (strip)
+          strip.style.opacity = String(1 - smooth(segment(p, 0.82, 0.95)));
+      };
+      const trigger = ScrollTrigger.create({
+        id: "sentinel-evidence-reel",
+        trigger: scene.querySelector(".v2-story-track"),
+        start: "top top",
+        end: "+=400%",
+        pin: scene.querySelector(".v2-story-pin"),
+        scrub: true,
+        invalidateOnRefresh: true,
+        onUpdate: (self) => render(self.progress),
+        onRefresh: (self) => render(self.progress),
+      });
+      let active = true;
+      void document.fonts.ready.then(() => {
+        if (active) {
+          ScrollTrigger.refresh();
+          render(trigger.progress);
+        }
+      });
+      render(trigger.progress);
+      return () => {
+        active = false;
+      };
     },
     { scope: root },
   );
-  function goChapter(i: number) {
-    const trigger = ScrollTrigger.getById("sentinel-evidence-reel");
-    if (trigger)
+  const skip = () => {
+    const end = document.getElementById("v2-after-story");
+    end?.scrollIntoView({ behavior: "instant" });
+    end?.focus({ preventScroll: true });
+  };
+  const chapter = (i: number) => {
+    const t = ScrollTrigger.getById("sentinel-evidence-reel");
+    if (t)
       window.scrollTo({
         top:
-          trigger.start +
-          (trigger.end - trigger.start) * (boundaries[i] ?? 0) +
-          1,
+          t.start +
+          (t.end - t.start) * (i === 5 ? 1 : (stageBoundaries[i] ?? 0)) +
+          (i === 5 ? -1 : 1),
         behavior: "instant",
       });
-    else document.getElementById(`v2-stage-${i}`)?.scrollIntoView();
-  }
-  function skip() {
-    const end = document.getElementById("v2-after-story");
-    end?.scrollIntoView({ behavior: "instant", block: "start" });
-    end?.focus({ preventScroll: true });
-  }
+  };
   return (
-    <div ref={root} className="v2-story" data-progress="0" data-stage="0">
-      <header className="v2-marketing-nav">
-        <Link className="v2-wordmark" to="/__v2-preview">
-          <span className="v2-brand-icon">S</span>SENTINEL
-          <span className="v2-nav-edition">/ INTELLIGENCE, IN CONTEXT.</span>
-        </Link>
-        <nav aria-label="Preview navigation">
-          <button onClick={skip}>Skip story</button>
-          <Link to="/__v2-preview/dossier">
-            Explore the workspace <ArrowUpRight size={15} />
-          </Link>
-        </nav>
-      </header>
+    <div
+      ref={root}
+      className="v2-story v2-spatial-story"
+      data-progress="0"
+      data-stage="0"
+    >
+      <StoryNav onSkip={skip} />
       <main>
         <div className="v2-story-track">
-          <section className="v2-story-pin" aria-label="Evidence Reel story">
-            <div className="v2-story-topline">
+          <section
+            className="v2-story-pin v2-spatial-pin"
+            aria-label="Evidence Reel story"
+          >
+            <div className="v2-scene-meta">
               <span>
-                <span className="v2-dot" /> FORENSIC INTELLIGENCE / HUMAN
-                DECISIONS
+                <i className="v2-dot" /> EVIDENCE TRANSPORT / HUMAN DECISIONS
               </span>
-              <span>
-                SCROLL TO INVESTIGATE <ArrowDown size={13} />
-              </span>
+              <span>SIMULATED / NO LIVE INFERENCE</span>
             </div>
-            <div className="v2-hero-grid">
-              <div className="v2-story-copy">
-                {storyStages.map((s, i) => (
-                  <section
-                    key={s.step}
-                    id={`v2-stage-${i}`}
-                    data-story-stage
-                    className={`v2-stage v2-stage-${i}`}
-                  >
-                    <p className="v2-eyebrow">
-                      <span>{s.step}</span> / {s.label}
-                    </p>
-                    <h1>
-                      {s.title}
-                      <br />
-                      <span>{s.subtitle}</span>
-                    </h1>
-                    <p className="v2-story-description">{s.text}</p>
-                    <Link className="v2-button" to="/__v2-preview/dossier">
-                      {i === 5
-                        ? "Enter the demo workspace"
-                        : "Explore the system"}{" "}
-                      <ArrowUpRight size={17} />
-                    </Link>
-                    {i === 0 && (
+            <svg
+              className="v2-spatial-art"
+              viewBox="0 0 1440 900"
+              aria-hidden="true"
+            >
+              <EvidenceTape />
+              <g data-machine-art>
+                <g data-machine-placement>
+                  <Machine />
+                </g>
+              </g>
+            </svg>
+            <div className="v2-scene-copy">
+              {storyStages.map((s, i) => (
+                <section
+                  data-story-stage
+                  className="v2-scene-stage"
+                  key={s.step}
+                >
+                  <p className="v2-eyebrow">
+                    {s.step} / {s.label}
+                  </p>
+                  <h1>
+                    {s.title}
+                    <br />
+                    <span>{s.subtitle}</span>
+                  </h1>
+                  <p>{s.text}</p>
+                  {i === 0 && (
+                    <>
+                      <Link
+                        className="v2-button"
+                        to="/__v2-preview/dossier"
+                        state={{ fromReel: true }}
+                      >
+                        Explore the system <ArrowUpRight size={17} />
+                      </Link>
                       <Link className="v2-text-link" to="/">
                         Open Command Center <ArrowRight size={14} />
                       </Link>
-                    )}
-                  </section>
-                ))}
-              </div>
-              <div className="v2-visual">
-                <div className="v2-visual-index">
-                  <span>EVIDENCE TRANSPORT</span>
-                  <span>ET—001</span>
-                </div>
-                <div className="v2-machine-wrap">
-                  <Machine />
-                </div>
-                <div data-readout="1" className="v2-stage-readout">
-                  <span className="v2-eyebrow">01 / SIMULATED TRANSACTION</span>
-                  <strong>
-                    $1,849.00 <small>USD</small>
-                  </strong>
-                  <p>
-                    DEMO-0148 <span>CAPTURED · FIXTURE</span>
-                  </p>
-                </div>
-                <div data-readout="2" className="v2-stage-readout">
-                  <span className="v2-eyebrow">02 / ILLUSTRATIVE SIGNALS</span>
-                  <p>
-                    Amount vs merchant median <b>8.4×</b>
-                  </p>
-                  <p>
-                    Payments · previous 24 hours <b>7</b>
-                  </p>
-                  <p>
-                    New customer <b>Yes</b>
-                  </p>
-                </div>
-                <div data-readout="3" className="v2-stage-readout">
-                  <span className="v2-eyebrow">
-                    03 / ILLUSTRATIVE ASSESSMENT
-                  </span>
-                  <strong className="v2-critical">
-                    87 <small>/ 100 · HIGH RISK</small>
-                  </strong>
-                  <p>Simulated score · human review</p>
-                </div>
-                <div data-case-reveal className="v2-case-reveal">
-                  <div>
-                    <span className="v2-eyebrow">
-                      INVESTIGATION PREVIEW / SIMULATED
-                    </span>
-                    <span>OPEN</span>
-                  </div>
-                  <strong>Evidence, assembled.</strong>
-                  <p>
-                    Payment context <span>→</span> Risk factors <span>→</span>{" "}
-                    Human review
-                  </p>
-                </div>
-                <div className="v2-visual-caption">
-                  <span>PRECISION IN. CLARITY OUT.</span>
-                  <span>ORIGINAL VECTOR CONSTRUCTION</span>
-                </div>
-              </div>
+                    </>
+                  )}
+                </section>
+              ))}
             </div>
-            <footer className="v2-story-footer">
-              <div className="v2-scroll-cue">
-                <ChevronDown size={17} />
-                <span>SCROLL TO FOLLOW THE EVIDENCE</span>
-              </div>
+            <div
+              className="v2-destination-preview"
+              data-dossier-frame
+              inert
+              aria-hidden="true"
+            >
+              <DemoDossier embedded />
+            </div>
+            <div className="v2-scene-enter" inert>
+              <span>THE EVIDENCE IS NOW YOUR WORKSPACE.</span>
+              <Link
+                className="v2-button"
+                to="/__v2-preview/dossier"
+                state={{ fromReel: true }}
+              >
+                Enter the demo workspace <ArrowUpRight size={17} />
+              </Link>
+            </div>
+            <footer className="v2-scene-footer">
+              <span>
+                <ArrowDown size={15} /> SCROLL TO UNFOLD THE EVIDENCE
+              </span>
               <nav aria-label="Story chapters">
                 {storyStages.map((s, i) => (
                   <button
-                    data-chapter
                     key={s.step}
-                    onClick={() => goChapter(i)}
+                    data-chapter
                     aria-label={`Go to ${s.label}`}
-                    aria-current={i === 0 ? "step" : undefined}
+                    onClick={() => chapter(i)}
                   >
                     <span>{s.step}</span>
                     <i />
                   </button>
                 ))}
               </nav>
-              <span>SIMULATED EXAMPLE / NOT LIVE INFERENCE</span>
+              <span>ONE TRANSACTION. ONE CONTINUOUS THREAD.</span>
             </footer>
-            <div className="v2-progress-track" aria-hidden="true">
+            <div className="v2-scene-progress" aria-hidden="true">
               <i data-progress />
             </div>
           </section>
         </div>
-        <section className="v2-after-story" id="v2-after-story" tabIndex={-1}>
-          <div>
-            <p className="v2-eyebrow">BEYOND THE NUMBER</p>
-            <h2>
-              See the payment.
-              <br />
-              <span>Understand the pattern.</span>
-            </h2>
+        <StoryAfter />
+      </main>
+      <StoryFooter />
+    </div>
+  );
+}
+function CompactStory() {
+  const root = useRef<HTMLDivElement>(null);
+  useGSAP(
+    () => {
+      const scene = root.current;
+      if (!scene) return;
+      const mm = gsap.matchMedia();
+      mm.add("(prefers-reduced-motion: no-preference)", () => {
+        const trigger = ScrollTrigger.create({
+          id: "sentinel-mobile-evidence",
+          trigger: scene.querySelector(".v2-compact-hero"),
+          start: "top top",
+          end: "bottom top",
+          onUpdate: (self) => {
+            updateTransport(scene, 0.14 + self.progress * 0.7);
+            scene.dataset.progress = self.progress.toFixed(4);
+          },
+        });
+        return () => trigger.kill();
+      });
+      return () => mm.revert();
+    },
+    { scope: root },
+  );
+  return (
+    <div ref={root} className="v2-story v2-spatial-story v2-compact-story">
+      <StoryNav
+        onSkip={() => {
+          const target = document.getElementById("v2-after-story");
+          target?.scrollIntoView();
+          target?.focus({ preventScroll: true });
+        }}
+      />
+      <main>
+        <section className="v2-compact-hero" data-story-stage>
+          <p className="v2-eyebrow">THE ANATOMY OF FRAUD / SIMULATED</p>
+          <h1>
+            Fraud leaves a pattern.
+            <br />
+            <span>SENTINEL reads it.</span>
+          </h1>
+          <p>
+            Follow one payment from its first signal to a focused investigation
+            workspace.
+          </p>
+          <Link
+            className="v2-button"
+            to="/__v2-preview/dossier"
+            state={{ fromReel: true }}
+          >
+            Explore the workspace <ArrowUpRight size={18} />
+          </Link>
+          <div className="v2-compact-machine">
+            <Machine />
           </div>
-          <div>
-            <p>
-              The signal is only the beginning. Explore a working dossier with
-              transaction context, an illustrative risk assessment, and a clear
-              record of where the data comes from.
-            </p>
-            <Link className="v2-button" to="/__v2-preview/dossier">
-              Open the Payment Dossier <ArrowUpRight size={18} />
-            </Link>
-            <Link className="v2-text-link" to="/__v2-preview/workspace">
-              Inspect authorized records <ArrowRight size={15} />
-            </Link>
+          <div className="v2-mobile-output" aria-hidden="true">
+            <svg viewBox="0 0 360 100" preserveAspectRatio="none">
+              <path
+                d="M335 0C380 75 260 25 260 55C260 110 0 50 0 100"
+                fill="none"
+                stroke="#7d9273"
+                strokeWidth="13"
+              />
+              <path
+                d="M335 0C380 75 260 25 260 55C260 110 0 50 0 100"
+                fill="none"
+                stroke="#172220"
+                strokeWidth="8"
+              />
+              <path
+                d="M335 0C380 75 260 25 260 55C260 110 0 50 0 100"
+                fill="none"
+                stroke="#c6ff4d"
+                strokeWidth="2"
+                strokeDasharray="2 10"
+              />
+            </svg>
           </div>
         </section>
+        <div className="v2-compact-evidence">
+          {storyStages.slice(1).map((s, j) => {
+            const i = j + 1;
+            return (
+              <section data-story-stage id={`v2-stage-${i}`} key={s.step}>
+                <p className="v2-eyebrow">
+                  {s.step} / {s.label}
+                </p>
+                <h2>
+                  {s.title} <span>{s.subtitle}</span>
+                </h2>
+                <p>{s.text}</p>
+                {i === 1 && (
+                  <strong>
+                    $1,849.00 <small>USD · SIMULATED</small>
+                  </strong>
+                )}
+                {i === 2 && (
+                  <dl>
+                    <div>
+                      <dt>Payments · previous 24 hours</dt>
+                      <dd>7</dd>
+                    </div>
+                    <div>
+                      <dt>Amount vs merchant median</dt>
+                      <dd>8.4×</dd>
+                    </div>
+                  </dl>
+                )}
+                {i === 3 && (
+                  <strong className="v2-compact-score">
+                    87 / 100 <small>ILLUSTRATIVE · HIGH RISK</small>
+                  </strong>
+                )}
+              </section>
+            );
+          })}
+        </div>
+        <div
+          className="v2-compact-workspace"
+          inert
+          aria-hidden="true"
+          aria-label="Shared dossier opening"
+        >
+          <DemoDossier embedded />
+        </div>
+        <div className="v2-compact-open">
+          <Link
+            className="v2-button"
+            to="/__v2-preview/dossier"
+            state={{ fromReel: true }}
+          >
+            Enter the demo workspace <ArrowUpRight size={17} />
+          </Link>
+        </div>
+        <StoryAfter />
       </main>
-      <footer className="v2-final-footer">
-        <span>SENTINEL / FORENSIC EDITORIAL</span>
-        <span>LOCAL DESIGN PROTOTYPE · V2 / 01</span>
-      </footer>
+      <StoryFooter />
     </div>
+  );
+}
+function StoryNav({ onSkip }: { onSkip: () => void }) {
+  return (
+    <header className="v2-spatial-nav">
+      <Link className="v2-wordmark" to="/__v2-preview">
+        <span className="v2-brand-icon">S</span>SENTINEL
+        <span className="v2-nav-edition">/ INTELLIGENCE, IN CONTEXT.</span>
+      </Link>
+      <nav aria-label="Preview navigation">
+        <button onClick={onSkip}>Skip story</button>
+        <Link to="/__v2-preview/dossier" state={{ fromReel: true }}>
+          Explore the workspace <ArrowUpRight size={15} />
+        </Link>
+      </nav>
+    </header>
+  );
+}
+function StoryAfter() {
+  return (
+    <section className="v2-after-story" id="v2-after-story" tabIndex={-1}>
+      <div>
+        <p className="v2-eyebrow">BEYOND THE NUMBER</p>
+        <h2>
+          See the payment.
+          <br />
+          <span>Understand the pattern.</span>
+        </h2>
+      </div>
+      <div>
+        <p>
+          The physical thread becomes transaction context, readable risk
+          factors, and a focused workspace. All example scores are illustrative.
+        </p>
+        <Link
+          className="v2-button"
+          to="/__v2-preview/dossier"
+          state={{ fromReel: true }}
+        >
+          Open the Payment Dossier <ArrowUpRight size={18} />
+        </Link>
+        <Link className="v2-text-link" to="/__v2-preview/workspace">
+          Inspect authorized records <ArrowRight size={15} />
+        </Link>
+      </div>
+    </section>
+  );
+}
+function StoryFooter() {
+  return (
+    <footer className="v2-final-footer">
+      <span>SENTINEL / FORENSIC EDITORIAL</span>
+      <span>LOCAL DESIGN PROTOTYPE · APPROVAL PENDING</span>
+    </footer>
   );
 }

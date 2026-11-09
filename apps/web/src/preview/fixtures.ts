@@ -77,14 +77,14 @@ export const storyStages = [
     label: "Signal extraction",
     title: "Patterns",
     subtitle: "become visible.",
-    text: "Amount deviations. Recent transaction velocity. Customer history. Past-only signals bring the payment into focus.",
+    text: "The tape leaves the machine. A simulated $1,849 payment, seven past-day payments, and an 8.4× amount deviation travel along one evidence path.",
   },
   {
     step: "03",
     label: "Risk evaluation",
     title: "Signals become",
     subtitle: "intelligence.",
-    text: "Inspect a classification alongside its contributing factors. A model score supports a decision; it does not establish intent.",
+    text: "The connected signals assemble into an illustrative 87/100 assessment. This demonstration is not live inference and does not establish intent.",
   },
   {
     step: "04",
