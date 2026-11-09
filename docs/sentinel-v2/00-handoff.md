@@ -1,3 +1,11 @@
+# Current direction — Follow the Money
+
+The user rejected the reel and graphite/lime identity. Read [09-money-trail-reset.md](09-money-trail-reset.md) for the replacement wallet narrative, ivory/purple identity, horizontal navigation, casefile layout and explicit prototype scope. Earlier descriptions below are historical and superseded for visual direction.
+
+DESIGN APPROVAL: PENDING
+
+DEPLOYMENT APPROVAL: PENDING
+
 # SENTINEL V2 — Phase 1 handoff
 
 Verdict: VISUAL CORRECTIONS READY FOR REVIEW. The technical foundation was accepted, but the original visual design was not approved. See 08-visual-corrections-review.md for the current correction pass.

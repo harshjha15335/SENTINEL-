@@ -1,8 +1,9 @@
-import "@fontsource/space-grotesk/latin-400.css";
-import "@fontsource/space-grotesk/latin-500.css";
-import "@fontsource/inter/latin-400.css";
-import "@fontsource/inter/latin-500.css";
-import "@fontsource/jetbrains-mono/latin-400.css";
+import "@fontsource/manrope/latin-400.css";
+import "@fontsource/manrope/latin-600.css";
+import "@fontsource/manrope/latin-700.css";
+import "@fontsource/dm-sans/latin-400.css";
+import "@fontsource/dm-sans/latin-500.css";
+import "@fontsource/ibm-plex-mono/latin-400.css";
 import "./preview.css";
 import {
   QueryCache,
@@ -14,8 +15,9 @@ import { Route, Routes } from "react-router-dom";
 import { ApiError } from "@/lib/api";
 import { meKey } from "@/features/auth/session";
 import { AuthorizedWorkspace, DemoDossier } from "./Dossier";
+import { CommandCenter } from "./CommandCenter";
 import { PreviewNavigation } from "./PreviewNavigation";
-import { EvidenceStory } from "./Story";
+import { MoneyStory } from "./Story";
 
 /** Development only. Private data uses a separate cache and the unchanged API/session. */
 export default function Preview() {
@@ -46,7 +48,8 @@ export default function Preview() {
       <div className="v2-preview">
         <PreviewNavigation />
         <Routes>
-          <Route index element={<EvidenceStory />} />
+          <Route index element={<MoneyStory />} />
+          <Route path="command-center" element={<CommandCenter />} />
           <Route path="dossier" element={<DemoDossier />} />
           <Route path="workspace" element={<AuthorizedWorkspace />} />
           <Route
@@ -54,7 +57,7 @@ export default function Preview() {
             element={
               <main className="v2-state">
                 <h1>Preview page not found.</h1>
-                <a href="/__v2-preview">Return to the reel</a>
+                <a href="/__v2-preview">Follow the money</a>
               </main>
             }
           />

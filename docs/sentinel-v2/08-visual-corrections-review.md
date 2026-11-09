@@ -1,3 +1,5 @@
+> Historical rejected visual direction. Superseded by [09-money-trail-reset.md](09-money-trail-reset.md).
+
 # Phase 1 visual corrections — review pending
 
 DESIGN APPROVAL: PENDING

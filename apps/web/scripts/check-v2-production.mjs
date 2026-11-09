@@ -18,15 +18,15 @@ await page
   .waitFor();
 const previewRoots = await page.locator(".v2-preview").count();
 const previewRequests = requests.filter((u) =>
-  /Preview|Story|Dossier|gsap|space-grotesk|jetbrains|inter-latin/.test(u),
+  /Preview|Story|Dossier|gsap|space-grotesk|jetbrains|inter-latin|manrope|dm-sans|Wallet|MoneyStory|CommandCenter/.test(u),
 );
 const previewAssets = readdirSync("dist/assets").filter((n) =>
-  /Preview|Story|Dossier|gsap|space-grotesk|jetbrains|inter-latin/.test(n),
+  /Preview|Story|Dossier|gsap|space-grotesk|jetbrains|inter-latin|manrope|dm-sans|Wallet|MoneyStory|CommandCenter/.test(n),
 );
 const staticPreviewAssets = readdirSync(
   (process.env.SENTINEL_V2_STATIC_DIST ?? "dist-static") + "/assets",
 ).filter((n) =>
-  /Preview|Story|Dossier|gsap|space-grotesk|jetbrains|inter-latin/.test(n),
+  /Preview|Story|Dossier|gsap|space-grotesk|jetbrains|inter-latin|manrope|dm-sans|Wallet|MoneyStory|CommandCenter/.test(n),
 );
 assert.equal(previewRoots, 0);
 assert.deepEqual(previewRequests, []);

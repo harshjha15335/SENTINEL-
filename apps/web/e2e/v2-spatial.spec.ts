@@ -1,63 +1,13 @@
+import AxeBuilder from "@axe-core/playwright";
 import { expect, test } from "@playwright/test";
-test("tape travels out of the housing and reverses with its evidence frames", async ({
-  page,
-}) => {
-  await page.goto("/__v2-preview");
-  await page.locator(".v2-spatial-art").waitFor();
-  await page.evaluate(() => scrollTo(0, 0.6 * innerHeight * 4));
-  await expect
-    .poll(() => page.locator(".v2-story").getAttribute("data-stage"))
-    .toBe("3");
-  const state = await page.locator(".v2-story").evaluate((el) => ({
-    distance: el.dataset.tapeDistance,
-    path: el.querySelector("[data-strip-length]")?.getAttribute("d"),
-    rotation: el.querySelector("[data-reel=left]")?.getAttribute("transform"),
-    radius: el.querySelector("[data-wound=left]")?.getAttribute("r"),
-  }));
-  expect(Number(state.distance)).toBeGreaterThan(1500);
-  const portGap = await page.locator(".v2-spatial-art").evaluate((svg) => {
-    const machine = svg.querySelector<SVGSVGElement>(".v2-machine");
-    const path = svg.querySelector<SVGPathElement>("[data-strip-length]");
-    const machineMatrix = machine?.getScreenCTM(),
-      pathMatrix = path?.getScreenCTM();
-    if (!path || !machineMatrix || !pathMatrix)
-      throw new Error("SVG coordinate system unavailable");
-    const port = new DOMPoint(763, 380).matrixTransform(machineMatrix);
-    const first = path.getPointAtLength(0);
-    const tape = new DOMPoint(first.x, first.y).matrixTransform(pathMatrix);
-    return Math.hypot(port.x - tape.x, port.y - tape.y);
-  });
-  expect(portGap).toBeLessThan(0.1);
-
-  await expect(page.locator("[data-path-node]").nth(0)).toBeVisible();
-  await page.evaluate(() => scrollTo(0, 0.9 * innerHeight * 4));
-  await page.waitForFunction(
-    () =>
-      Number(
-        document.querySelector(".v2-story")?.getAttribute("data-progress"),
-      ) > 0.89,
-  );
-  await page.evaluate(() => scrollTo(0, 0.6 * innerHeight * 4));
-  await page.waitForFunction(
-    () =>
-      document.querySelector(".v2-story")?.getAttribute("data-stage") === "3",
-  );
-  const reversed = await page.locator(".v2-story").evaluate((el) => ({
-    distance: el.dataset.tapeDistance,
-    path: el.querySelector("[data-strip-length]")?.getAttribute("d"),
-    rotation: el.querySelector("[data-reel=left]")?.getAttribute("transform"),
-    radius: el.querySelector("[data-wound=left]")?.getAttribute("r"),
-  }));
-  expect(reversed).toEqual(state);
-});
 test("shared live dossier layout hands off at the top and history restores the story", async ({
   page,
 }) => {
   await page.goto("/__v2-preview");
-  await page.locator(".v2-spatial-art").waitFor();
+  await page.locator(".v2-money-art").waitFor();
   await page.evaluate(() => scrollTo(0, innerHeight * 4));
-  const enter = page.getByRole("link", {
-    name: "Enter the demo workspace",
+  const enter = page.locator(".v2-scene-enter").getByRole("link", {
+    name: "Enter SENTINEL",
     exact: true,
   });
   await expect(enter).toBeVisible();
@@ -79,7 +29,7 @@ test("shared live dossier layout hands off at the top and history restores the s
   await page.reload();
   await expect.poll(() => page.evaluate(() => scrollY)).toBe(150);
   await page.goBack();
-  await expect(page.locator(".v2-story")).toHaveAttribute("data-stage", "5");
+  await expect(page.locator(".v2-story")).toHaveAttribute("data-stage", "6");
   await page.goForward();
   await expect.poll(() => page.evaluate(() => scrollY)).toBe(150);
   await page.goto("/__v2-preview/dossier");
@@ -88,32 +38,91 @@ test("shared live dossier layout hands off at the top and history restores the s
   ).toBeInViewport();
   await expect.poll(() => page.evaluate(() => scrollY)).toBe(0);
 });
-test("mobile primary action is above the fold and transport responds without pinning", async ({
+test("mobile primary action is above the fold and wallet responds without pinning", async ({
   page,
 }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/__v2-preview");
   const cta = page
     .locator(".v2-compact-hero")
-    .getByRole("link", { name: "Explore the workspace" });
+    .getByRole("link", { name: "Enter SENTINEL" });
   await expect(cta).toBeInViewport();
   await expect(page.locator(".pin-spacer")).toHaveCount(0);
   const initial = await page
-    .locator("[data-reel=left]")
-    .getAttribute("transform");
+    .locator("[data-wallet-fold]")
+    .getAttribute("style");
   await page.evaluate(() => scrollTo(0, 900));
   await page.waitForTimeout(100);
   expect(
-    await page.locator("[data-reel=left]").getAttribute("transform"),
+    await page.locator("[data-wallet-fold]").getAttribute("style"),
   ).not.toEqual(initial);
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.reload();
-  const still = await page
-    .locator("[data-reel=left]")
-    .getAttribute("transform");
+  const still = await page.locator("[data-wallet-fold]").getAttribute("style");
   await page.evaluate(() => scrollTo(0, 1300));
   await page.waitForTimeout(100);
   expect(
-    await page.locator("[data-reel=left]").getAttribute("transform"),
+    await page.locator("[data-wallet-fold]").getAttribute("style"),
   ).toEqual(still);
+});
+test("wallet, main payment and field advance continuously and reverse exactly", async ({
+  page,
+}) => {
+  await page.goto("/__v2-preview");
+  await page.locator(".v2-money-art").waitFor();
+  const sample = async (p: number) => {
+    await page.evaluate((n) => scrollTo(0, n * innerHeight * 4), p);
+    await expect
+      .poll(async () =>
+        Number(await page.locator(".v2-story").getAttribute("data-progress")),
+      )
+      .toBeCloseTo(p, 2);
+    return page.locator(".v2-story").evaluate((el) => ({
+      open: el.dataset.walletOpen,
+      receipt: el
+        .querySelector("[data-hero-receipt]")
+        ?.getAttribute("transform"),
+      wallet: el
+        .querySelector("[data-wallet-placement]")
+        ?.getAttribute("transform"),
+      field: el.querySelector("[data-field]")?.getAttribute("style"),
+    }));
+  };
+  const start = await sample(0),
+    opened = await sample(0.2);
+  expect(Number(opened.open)).toBeGreaterThan(0);
+  expect(opened.receipt).not.toEqual(start.receipt);
+  const mid = await sample(0.65);
+  expect(mid.field).toContain("opacity: 1");
+  await sample(0.99);
+  expect(await sample(0.65)).toEqual(mid);
+  expect(await sample(0)).toEqual(start);
+  await page.reload();
+  await expect(page.locator(".pin-spacer")).toHaveCount(1);
+});
+test("command center is labeled simulated and navigation offers implemented destinations", async ({
+  page,
+}) => {
+  await page.goto("/__v2-preview/command-center");
+  await expect(
+    page.getByRole("heading", { name: "Know what needs attention." }),
+  ).toBeVisible();
+  await expect(
+    page.getByText("INTERACTIVE COMPOSITION PROTOTYPE / SIMULATED"),
+  ).toBeVisible();
+  const audit = await new AxeBuilder({ page })
+    .withTags(["wcag2a", "wcag2aa", "wcag21aa", "wcag22aa"])
+    .analyze();
+  expect(audit.violations).toEqual([]);
+  await page.getByRole("link", { name: "Review the payment" }).click();
+  await expect(
+    page.getByRole("article", { name: "Payment dossier" }),
+  ).toBeVisible();
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.getByText("Menu", { exact: true }).click();
+  await page
+    .getByRole("navigation", { name: "Mobile workspace" })
+    .getByRole("link", { name: "Transactions", exact: true })
+    .click();
+  await expect(page).toHaveURL(/workspace/);
 });

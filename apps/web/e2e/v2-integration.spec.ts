@@ -145,3 +145,55 @@ test("API failure stays an error; expiry hides private data; empty search remain
     page.getByRole("article", { name: "Payment dossier" }),
   ).toHaveCount(0);
 });
+
+test("explorer filters, pagination and sorting preserve real API query semantics", async ({
+  page,
+}) => {
+  await login(page);
+  await page.goto("/__v2-preview/workspace");
+  await expect(page.getByLabel("Transaction results")).toBeVisible();
+  const filter = page.waitForResponse(
+    (r) =>
+      r.url().includes("/api/v1/transactions?") &&
+      r.url().includes("status=CAPTURED"),
+  );
+  await page
+    .getByLabel("Payment status", { exact: true })
+    .selectOption("CAPTURED");
+  expect((await filter).ok()).toBeTruthy();
+  const origin = page.waitForResponse(
+    (r) =>
+      r.url().includes("/api/v1/transactions?") &&
+      r.url().includes("data_origin=SYNTHETIC_DEMO"),
+  );
+  await page
+    .getByLabel("Data origin", { exact: true })
+    .selectOption("SYNTHETIC_DEMO");
+  expect((await origin).ok()).toBeTruthy();
+  await expect(page).toHaveURL(/status=CAPTURED/);
+  await page
+    .getByRole("button", { name: "Amount ascending · current page" })
+    .click();
+  await expect(
+    page.getByRole("button", { name: "Amount descending · current page" }),
+  ).toBeVisible();
+  const next = page.getByRole("button", { name: "Next page" });
+  if (await next.isEnabled()) {
+    const response = page.waitForResponse(
+      (r) =>
+        r.url().includes("/api/v1/transactions?") &&
+        r.url().includes("offset=10"),
+    );
+    await next.click();
+    expect((await response).ok()).toBeTruthy();
+    await expect(page).toHaveURL(/page=1/);
+    await page.getByRole("button", { name: "Previous page" }).click();
+  }
+  await page.reload();
+  await expect(page.getByLabel("Payment status", { exact: true })).toHaveValue(
+    "CAPTURED",
+  );
+  await expect(page.getByLabel("Data origin", { exact: true })).toHaveValue(
+    "SYNTHETIC_DEMO",
+  );
+});

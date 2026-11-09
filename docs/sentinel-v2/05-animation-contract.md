@@ -1,3 +1,5 @@
+> Historical rejected visual direction. Superseded by [09-money-trail-reset.md](09-money-trail-reset.md).
+
 # Evidence Reel — revised spatial motion contract
 
 This supersedes the stationary-machine prototype at `53c4295`. Design and deployment approval remain PENDING. The user's reference is now available and was visually inspected: the 90-second trimmed recording shows a physical cassette becoming a curved filmstrip that carries content through the page. The key sampled unfolding sequence is approximately 28–50 seconds into the supplied clip. No original cassette art, branding, photographs or composition was copied.

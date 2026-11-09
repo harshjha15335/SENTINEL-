@@ -1,5 +1,4 @@
 import {
-  ArrowDownLeft,
   ArrowUpRight,
   Check,
   ChevronRight,
@@ -19,6 +18,8 @@ import {
 } from "@/features/transactions/useTransactions";
 import {
   ApiError,
+  type DataOrigin,
+  type TransactionStatus,
   type RiskAssessment,
   type TransactionDetail,
 } from "@/lib/api";
@@ -36,13 +37,13 @@ export function DemoDossier({ embedded = false }: { embedded?: boolean }) {
       </div>
       <div className="v2-workspace-intro">
         <div>
-          <p className="v2-eyebrow">THE INVESTIGATOR’S WORKSPACE</p>
+          <p className="v2-eyebrow">TRANSACTIONS / PAYMENT ANALYSIS</p>
           <h1>
             Payment dossier<span>.</span>
           </h1>
         </div>
         <p>
-          One payment. All the context.
+          Follow the facts. Find the context.
           <br />A clear path to your next decision.
         </p>
       </div>
@@ -114,11 +115,31 @@ export function AuthorizedWorkspace() {
 function LiveBrowser() {
   const [params, setParams] = useSearchParams();
   const [search, setSearch] = useState(params.get("q") ?? "");
+  const page = Math.max(0, Number(params.get("page")) || 0);
+  const [descending, setDescending] = useState(false);
+  const status = (params.get("status") ?? "") as TransactionStatus | "";
+  const origin = (params.get("origin") ?? "") as DataOrigin | "";
   const q = useTransactions({
-    page: 0,
+    page,
     pageSize: 10,
     q: params.get("q") ?? "",
+    status,
+    origin,
   });
+  const changeFilter = (key: string, value: string) => {
+    const next = new URLSearchParams(params);
+    next.set(key, value);
+    next.delete("page");
+    next.delete("id");
+    setParams(next);
+  };
+  const items = q.data
+    ? [...q.data.items].sort((a, b) =>
+        descending
+          ? b.amount_minor - a.amount_minor
+          : a.amount_minor - b.amount_minor,
+      )
+    : [];
   const id = params.get("id");
   return (
     <>
@@ -126,7 +147,7 @@ function LiveBrowser() {
         <div>
           <p className="v2-eyebrow">YOUR MERCHANT WORKSPACE</p>
           <h1>
-            Follow the evidence<span>.</span>
+            Explore your transactions<span>.</span>
           </h1>
         </div>
       </div>
@@ -135,7 +156,11 @@ function LiveBrowser() {
         role="search"
         onSubmit={(e) => {
           e.preventDefault();
-          setParams({ q: search });
+          const next = new URLSearchParams(params);
+          next.set("q", search);
+          next.delete("page");
+          next.delete("id");
+          setParams(next);
         }}
       >
         <Search size={18} />
@@ -148,6 +173,45 @@ function LiveBrowser() {
           onChange={(e) => setSearch(e.target.value)}
           placeholder="Search order or capture ID"
         />
+        <label className="v2-sr" htmlFor="preview-status">
+          Payment status
+        </label>
+        <select
+          id="preview-status"
+          value={status}
+          onChange={(e) => changeFilter("status", e.target.value)}
+        >
+          <option value="">All statuses</option>
+          {[
+            "ORDER_CREATED",
+            "CAPTURE_PENDING",
+            "CAPTURED",
+            "CAPTURE_DECLINED",
+            "CAPTURE_FAILED",
+            "REFUNDED",
+            "PARTIALLY_REFUNDED",
+          ].map((v) => (
+            <option key={v}>{v}</option>
+          ))}
+        </select>
+        <label className="v2-sr" htmlFor="preview-origin">
+          Data origin
+        </label>
+        <select
+          id="preview-origin"
+          value={origin}
+          onChange={(e) => changeFilter("origin", e.target.value)}
+        >
+          <option value="">All origins</option>
+          {[
+            "SIMULATED",
+            "SYNTHETIC_DEMO",
+            "MERCHANT_PROVIDED",
+            "LIVE_SANDBOX",
+          ].map((v) => (
+            <option key={v}>{v}</option>
+          ))}
+        </select>
         <button className="v2-button" type="submit">
           Search
         </button>
@@ -160,8 +224,19 @@ function LiveBrowser() {
         <p className="v2-state">No transactions match this search.</p>
       )}
       {q.data && (
+        <div className="v2-list-tools">
+          <span>
+            {q.data.total} records · page {page + 1}
+            {q.isFetching ? " · Updating…" : ""}
+          </span>
+          <button onClick={() => setDescending(!descending)}>
+            Amount {descending ? "descending" : "ascending"} · current page
+          </button>
+        </div>
+      )}
+      {q.data && (
         <div className="v2-live-list" aria-label="Transaction results">
-          {q.data.items.map((t) => (
+          {items.map((t) => (
             <button
               aria-pressed={id === t.id}
               key={t.id}
@@ -177,6 +252,30 @@ function LiveBrowser() {
               <ChevronRight size={16} />
             </button>
           ))}
+        </div>
+      )}
+      {q.data && (
+        <div className="v2-list-tools">
+          <button
+            disabled={page === 0 || q.isFetching}
+            onClick={() => {
+              const next = new URLSearchParams(params);
+              next.set("page", String(page - 1));
+              setParams(next);
+            }}
+          >
+            Previous page
+          </button>
+          <button
+            disabled={(page + 1) * 10 >= q.data.total || q.isFetching}
+            onClick={() => {
+              const next = new URLSearchParams(params);
+              next.set("page", String(page + 1));
+              setParams(next);
+            }}
+          >
+            Next page
+          </button>
         </div>
       )}
       {id && <LiveDossier key={id} id={id} />}
@@ -256,7 +355,7 @@ export function QueryError({
     </div>
   );
 }
-function Workspace({
+export function Workspace({
   children,
   demo = false,
   embedded = false,
@@ -268,46 +367,54 @@ function Workspace({
   const Content = embedded ? "div" : "main";
   return (
     <div className="v2-workspace">
-      <aside className="v2-rail">
+      <header className="v2-global-header">
         <Link className="v2-wordmark" to="/__v2-preview">
-          <span className="v2-brand-icon">S</span>
-          <span>
-            SENTINEL<span className="v2-brand-sub">FINANCIAL INTELLIGENCE</span>
-          </span>
+          <span className="v2-brand-icon">S</span>SENTINEL
         </Link>
-        <div className="v2-rail-caption">WORKSPACE / PREVIEW</div>
-        <nav aria-label="Prototype workspace">
+        <nav className="v2-global-nav" aria-label="Prototype workspace">
+          <Link to="/__v2-preview/command-center">Command Center</Link>
           <Link
-            aria-current={demo ? "page" : undefined}
-            to="/__v2-preview/dossier"
-          >
-            <Fingerprint size={18} /> Demo dossier <ChevronRight size={13} />
-          </Link>
-          <Link
-            aria-current={!demo ? "page" : undefined}
             to="/__v2-preview/workspace"
+            aria-current={!demo ? "page" : undefined}
           >
-            <ShieldCheck size={18} /> Authorized records
+            Transactions
           </Link>
-          <Link to="/__v2-preview">
-            <ArrowDownLeft size={18} /> Evidence Reel
-          </Link>
+          <Link to="/cases">Investigations ↗</Link>
+          <Link to="/model">Risk Intelligence ↗</Link>
+          <Link to="/policy">Policy Lab ↗</Link>
+          <Link to="/monitoring">Monitoring ↗</Link>
         </nav>
-        <div className="v2-rail-bottom">
-          <span className="v2-dot" /> HUMAN JUDGMENT. BETTER INFORMED.
-          <br />
-          <small>V2 DESIGN PROTOTYPE / 01</small>
-        </div>
-      </aside>
+        <details className="v2-mobile-menu">
+          <summary>Menu</summary>
+          <nav aria-label="Mobile workspace">
+            <Link to="/__v2-preview/command-center">Command Center</Link>
+            <Link to="/__v2-preview/workspace">Transactions</Link>
+            <Link to="/__v2-preview/dossier">Demo dossier</Link>
+            <Link to="/cases">Investigations ↗</Link>
+            <Link to="/model">Risk Intelligence ↗</Link>
+            <Link to="/policy">Policy Lab ↗</Link>
+            <Link to="/monitoring">Monitoring ↗</Link>
+            <Link to="/settings">Account ↗</Link>
+            <Link to="/__v2-preview">Follow the money</Link>
+          </nav>
+        </details>
+        <Link
+          className="v2-account"
+          to="/settings"
+          aria-label="Account settings"
+        >
+          Account ↗
+        </Link>
+      </header>
       <Content className="v2-workspace-main">
-        <header className="v2-workspace-top">
+        <div className="v2-workspace-top">
+          <Link to="/__v2-preview/dossier">Demo dossier</Link>
           <span>
-            SENTINEL <span>/</span> TRANSACTIONS <span>/</span> DOSSIER
+            {demo ? "SIMULATED PREVIEW" : "EXISTING MERCHANT SESSION"} · ↗ opens
+            existing application
           </span>
-          <span className="v2-mono">
-            {demo ? "DEMO ENVIRONMENT" : "EXISTING SESSION"}
-          </span>
-        </header>
+          <Link to="/__v2-preview">Follow the money ↗</Link>
+        </div>
         {children}
       </Content>
     </div>
@@ -353,6 +460,12 @@ function Dossier({
           </p>
         </div>
         <div className="v2-record-status">
+          <span
+            className={`v2-classification ${band === "HIGH" ? "v2-critical" : ""}`}
+          >
+            {band ? `${band} RISK` : "NOT SCORED"} ·{" "}
+            {demo ? "ILLUSTRATIVE" : "RECORDED ASSESSMENT"}
+          </span>
           <span className="v2-status">
             <Check size={13} />
             {humanize(t.status)}
@@ -371,11 +484,50 @@ function Dossier({
           </time>
         </div>
       </header>
+      <section className="v2-evidence-ledger" aria-label="Evidence sequence">
+        <h3>The payment’s story</h3>
+        <ol>
+          {(demo
+            ? [
+                { at: "10:42 UTC", label: "Demo order created" },
+                { at: "10:43 UTC", label: "Simulated capture recorded" },
+              ]
+            : [
+                ...t.audit.map((a) => ({
+                  at: a.created_at,
+                  label: humanize(a.action.replaceAll(".", "_")),
+                })),
+                ...t.events.map((e) => ({
+                  at: e.received_at,
+                  label: e.provider_event_type,
+                })),
+              ]
+          )
+            .sort((a, b) => a.at.localeCompare(b.at))
+            .slice(0, 4)
+            .map((e, i) => (
+              <li key={i}>
+                <time>
+                  {demo
+                    ? e.at
+                    : new Date(e.at).toLocaleTimeString("en-GB", {
+                        timeZone: "UTC",
+                      }) + " UTC"}
+                </time>
+                <strong>{e.label}</strong>
+              </li>
+            ))}
+        </ol>
+        {!demo && !t.audit.length && !t.events.length && (
+          <p>No recorded events for this payment.</p>
+        )}
+      </section>
       <div className="v2-dossier-body">
         <section className="v2-facts">
           <div className="v2-tabs" role="group" aria-label="Dossier view">
             {["overview", "timeline"].map((s) => (
               <button
+                aria-label={`${s} ${s === "overview" ? "01" : "02"}`}
                 aria-pressed={tab === s}
                 key={s}
                 onClick={() => setTab(s)}
@@ -388,7 +540,7 @@ function Dossier({
           {tab === "overview" ? (
             <>
               <div className="v2-section-label">
-                <span>01 / TRANSACTION CONTEXT</span>
+                <span>THE PAYMENT, IN DETAIL</span>
                 <Fingerprint size={17} />
               </div>
               <dl className="v2-fact-grid">
@@ -425,7 +577,7 @@ function Dossier({
                     : (assessment?.model_version ?? "NO VERIFIED MODEL OUTPUT")}
                 </span>
                 <span>
-                  TRACEABLE BY DESIGN <ArrowUpRight size={13} />
+                  FOLLOW THE FACTS <ArrowUpRight size={13} />
                 </span>
               </div>
             </>
@@ -490,7 +642,7 @@ function Dossier({
         </section>
         <aside className="v2-risk" aria-label="Risk assessment">
           <div className="v2-section-label">
-            <span>02 / RISK INTELLIGENCE</span>
+            <span>THE REASON TO LOOK CLOSER</span>
             <span className="v2-dot" />
           </div>
           <p className={`v2-risk-band ${band === "HIGH" ? "v2-critical" : ""}`}>

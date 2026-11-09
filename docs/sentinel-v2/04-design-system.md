@@ -1,3 +1,5 @@
+> Historical rejected visual direction. Superseded by [09-money-trail-reset.md](09-money-trail-reset.md).
+
 # Forensic Editorial — prototype design system
 
 Approval status: PENDING. Source: `apps/web/src/preview/preview.css`; all selectors are below `.v2-preview`. Existing global styling and components are unchanged. Fontface imports are lazy preview assets; font-family assignments apply only inside that root. Existing Tailwind base styles are overridden within the preview, never globally rewritten.

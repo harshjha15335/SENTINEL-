@@ -27,7 +27,7 @@ async function progress(page: Page, p: number) {
     )
     .toBeCloseTo(p, 2);
 }
-test("six scroll checkpoints, rewind, restored position and clean remount", async ({
+test("seven scroll checkpoints, rewind, restored position and clean remount", async ({
   page,
 }) => {
   const errors: string[] = [];
@@ -39,55 +39,59 @@ test("six scroll checkpoints, rewind, restored position and clean remount", asyn
   await page.goto("/__v2-preview");
   await expect(
     page.getByRole("heading", {
-      name: "Fraud leaves a pattern. SENTINEL reads it.",
+      name: "Every payment has a story.",
     }),
   ).toBeVisible();
   await page.evaluate(() => document.fonts.ready);
   const initial = await page
-    .locator("[data-reel=left]")
+    .locator("[data-wallet-placement]")
     .getAttribute("transform");
   await page.waitForTimeout(150);
   expect(
-    await page.locator("[data-reel=left]").getAttribute("transform"),
+    await page.locator("[data-wallet-placement]").getAttribute("transform"),
   ).toEqual(initial);
   let middle: string | null = null;
-  for (const [i, p] of [0, 0.2, 0.4, 0.6, 0.8, 0.999].entries()) {
+  for (const [i, p] of [0, 0.2, 0.35, 0.5, 0.65, 0.75, 0.999].entries()) {
     await progress(page, p);
-    if (i === 5)
+    if (i === 6)
       await expect(page.locator("[data-dossier-frame]")).toBeVisible();
     else await expect(page.locator("[data-story-stage]").nth(i)).toBeVisible();
     await page.screenshot({ path: `${shots}/reel-${i}.png` });
-    if (p === 0.4)
-      middle = await page.locator("[data-reel=left]").getAttribute("transform");
+    if (p === 0.35)
+      middle = await page
+        .locator("[data-wallet-placement]")
+        .getAttribute("transform");
   }
-  await progress(page, 0.4);
+  await progress(page, 0.35);
   expect(
-    await page.locator("[data-reel=left]").getAttribute("transform"),
+    await page.locator("[data-wallet-placement]").getAttribute("transform"),
   ).toEqual(middle);
   expect(middle).not.toEqual(initial);
   await page.reload();
   await expect(page.locator(".v2-story")).toHaveAttribute("data-stage", "2");
   await progress(page, 0);
   expect(
-    await page.locator("[data-reel=left]").getAttribute("transform"),
+    await page.locator("[data-wallet-placement]").getAttribute("transform"),
   ).toEqual(initial);
   await audit(page);
   await page.getByRole("button", { name: "Skip story" }).click();
   await expect(page.locator("#v2-after-story")).toBeFocused();
   await expect(
     page.getByRole("heading", {
-      name: "See the payment. Understand the pattern.",
+      name: "Money moves. Risk hides. SENTINEL reveals it.",
     }),
   ).toBeInViewport();
   await page.getByRole("link", { name: "Open the Payment Dossier" }).click();
   await expect(
     page.getByRole("heading", { name: "Payment dossier." }),
   ).toBeVisible();
-  await page.getByRole("link", { name: "Evidence Reel", exact: true }).click();
   await page
-    .getByRole("button", { name: "Go to Risk evaluation", exact: true })
+    .getByRole("link", { name: "Follow the money ↗", exact: true })
     .click();
-  await expect(page.locator(".v2-story")).toHaveAttribute("data-stage", "3");
+  await page
+    .getByRole("button", { name: "Go to Risk analysis", exact: true })
+    .click();
+  await expect(page.locator(".v2-story")).toHaveAttribute("data-stage", "4");
   expect(await page.locator(".pin-spacer").count()).toBe(1);
   expect(errors).toEqual([]);
   expect(apiCalls).toEqual([]);
@@ -138,7 +142,7 @@ for (const [width, height] of [
   test(`responsive reel and dossier ${width}x${height}`, async ({ page }) => {
     await page.setViewportSize({ width: width ?? 390, height: height ?? 844 });
     await page.goto("/__v2-preview");
-    await expect(page.locator(".v2-machine")).toBeVisible();
+    await expect(page.locator(".v2-wallet")).toBeVisible();
     expect(
       await page.evaluate(
         () => document.documentElement.scrollWidth - window.innerWidth,
@@ -147,7 +151,7 @@ for (const [width, height] of [
     if ((width ?? 0) <= 900)
       await expect(
         page.getByRole("heading", {
-          name: "From first signal to final decision.",
+          name: "Your next move, better informed.",
         }),
       ).toBeVisible();
     if (width === 390)
@@ -175,7 +179,7 @@ test("reduced motion exposes all narrative content and keyboard skip", async ({
 }) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.goto("/__v2-preview");
-  await expect(page.locator("[data-story-stage]")).toHaveCount(6);
+  await expect(page.locator("[data-story-stage]")).toHaveCount(7);
   for (const el of await page.locator("[data-story-stage]").all())
     await expect(el).toBeVisible();
   expect(await page.locator(".pin-spacer").count()).toBe(0);
@@ -213,9 +217,9 @@ test("resize through mobile and back releases pin and preserves readable content
 }) => {
   await page.goto("/__v2-preview");
   await page
-    .getByRole("button", { name: "Go to Risk evaluation", exact: true })
+    .getByRole("button", { name: "Go to Risk analysis", exact: true })
     .click();
-  await expect(page.locator(".v2-story")).toHaveAttribute("data-stage", "3");
+  await expect(page.locator(".v2-story")).toHaveAttribute("data-stage", "4");
   await page.setViewportSize({ width: 390, height: 844 });
   await expect(page.locator(".pin-spacer")).toHaveCount(0);
   for (const el of await page.locator("[data-story-stage]").all())
@@ -223,11 +227,11 @@ test("resize through mobile and back releases pin and preserves readable content
   await page.setViewportSize({ width: 1440, height: 900 });
   await expect(page.locator(".pin-spacer")).toHaveCount(1);
   await page
-    .getByRole("button", { name: "Go to The anatomy of fraud", exact: true })
+    .getByRole("button", { name: "Go to The wallet", exact: true })
     .click();
   await expect(
     page.getByRole("heading", {
-      name: "Fraud leaves a pattern. SENTINEL reads it.",
+      name: "Every payment has a story.",
     }),
   ).toBeVisible();
 });

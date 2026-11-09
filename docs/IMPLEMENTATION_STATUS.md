@@ -156,3 +156,7 @@ Historical implementation baseline: 2026-10-11 (session 3). Current Session 8 re
   - graph analytics and explorer
   - policy lab
 - **Phase 6:** deployment, CSP, security review, demo video.
+
+### Local V2 creative reset — Follow the Money (2026-11-09)
+
+The isolated development preview is being replaced with an original wallet/money narrative and warm ivory/electric-purple identity, per explicit rejection of the reel design. New horizontal navigation, chronological payment casefile, read-only transaction explorer and clearly labeled simulated Command Center composition are scoped to the preview. Existing operational screens, backend, auth and production routes remain intact. See `docs/sentinel-v2/09-money-trail-reset.md` and the delivered test report for verification; prior reel captures are historical. Design and deployment approval remain PENDING. No broad Phase 2 migration, push, merge or deployment.
