@@ -1,22 +1,33 @@
+import { workspaceNavigate } from "./workspace-navigation";
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test, type Page } from "@playwright/test";
 
 // Phase 4 vertical slice on a SYNTHETIC_DEMO high-risk case, without AI credentials:
 // deterministic summary → evidence upload → packet → refund-intent request → admin approval.
-const ANALYST = { email: "analyst@northwind.example", password: process.env.SENTINEL_E2E_ANALYST_PASSWORD ?? "" };
-const ADMIN = { email: "admin@northwind.example", password: process.env.SENTINEL_E2E_ADMIN_PASSWORD ?? "" };
+const ANALYST = {
+  email: "analyst@northwind.example",
+  password: process.env.SENTINEL_E2E_ANALYST_PASSWORD ?? "",
+};
+const ADMIN = {
+  email: "admin@northwind.example",
+  password: process.env.SENTINEL_E2E_ADMIN_PASSWORD ?? "",
+};
 const SHOTS = process.env.SENTINEL_SCREENSHOT_DIR;
 // Unique per run, so reruns against the same database find exactly one upload.
 const FILE = `invoice-${Date.now()}.pdf`;
 
-test.skip(!ANALYST.password || !ADMIN.password, "SENTINEL_E2E_ANALYST_PASSWORD and SENTINEL_E2E_ADMIN_PASSWORD are required");
+test.skip(
+  !ANALYST.password || !ADMIN.password,
+  "SENTINEL_E2E_ANALYST_PASSWORD and SENTINEL_E2E_ADMIN_PASSWORD are required",
+);
 
 // The production container sends a Content-Security-Policy; nothing the workbench loads may break it.
 const cspViolations: string[] = [];
 test.beforeEach(({ page }) => {
   cspViolations.length = 0;
   page.on("console", (msg) => {
-    if (msg.type() === "error" && /Content Security Policy/i.test(msg.text())) cspViolations.push(msg.text());
+    if (msg.type() === "error" && /Content Security Policy/i.test(msg.text()))
+      cspViolations.push(msg.text());
   });
 });
 test.afterEach(() => {
@@ -28,16 +39,25 @@ async function signIn(page: Page, who: { email: string; password: string }) {
   await page.getByLabel("Work email").fill(who.email);
   await page.getByLabel("Password").fill(who.password);
   await page.getByRole("button", { name: "Sign in" }).click();
-  await expect(page.getByRole("heading", { name: "Command Center" })).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "Command Center" }),
+  ).toBeVisible();
 }
 
 async function audit(page: Page, name: string) {
-  const results = await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21aa", "wcag22aa"]).analyze();
-  expect(results.violations, `${name}: ${results.violations.map((v) => `${v.id} (${v.nodes.length})`).join(", ")}`).toEqual([]);
+  const results = await new AxeBuilder({ page })
+    .withTags(["wcag2a", "wcag2aa", "wcag21aa", "wcag22aa"])
+    .analyze();
+  expect(
+    results.violations,
+    `${name}: ${results.violations.map((v) => `${v.id} (${v.nodes.length})`).join(", ")}`,
+  ).toEqual([]);
 }
 
 async function noHorizontalOverflow(page: Page) {
-  const overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
+  const overflow = await page.evaluate(
+    () => document.documentElement.scrollWidth - window.innerWidth,
+  );
   expect(overflow).toBeLessThanOrEqual(1);
 }
 
@@ -59,20 +79,48 @@ function pdf(text: string): Buffer {
   });
   const xref = body.length;
   body += `xref\n0 ${objs.length + 1}\n0000000000 65535 f \n`;
-  for (const off of offsets) body += `${String(off).padStart(10, "0")} 00000 n \n`;
+  for (const off of offsets)
+    body += `${String(off).padStart(10, "0")} 00000 n \n`;
   body += `trailer\n<< /Size ${objs.length + 1} /Root 1 0 R >>\nstartxref\n${xref}\n%%EOF\n`;
   return Buffer.from(body, "latin1");
 }
 
-test("investigate, attach evidence, export a packet and approve refund intent", async ({ page }, info) => {
+test("investigate, attach evidence, export a packet and approve refund intent", async ({
+  page,
+}, info) => {
   test.setTimeout(120_000);
   await signIn(page, ANALYST);
-  await page.getByRole("navigation", { name: "Primary" }).getByRole("link", { name: "Review Queue" }).click();
-  await expect(page.getByRole("note", { name: "Review capacity warning" })).toBeVisible();
+  await workspaceNavigate(page, "Investigations");
+  await expect(
+    page.getByRole("note", { name: "Review capacity warning" }),
+  ).toBeVisible();
   // Each viewport works on its own case so runs do not collide.
-  const index = info.project.name === "desktop" ? 2 : 3;
-  await page.getByRole("list", { name: "Cases" }).getByRole("link").nth(index).click();
-  await expect(page.getByRole("heading", { name: /risk payment needs review/ })).toBeVisible();
+  await expect(
+    page.getByRole("list", { name: "Cases" }).getByRole("link").first(),
+  ).toBeVisible();
+  const links = await page
+    .getByRole("list", { name: "Cases" })
+    .getByRole("link")
+    .all();
+  let selected = false;
+  for (const link of links) {
+    const href = await link.getAttribute("href");
+    const id = href?.split("/").pop();
+    const r = await page.request.get(`/api/v1/cases/${id}/approvals`);
+    const body = await r.json();
+    if (r.ok() && Array.isArray(body) && body.length === 0) {
+      await link.click();
+      selected = true;
+      break;
+    }
+  }
+  expect(
+    selected,
+    "A pristine local fixture case is required for independent approval parity",
+  ).toBeTruthy();
+  await expect(
+    page.getByRole("heading", { name: /risk payment needs review/ }),
+  ).toBeVisible();
   const caseUrl = page.url();
 
   // 3. Verified payment and risk information.
@@ -81,22 +129,39 @@ test("investigate, attach evidence, export a packet and approve refund intent", 
 
   // 4. Investigation (deterministic: no AI credentials in this environment).
   await expect(page.getByText("AI provider not configured")).toBeVisible();
-  await page.getByRole("button", { name: "Generate deterministic summary" }).click();
-  const findings = page.getByRole("article", { name: "Investigation findings" });
-  await expect(findings.getByText("Deterministic summary — AI provider unavailable", { exact: true })).toBeVisible({ timeout: 20_000 });
+  await page
+    .getByRole("button", { name: "Generate deterministic summary" })
+    .click();
+  const findings = page.getByRole("article", {
+    name: "Investigation findings",
+  });
+  await expect(
+    findings.getByText("Deterministic summary — AI provider unavailable", {
+      exact: true,
+    }),
+  ).toBeVisible({ timeout: 20_000 });
   await expect(findings.getByText("Rule-based")).toBeVisible();
   await expect(findings.getByText(/Verified facts \(\d+\)/)).toBeVisible();
 
+  await page.getByRole("tab", { name: "Evidence & packets" }).click();
   // 6. Evidence upload.
-  await page.getByLabel("Upload evidence").setInputFiles({ name: FILE, mimeType: "application/pdf", buffer: pdf(`Invoice 1001 ${info.project.name} ${Date.now()}`) });
+  await page.getByLabel("Upload evidence").setInputFiles({
+    name: FILE,
+    mimeType: "application/pdf",
+    buffer: pdf(`Invoice 1001 ${info.project.name} ${Date.now()}`),
+  });
   await page.getByLabel("What is it?").selectOption("INVOICE");
   await page.getByRole("button", { name: "Upload", exact: true }).click();
   await expect(page.getByText(FILE)).toBeVisible();
-  await expect(page.getByRole("link", { name: `Download ${FILE}` })).toBeVisible();
+  await expect(
+    page.getByRole("link", { name: `Download ${FILE}` }),
+  ).toBeVisible();
 
   // 7. Evidence packet.
   // Packets are listed newest first; earlier runs against the same database may have made some.
-  const packetLinks = page.getByRole("link", { name: /Download packet generated/ });
+  const packetLinks = page.getByRole("link", {
+    name: /Download packet generated/,
+  });
   const before = await packetLinks.count();
   await page.getByRole("button", { name: "Generate packet" }).click();
   await expect(packetLinks).toHaveCount(before + 1);
@@ -106,31 +171,71 @@ test("investigate, attach evidence, export a packet and approve refund intent", 
   expect(resp.status()).toBe(200);
   expect(resp.headers()["content-type"]).toBe("application/pdf");
 
+  await page.getByRole("tab", { name: "Decision & approvals" }).click();
   // 8. Approval request (refund intent; amount fixed by the server).
   await page.getByLabel(/Prepare refund/).check();
-  await page.getByLabel("Justification").fill("High risk payer with earlier refunds; prepare refund for review.");
+  await page
+    .getByLabel("Justification")
+    .fill(
+      `High risk payer with earlier refunds; prepare refund for review. ${FILE}`,
+    );
   await page.getByRole("button", { name: "Request approval" }).click();
-  await expect(page.getByText(/You cannot decide your own request/)).toBeVisible();
+  await expect(
+    page.getByText(/You cannot decide your own request/),
+  ).toBeVisible();
   await audit(page, "workbench (analyst)");
   await noHorizontalOverflow(page);
-  if (SHOTS) await page.screenshot({ path: `${SHOTS}/${info.project.name}-9-workbench.png`, fullPage: true });
+  if (SHOTS)
+    await page.screenshot({
+      path: `${SHOTS}/${info.project.name}-9-workbench.png`,
+      fullPage: true,
+    });
 
   // 9. Admin approves.
   await page.getByRole("button", { name: "Sign out" }).click();
   await signIn(page, ADMIN);
   await page.goto(caseUrl);
-  await page.getByLabel("Decision note").fill("Snapshot and evidence reviewed.");
-  await page.getByRole("button", { name: "Approve", exact: true }).click();
+  await page.getByRole("tab", { name: "Decision & approvals" }).click();
+  const approval = page
+    .locator("li")
+    .filter({
+      hasText: `High risk payer with earlier refunds; prepare refund for review. ${FILE}`,
+    })
+    .last();
+  await approval
+    .getByLabel("Decision note")
+    .fill("Snapshot and evidence reviewed.");
+  await approval.getByRole("button", { name: "Approve", exact: true }).click();
   // Requests are listed newest first; earlier runs may have left approved ones.
-  await expect(page.getByText(/Approved by admin@northwind.example/).first()).toBeVisible();
-  await expect(page.getByText(/no PayPal request was made/).first()).toBeVisible();
+  await expect(
+    page.getByText(/Approved by admin@northwind.example/).first(),
+  ).toBeVisible();
+  await expect(
+    page.getByText(/no PayPal request was made/).first(),
+  ).toBeVisible();
 
+  await page.getByRole("tab", { name: "Notes & activity" }).click();
   // 10. Audit trail.
-  const activity = page.getByRole("region", { name: "Activity" }).or(page.locator("section", { hasText: "Activity" }).last());
-  for (const label of ["Investigation completed", "Evidence uploaded", "Evidence packet generated", "Approval requested", "Approval granted", "Approved action recorded (no payment executed)"]) {
-    await expect(activity.getByText(label, { exact: true }).first()).toBeVisible();
+  const activity = page
+    .getByRole("region", { name: "Activity" })
+    .or(page.locator("section", { hasText: "Activity" }).last());
+  for (const label of [
+    "Investigation completed",
+    "Evidence uploaded",
+    "Evidence packet generated",
+    "Approval requested",
+    "Approval granted",
+    "Approved action recorded (no payment executed)",
+  ]) {
+    await expect(
+      activity.getByText(label, { exact: true }).first(),
+    ).toBeVisible();
   }
   await audit(page, "workbench (admin)");
   await noHorizontalOverflow(page);
-  if (SHOTS) await page.screenshot({ path: `${SHOTS}/${info.project.name}-10-approved.png`, fullPage: true });
+  if (SHOTS)
+    await page.screenshot({
+      path: `${SHOTS}/${info.project.name}-10-approved.png`,
+      fullPage: true,
+    });
 });

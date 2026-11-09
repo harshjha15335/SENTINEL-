@@ -33,13 +33,13 @@ function skip() {
 function StoryNav() {
   return (
     <header className="v2-story-nav">
-      <Link className="v2-wordmark" to="/__v2-preview">
+      <Link className="v2-wordmark" to="/">
         <span className="v2-brand-icon">S</span>SENTINEL
         <span className="v2-nav-edition">FOLLOW THE MONEY</span>
       </Link>
       <nav aria-label="Preview navigation">
         <button onClick={skip}>Skip story</button>
-        <Link to="/__v2-preview/dossier" className="v2-nav-cta">
+        <Link to="/demo-payment" className="v2-nav-cta">
           Explore simulated demo <ArrowUpRight size={16} />
         </Link>
       </nav>
@@ -393,14 +393,11 @@ function DesktopStory() {
                   <p>{s.text}</p>
                   {i === 0 && (
                     <>
-                      <Link className="v2-button" to="/__v2-preview/dossier">
+                      <Link className="v2-button" to="/demo-payment">
                         Explore simulated demo <ArrowUpRight size={18} />
                       </Link>
                       <small>Explore an interactive, simulated payment.</small>
-                      <Link
-                        className="v2-auth-link"
-                        to="/__v2-preview/workspace"
-                      >
+                      <Link className="v2-auth-link" to="/app/transactions">
                         Open authenticated workspace <ArrowUpRight size={15} />
                       </Link>
                     </>
@@ -419,7 +416,7 @@ function DesktopStory() {
             <ReceiptMorph />
             <div className="v2-scene-enter" inert>
               <span>FROM PAYMENT TO PERSPECTIVE.</span>
-              <Link className="v2-button" to="/__v2-preview/dossier">
+              <Link className="v2-button" to="/demo-payment">
                 Explore simulated demo <ArrowUpRight size={18} />
               </Link>
             </div>
@@ -493,10 +490,10 @@ function CompactStory() {
             <span>has a story.</span>
           </h1>
           <p>Not every story ends well.</p>
-          <Link className="v2-button" to="/__v2-preview/dossier">
+          <Link className="v2-button" to="/demo-payment">
             Explore simulated demo <ArrowUpRight size={18} />
           </Link>
-          <Link className="v2-auth-link" to="/__v2-preview/workspace">
+          <Link className="v2-auth-link" to="/app/transactions">
             Open authenticated workspace <ArrowUpRight size={15} />
           </Link>
           <div className="v2-compact-wallet">
@@ -565,10 +562,10 @@ function StoryAfter() {
           A clearer view of each payment. A thoughtful place to decide what
           happens next.
         </p>
-        <Link className="v2-button" to="/__v2-preview/dossier">
+        <Link className="v2-button" to="/demo-payment">
           Open the simulated dossier <ArrowUpRight size={18} />
         </Link>
-        <Link className="v2-text-link" to="/__v2-preview/workspace">
+        <Link className="v2-text-link" to="/app/transactions">
           Open authenticated workspace <ArrowUpRight size={15} />
         </Link>
       </div>

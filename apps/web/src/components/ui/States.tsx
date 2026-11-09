@@ -10,7 +10,7 @@ export function Skeleton({ className }: { className?: string }) {
 
 export function EmptyState({ title, children, action }: { title: string; children?: ReactNode; action?: ReactNode }) {
   return (
-    <div className="flex flex-col items-center gap-2 px-6 py-10 text-center">
+    <div className="flex flex-col items-center gap-2 px-6 py-7 text-center">
       <Inbox aria-hidden className="size-5 text-fg-subtle" />
       <p className="text-sm font-medium text-fg">{title}</p>
       {children && <p className="max-w-md text-sm text-fg-muted">{children}</p>}

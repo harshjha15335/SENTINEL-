@@ -331,8 +331,7 @@ function LiveDossier({ id }: { id: string }) {
           </Link>
         ))}
         <p className="v2-fine">
-          Case links open the existing application. Its workflows remain intact
-          during this prototype.
+          Case links open the operational investigation workspace.
         </p>
       </section>
     </>
@@ -368,13 +367,13 @@ export function Workspace({
   return (
     <div className="v2-workspace">
       <header className="v2-global-header">
-        <Link className="v2-wordmark" to="/__v2-preview">
+        <Link className="v2-wordmark" to="/">
           <span className="v2-brand-icon">S</span>SENTINEL
         </Link>
         <nav className="v2-global-nav" aria-label="Prototype workspace">
-          <Link to="/__v2-preview/command-center">Command Center</Link>
+          <Link to="/app">Command Center</Link>
           <Link
-            to="/__v2-preview/workspace"
+            to="/app/transactions"
             aria-current={!demo ? "page" : undefined}
           >
             Transactions
@@ -395,9 +394,9 @@ export function Workspace({
         <details className="v2-mobile-menu">
           <summary>Menu</summary>
           <nav aria-label="Mobile workspace">
-            <Link to="/__v2-preview/command-center">Command Center</Link>
-            <Link to="/__v2-preview/workspace">Transactions</Link>
-            <Link to="/__v2-preview/dossier">Demo dossier</Link>
+            <Link to="/app">Command Center</Link>
+            <Link to="/app/transactions">Transactions</Link>
+            <Link to="/demo-payment">Demo dossier</Link>
             <Link to="/cases">
               Investigations <ArrowUpRight size={13} aria-hidden="true" />
             </Link>
@@ -413,7 +412,7 @@ export function Workspace({
             <Link to="/settings">
               Account <ArrowUpRight size={13} aria-hidden="true" />
             </Link>
-            <Link to="/__v2-preview">Follow the money</Link>
+            <Link to="/">Follow the money</Link>
           </nav>
         </details>
         <Link
@@ -426,12 +425,12 @@ export function Workspace({
       </header>
       <Content className="v2-workspace-main">
         <div className="v2-workspace-top">
-          <Link to="/__v2-preview/dossier">Demo dossier</Link>
+          <Link to="/demo-payment">Demo dossier</Link>
           <span>
             {demo ? "SIMULATED PREVIEW" : "EXISTING MERCHANT SESSION"} ·
-            Arrow-marked links open the existing application
+            Arrow-marked links open the operational workspace
           </span>
-          <Link to="/__v2-preview">
+          <Link to="/">
             Follow the money <ArrowUpRight size={13} aria-hidden="true" />
           </Link>
         </div>

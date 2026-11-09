@@ -1,4 +1,4 @@
-.v2-preview {
+.sentinel-experience {
   --background: #f7f4ee;
   --surface: #ffffff;
   --surface-alternate: #efebf5;
@@ -20,62 +20,62 @@
   isolation: isolate;
   color-scheme: light;
 }
-.v2-preview * {
+.sentinel-experience * {
   box-sizing: border-box;
 }
-.v2-preview h1,
-.v2-preview h2,
-.v2-preview h3 {
+.sentinel-experience h1,
+.sentinel-experience h2,
+.sentinel-experience h3 {
   font-family: Manrope, sans-serif;
   font-weight: 600;
   line-height: 1.15;
   letter-spacing: -0.04em;
   margin: 0;
 }
-.v2-preview h1 {
+.sentinel-experience h1 {
   font-size: clamp(36px, 4vw, 60px);
 }
-.v2-preview h2 {
+.sentinel-experience h2 {
   font-size: clamp(25px, 2.5vw, 38px);
 }
-.v2-preview h3 {
+.sentinel-experience h3 {
   font-size: 18px;
   letter-spacing: -0.02em;
 }
-.v2-preview p {
+.sentinel-experience p {
   margin: 0 0 1em;
 }
-.v2-preview button,
-.v2-preview input,
-.v2-preview select {
+.sentinel-experience button,
+.sentinel-experience input,
+.sentinel-experience select {
   font: inherit;
 }
-.v2-preview button,
-.v2-preview a,
-.v2-preview summary {
+.sentinel-experience button,
+.sentinel-experience a,
+.sentinel-experience summary {
   -webkit-tap-highlight-color: transparent;
 }
-.v2-preview button {
+.sentinel-experience button {
   cursor: pointer;
 }
-.v2-preview a {
+.sentinel-experience a {
   color: inherit;
   text-decoration: none;
 }
-.v2-preview button:focus-visible,
-.v2-preview a:focus-visible,
-.v2-preview input:focus-visible,
-.v2-preview select:focus-visible,
-.v2-preview summary:focus-visible,
+.sentinel-experience button:focus-visible,
+.sentinel-experience a:focus-visible,
+.sentinel-experience input:focus-visible,
+.sentinel-experience select:focus-visible,
+.sentinel-experience summary:focus-visible,
 [tabindex="-1"]:focus-visible {
   outline: 3px solid var(--accent);
   outline-offset: 5px;
 }
-.v2-preview button:disabled {
+.sentinel-experience button:disabled {
   opacity: 0.5;
   cursor: default;
 }
-.v2-preview .v2-button {
+.sentinel-experience .v2-button {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -89,10 +89,10 @@
   font-weight: 500;
   min-height: 48px;
 }
-.v2-preview .v2-button:hover {
+.sentinel-experience .v2-button:hover {
   background: #6034d0;
 }
-.v2-preview .v2-text-link {
+.sentinel-experience .v2-text-link {
   display: inline-flex;
   gap: 12px;
   align-items: center;
@@ -101,7 +101,7 @@
   padding: 8px 0;
   font-size: 14px;
 }
-.v2-preview .v2-wordmark {
+.sentinel-experience .v2-wordmark {
   display: flex;
   align-items: center;
   gap: 10px;

@@ -25,7 +25,7 @@ export function CapacityWarning({ card, compact = false }: { card?: ModelCard; c
             ? "Expect more high-risk cases than the threshold was planned for. The policy stays in shadow mode; the threshold was not tuned on test data. "
             : cap.message}
           {compact && (
-            <Link to="/model" className="text-accent underline underline-offset-2">
+            <Link to="/app/model" className="text-accent underline underline-offset-2">
               Model details
             </Link>
           )}

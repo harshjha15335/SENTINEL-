@@ -1,4 +1,8 @@
-import type { ColDef, ICellRendererParams, RowClickedEvent } from "ag-grid-community";
+import type {
+  ColDef,
+  ICellRendererParams,
+  RowClickedEvent,
+} from "ag-grid-community";
 import { AgGridReact } from "ag-grid-react";
 import { ChevronLeft, ChevronRight, Search } from "lucide-react";
 import { useMemo, useState } from "react";
@@ -16,8 +20,21 @@ import { formatDateTime, formatMoney, humanize } from "@/lib/format";
 
 import { useTransactions } from "./useTransactions";
 
-const STATUSES: TransactionStatus[] = ["ORDER_CREATED", "CAPTURE_PENDING", "CAPTURED", "CAPTURE_DECLINED", "CAPTURE_FAILED", "PARTIALLY_REFUNDED", "REFUNDED"];
-const ORIGINS: DataOrigin[] = ["LIVE_SANDBOX", "SIMULATED", "SYNTHETIC_DEMO", "MERCHANT_PROVIDED"];
+const STATUSES: TransactionStatus[] = [
+  "ORDER_CREATED",
+  "CAPTURE_PENDING",
+  "CAPTURED",
+  "CAPTURE_DECLINED",
+  "CAPTURE_FAILED",
+  "PARTIALLY_REFUNDED",
+  "REFUNDED",
+];
+const ORIGINS: DataOrigin[] = [
+  "LIVE_SANDBOX",
+  "SIMULATED",
+  "SYNTHETIC_DEMO",
+  "MERCHANT_PROVIDED",
+];
 const PAGE_SIZE = 25;
 
 export function TransactionsPage() {
@@ -27,7 +44,13 @@ export function TransactionsPage() {
   const origin = (params.get("origin") ?? "") as DataOrigin | "";
   const page = Math.max(0, Number(params.get("page") ?? 0) || 0);
   const [search, setSearch] = useState(params.get("q") ?? "");
-  const q = useTransactions({ status, origin, q: params.get("q") ?? "", page, pageSize: PAGE_SIZE });
+  const q = useTransactions({
+    status,
+    origin,
+    q: params.get("q") ?? "",
+    page,
+    pageSize: PAGE_SIZE,
+  });
 
   const update = (patch: Record<string, string>) => {
     const next = new URLSearchParams(params);
@@ -41,36 +64,82 @@ export function TransactionsPage() {
 
   const columns = useMemo<ColDef<Transaction>[]>(
     () => [
-      { headerName: "PayPal order", field: "paypal_order_id", minWidth: 170, cellClass: "font-mono text-xs", valueFormatter: (p) => p.value ?? "—" },
-      { headerName: "Capture", field: "paypal_capture_id", minWidth: 160, cellClass: "font-mono text-xs", valueFormatter: (p) => p.value ?? "—" },
-      { headerName: "Item", field: "product_name", minWidth: 150, valueFormatter: (p) => p.value ?? "—" },
+      {
+        headerName: "PayPal order",
+        field: "paypal_order_id",
+        minWidth: 170,
+        cellClass: "font-mono text-xs",
+        valueFormatter: (p) => p.value ?? "—",
+      },
+      {
+        headerName: "Capture",
+        field: "paypal_capture_id",
+        minWidth: 160,
+        cellClass: "font-mono text-xs",
+        valueFormatter: (p) => p.value ?? "—",
+      },
+      {
+        headerName: "Item",
+        field: "product_name",
+        minWidth: 150,
+        valueFormatter: (p) => p.value ?? "—",
+      },
       {
         headerName: "Amount",
         field: "amount_minor",
         type: "rightAligned",
         minWidth: 110,
         cellClass: "tabular",
-        valueFormatter: (p) => (p.data ? formatMoney(p.data.amount_minor, p.data.currency) : ""),
+        valueFormatter: (p) =>
+          p.data ? formatMoney(p.data.amount_minor, p.data.currency) : "",
       },
-      { headerName: "Currency", field: "currency", minWidth: 100, maxWidth: 110 },
-      { headerName: "Status", field: "status", minWidth: 150, cellRenderer: (p: ICellRendererParams<Transaction>) => (p.data ? <StatusBadge status={p.data.status} /> : null) },
+      {
+        headerName: "Currency",
+        field: "currency",
+        minWidth: 100,
+        maxWidth: 110,
+      },
+      {
+        headerName: "Status",
+        field: "status",
+        minWidth: 150,
+        cellRenderer: (p: ICellRendererParams<Transaction>) =>
+          p.data ? <StatusBadge status={p.data.status} /> : null,
+      },
       {
         headerName: "Risk",
         colId: "risk",
         minWidth: 150,
         sortable: false,
-        headerTooltip: "Latest model-generated assessment. Unscored payments show no number.",
+        headerTooltip:
+          "Latest model-generated assessment. Unscored payments show no number.",
         cellRenderer: (p: ICellRendererParams<Transaction>) =>
-          p.data?.risk_band ? <RiskBadge band={p.data.risk_band} score={p.data.risk_score} /> : <span className="text-fg-subtle">Not scored</span>,
+          p.data?.risk_band ? (
+            <RiskBadge band={p.data.risk_band} score={p.data.risk_score} />
+          ) : (
+            <span className="text-fg-subtle">Not scored</span>
+          ),
       },
-      { headerName: "Origin", field: "data_origin", minWidth: 160, cellRenderer: (p: ICellRendererParams<Transaction>) => (p.data ? <OriginBadge origin={p.data.data_origin} /> : null) },
-      { headerName: "Payment source", colId: "source", minWidth: 130, valueGetter: () => "PayPal" },
+      {
+        headerName: "Origin",
+        field: "data_origin",
+        minWidth: 160,
+        cellRenderer: (p: ICellRendererParams<Transaction>) =>
+          p.data ? <OriginBadge origin={p.data.data_origin} /> : null,
+      },
+      {
+        headerName: "Payment source",
+        colId: "source",
+        minWidth: 130,
+        valueGetter: () => "PayPal",
+      },
       {
         headerName: "Occurred",
         colId: "when",
         minWidth: 150,
         cellClass: "tabular",
-        headerTooltip: "Capture time, or order creation time when there is no capture yet.",
+        headerTooltip:
+          "Capture time, or order creation time when there is no capture yet.",
         valueGetter: (p) => p.data?.occurred_at ?? p.data?.created_at,
         valueFormatter: (p) => formatDateTime(p.value as string | undefined),
       },
@@ -83,8 +152,11 @@ export function TransactionsPage() {
 
   return (
     <>
-      <PageHeader title="Transactions" description="Every PayPal order SENTINEL has created or reconciled. Select a row to open its record." />
-      <div className="mb-3 flex flex-wrap items-center gap-2">
+      <PageHeader
+        title="Transactions"
+        description="Every PayPal order SENTINEL has created or reconciled. Select a row to open its record."
+      />
+      <div className="workspace-toolbar">
         <form
           role="search"
           className="relative min-w-56 flex-1 sm:max-w-sm"
@@ -93,8 +165,13 @@ export function TransactionsPage() {
             update({ q: search });
           }}
         >
-          <label htmlFor="txn-search" className="sr-only">Search by PayPal order or capture ID</label>
-          <Search aria-hidden className="pointer-events-none absolute top-2.5 left-3 size-4 text-fg-subtle" />
+          <label htmlFor="txn-search" className="sr-only">
+            Search by PayPal order or capture ID
+          </label>
+          <Search
+            aria-hidden
+            className="pointer-events-none absolute top-2.5 left-3 size-4 text-fg-subtle"
+          />
           <input
             id="txn-search"
             value={search}
@@ -103,16 +180,39 @@ export function TransactionsPage() {
             className="h-9 w-full rounded-md border border-line-strong bg-sunken pr-3 pl-9 text-sm placeholder:text-fg-subtle focus:border-accent focus:outline-none"
           />
         </form>
-        <Select label="Status" value={status} onChange={(v) => update({ status: v })} options={STATUSES.map((s) => [s, humanize(s)])} />
-        <Select label="Origin" value={origin} onChange={(v) => update({ origin: v })} options={ORIGINS.map((o) => [o, humanize(o)])} />
+        <Select
+          label="Status"
+          value={status}
+          onChange={(v) => update({ status: v })}
+          options={STATUSES.map((s) => [s, humanize(s)])}
+        />
+        <Select
+          label="Origin"
+          value={origin}
+          onChange={(v) => update({ origin: v })}
+          options={ORIGINS.map((o) => [o, humanize(o)])}
+        />
       </div>
 
-      {q.isError && <ErrorState error={q.error} onRetry={() => void q.refetch()} />}
+      {q.isError && (
+        <ErrorState error={q.error} onRetry={() => void q.refetch()} />
+      )}
       {q.data && q.data.total === 0 && !q.isFetching ? (
-        <div className="rounded-lg border border-line bg-surface">
+        <div className="workspace-list-empty">
           <EmptyState
-            title={status || origin || params.get("q") ? "No transactions match these filters" : "No transactions yet"}
-            action={<Button variant="secondary" onClick={() => navigate("/checkout")}>Open sandbox checkout</Button>}
+            title={
+              status || origin || params.get("q")
+                ? "No transactions match these filters"
+                : "No transactions yet"
+            }
+            action={
+              <Button
+                variant="secondary"
+                onClick={() => navigate("/app/checkout")}
+              >
+                Open sandbox checkout
+              </Button>
+            }
           >
             Transactions appear once an order is created through PayPal.
           </EmptyState>
@@ -126,28 +226,48 @@ export function TransactionsPage() {
             defaultColDef={{ sortable: true, resizable: true, flex: 1 }}
             loading={q.isPending}
             getRowId={(p) => p.data.id}
-            onRowClicked={(e: RowClickedEvent<Transaction>) => e.data && navigate(`/transactions/${e.data.id}`)}
+            onRowClicked={(e: RowClickedEvent<Transaction>) =>
+              e.data && navigate(`/app/transactions/${e.data.id}`)
+            }
             onCellKeyDown={(e) => {
               const ke = e.event as KeyboardEvent | undefined;
-              if (ke?.key === "Enter" && e.data) navigate(`/transactions/${e.data.id}`);
+              if (ke?.key === "Enter" && e.data)
+                navigate(`/app/transactions/${e.data.id}`);
             }}
             domLayout="autoHeight"
-            rowHeight={42}
-            headerHeight={38}
+            rowHeight={54}
+            headerHeight={46}
             suppressCellFocus={false}
           />
         </div>
       )}
 
-      <nav aria-label="Pagination" className="mt-3 flex items-center justify-between text-sm text-fg-muted">
+      <nav
+        aria-label="Pagination"
+        className="mt-3 flex items-center justify-between text-sm text-fg-muted"
+      >
         <p className="tabular">
-          {total === 0 ? "0 results" : `${page * PAGE_SIZE + 1}–${Math.min(total, (page + 1) * PAGE_SIZE)} of ${total}`}
+          {total === 0
+            ? "0 results"
+            : `${page * PAGE_SIZE + 1}–${Math.min(total, (page + 1) * PAGE_SIZE)} of ${total}`}
         </p>
         <div className="flex gap-1">
-          <Button variant="ghost" iconOnly aria-label="Previous page" disabled={page === 0} onClick={() => update({ page: String(page - 1) })}>
+          <Button
+            variant="ghost"
+            iconOnly
+            aria-label="Previous page"
+            disabled={page === 0}
+            onClick={() => update({ page: String(page - 1) })}
+          >
             <ChevronLeft className="size-4" />
           </Button>
-          <Button variant="ghost" iconOnly aria-label="Next page" disabled={page + 1 >= pages} onClick={() => update({ page: String(page + 1) })}>
+          <Button
+            variant="ghost"
+            iconOnly
+            aria-label="Next page"
+            disabled={page + 1 >= pages}
+            onClick={() => update({ page: String(page + 1) })}
+          >
             <ChevronRight className="size-4" />
           </Button>
         </div>
@@ -156,11 +276,23 @@ export function TransactionsPage() {
   );
 }
 
-function Select({ label, value, onChange, options }: { label: string; value: string; onChange: (v: string) => void; options: [string, string][] }) {
+function Select({
+  label,
+  value,
+  onChange,
+  options,
+}: {
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+  options: [string, string][];
+}) {
   const id = `filter-${label.toLowerCase()}`;
   return (
     <div className="flex items-center gap-2">
-      <label htmlFor={id} className="text-sm text-fg-muted">{label}</label>
+      <label htmlFor={id} className="text-sm text-fg-muted">
+        {label}
+      </label>
       <select
         id={id}
         value={value}
@@ -169,7 +301,9 @@ function Select({ label, value, onChange, options }: { label: string; value: str
       >
         <option value="">All</option>
         {options.map(([v, l]) => (
-          <option key={v} value={v}>{l}</option>
+          <option key={v} value={v}>
+            {l}
+          </option>
         ))}
       </select>
     </div>

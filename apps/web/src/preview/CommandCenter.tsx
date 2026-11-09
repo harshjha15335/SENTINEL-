@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { ArrowUpRight, ArrowRight } from "lucide-react";
-import { Workspace } from "./Dossier";
-import { examples } from "./fixtures";
+import { Workspace } from "@/features/experience/Dossier";
+import { examples } from "@/features/experience/fixtures";
 import { formatMoney } from "@/lib/format";
 /** Interactive composition prototype, never an operational aggregate. */
 export function CommandCenter() {

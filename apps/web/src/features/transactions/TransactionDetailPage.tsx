@@ -18,11 +18,16 @@ export function TransactionDetailPage() {
   const q = useTransaction(id);
   return (
     <>
-      <Link to="/transactions" className="mb-4 inline-flex items-center gap-1.5 text-sm text-fg-muted hover:text-fg">
+      <Link
+        to="/app/transactions"
+        className="mb-4 inline-flex items-center gap-1.5 text-sm text-fg-muted hover:text-fg"
+      >
         <ArrowLeft aria-hidden className="size-4" /> Transactions
       </Link>
       {q.isPending && <Skeleton className="h-72" />}
-      {q.isError && <ErrorState error={q.error} onRetry={() => void q.refetch()} />}
+      {q.isError && (
+        <ErrorState error={q.error} onRetry={() => void q.refetch()} />
+      )}
       {q.data && <Detail t={q.data} />}
     </>
   );
@@ -36,13 +41,21 @@ const ACTION_LABELS: Record<string, string> = {
   "risk.assessment.created": "Risk assessment recorded (model-generated)",
 };
 
-type TimelineItem = { at: string; label: string; detail?: string; source: "SENTINEL" | "PayPal webhook" };
+type TimelineItem = {
+  at: string;
+  label: string;
+  detail?: string;
+  source: "SENTINEL" | "PayPal webhook";
+};
 
 function timeline(t: TransactionDetail): TimelineItem[] {
   const items: TimelineItem[] = t.audit.map((a) => ({
     at: a.created_at,
     label: ACTION_LABELS[a.action] ?? humanize(a.action.replaceAll(".", "_")),
-    detail: a.actor_type === "PAYPAL_WEBHOOK" ? `${String(a.metadata["from"] ?? "")} → ${String(a.metadata["to"] ?? "")}` : undefined,
+    detail:
+      a.actor_type === "PAYPAL_WEBHOOK"
+        ? `${String(a.metadata["from"] ?? "")} → ${String(a.metadata["to"] ?? "")}`
+        : undefined,
     source: a.actor_type === "PAYPAL_WEBHOOK" ? "PayPal webhook" : "SENTINEL",
   }));
   for (const e of t.events) {
@@ -59,49 +72,83 @@ function timeline(t: TransactionDetail): TimelineItem[] {
 function Detail({ t }: { t: TransactionDetail }) {
   return (
     <>
-      <PageHeader
-        title={formatMoney(t.amount_minor, t.currency)}
-        description={
-          <span className="flex flex-wrap items-center gap-2">
-            <StatusBadge status={t.status} />
-            <OriginBadge origin={t.data_origin} />
-            <span>{t.product_name ?? "Unknown item"} × {t.quantity}</span>
-          </span>
-        }
-      />
+      <div className="casefile-record-heading">
+        <p className="workspace-kicker">PAYMENT DOSSIER / {t.id.slice(0, 8)}</p>
+        <PageHeader
+          title={formatMoney(t.amount_minor, t.currency)}
+          description={
+            <span className="flex flex-wrap items-center gap-2">
+              <StatusBadge status={t.status} />
+              <OriginBadge origin={t.data_origin} />
+              <span>
+                {t.product_name ?? "Unknown item"} × {t.quantity}
+              </span>
+            </span>
+          }
+        />
+      </div>
       {t.failure_reason && (
-        <div role="alert" className="mb-4 rounded-md border border-critical/40 bg-critical-soft px-3 py-2 text-sm text-fg">
+        <div
+          role="alert"
+          className="mb-4 rounded-md border border-critical/40 bg-critical-soft px-3 py-2 text-sm text-fg"
+        >
           {t.failure_reason}
         </div>
       )}
-      <div className="grid gap-4 lg:grid-cols-3">
-        <Panel title="PayPal references" className="lg:col-span-2">
-          <dl className="grid gap-x-6 gap-y-3 sm:grid-cols-2">
+      <div className="casefile-ledger">
+        <Panel title="PayPal references" className="casefile-facts">
+          <dl className="grid gap-x-8 gap-y-6 sm:grid-cols-3">
             <Field label="Order ID" mono value={t.paypal_order_id} />
             <Field label="Capture ID" mono value={t.paypal_capture_id} />
             <Field label="Provider status" value={t.provider_status} />
-            <Field label="Payer reference" mono value={t.payer_reference} hint="PayPal payer ID. SENTINEL does not store buyer email or name." />
-            <Field label={t.data_origin === "SYNTHETIC_DEMO" ? "Occurred at (synthetic)" : "Captured at"} value={formatDateTime(t.occurred_at)} />
+            <Field
+              label="Payer reference"
+              mono
+              value={t.payer_reference}
+              hint="PayPal payer ID. SENTINEL does not store buyer email or name."
+            />
+            <Field
+              label={
+                t.data_origin === "SYNTHETIC_DEMO"
+                  ? "Occurred at (synthetic)"
+                  : "Captured at"
+              }
+              value={formatDateTime(t.occurred_at)}
+            />
             <Field label="SENTINEL record" mono value={t.id} />
           </dl>
         </Panel>
         <RiskPanel
           transactionId={t.id}
           scorable={t.occurred_at != null}
-          className="lg:row-span-2"
+          className="risk-record"
           caseSlot={<TransactionCases transactionId={t.id} />}
         />
-        <Panel title="Event timeline" className="lg:col-span-2">
+        <Panel title="Event timeline" className="casefile-facts">
+          {timeline(t).length === 0 && (
+            <p className="text-sm text-fg-muted">
+              No recorded audit or provider events for this payment.
+            </p>
+          )}
           <ol className="relative ml-1 border-l border-line">
             {timeline(t).map((item, i) => (
               <li key={i} className="relative pb-4 pl-5 last:pb-0">
-                <span aria-hidden className="absolute top-1.5 -left-[5px] size-2.5 rounded-full border-2 border-surface bg-accent" />
+                <span
+                  aria-hidden
+                  className="absolute top-1.5 -left-[5px] size-2.5 rounded-full border-2 border-surface bg-accent"
+                />
                 <div className="flex flex-wrap items-baseline gap-x-3 gap-y-0.5">
                   <p className="text-sm font-medium">{item.label}</p>
-                  <p className="tabular text-xs text-fg-subtle">{formatDateTime(item.at)}</p>
-                  <span className="text-[11px] tracking-wide text-fg-subtle uppercase">{item.source}</span>
+                  <p className="tabular text-xs text-fg-subtle">
+                    {formatDateTime(item.at)}
+                  </p>
+                  <span className="text-[11px] tracking-wide text-fg-subtle uppercase">
+                    {item.source}
+                  </span>
                 </div>
-                {item.detail && <p className="mt-0.5 text-xs text-fg-muted">{item.detail}</p>}
+                {item.detail && (
+                  <p className="mt-0.5 text-xs text-fg-muted">{item.detail}</p>
+                )}
               </li>
             ))}
           </ol>
@@ -111,11 +158,27 @@ function Detail({ t }: { t: TransactionDetail }) {
   );
 }
 
-function Field({ label, value, mono, hint }: { label: string; value: string | null | undefined; mono?: boolean; hint?: string }) {
+function Field({
+  label,
+  value,
+  mono,
+  hint,
+}: {
+  label: string;
+  value: string | null | undefined;
+  mono?: boolean;
+  hint?: string;
+}) {
   return (
     <div className="min-w-0">
-      <dt className="text-xs text-fg-subtle" title={hint}>{label}</dt>
-      <dd className={`mt-0.5 truncate text-sm ${mono ? "font-mono text-[13px]" : ""}`}>{value || "—"}</dd>
+      <dt className="text-xs text-fg-subtle" title={hint}>
+        {label}
+      </dt>
+      <dd
+        className={`mt-0.5 truncate text-sm ${mono ? "font-mono text-[13px]" : ""}`}
+      >
+        {value || "—"}
+      </dd>
     </div>
   );
 }

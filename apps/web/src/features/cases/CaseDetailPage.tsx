@@ -1,7 +1,8 @@
 import { ArrowLeft } from "lucide-react";
 import { useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useParams, useSearchParams } from "react-router-dom";
 
+import { WorkspaceTabs } from "@/components/layout/WorkspaceTabs";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
@@ -12,14 +13,24 @@ import { StatusBadge } from "@/components/ui/StatusBadge";
 import { useToast } from "@/components/ui/Toast";
 import { useMe } from "@/features/auth/session";
 import { ApprovalsPanel } from "@/features/investigation/ApprovalsPanel";
-import { ChecklistPanel, EvidencePanel } from "@/features/investigation/EvidencePanel";
+import {
+  ChecklistPanel,
+  EvidencePanel,
+} from "@/features/investigation/EvidencePanel";
 import { InvestigationPanel } from "@/features/investigation/InvestigationPanel";
 import { PacketPanel } from "@/features/investigation/PacketPanel";
 import { RiskPanel } from "@/features/risk/RiskPanel";
 import { isOperator, type CaseDetail, type CaseResolution } from "@/lib/api";
 import { formatDateTime, formatMoney, humanize } from "@/lib/format";
 
-import { isOverdue, PRIORITY_TONE, RESOLUTION_HELP, RESOLUTION_LABEL, STATUS_LABEL, STATUS_TONE } from "./labels";
+import {
+  isOverdue,
+  PRIORITY_TONE,
+  RESOLUTION_HELP,
+  RESOLUTION_LABEL,
+  STATUS_LABEL,
+  STATUS_TONE,
+} from "./labels";
 import { useAddNote, useCase, useClaimCase, useResolveCase } from "./useCases";
 
 export function CaseDetailPage() {
@@ -27,11 +38,16 @@ export function CaseDetailPage() {
   const q = useCase(id);
   return (
     <>
-      <Link to="/cases" className="mb-4 inline-flex items-center gap-1.5 text-sm text-fg-muted hover:text-fg">
+      <Link
+        to="/app/cases"
+        className="mb-4 inline-flex items-center gap-1.5 text-sm text-fg-muted hover:text-fg"
+      >
         <ArrowLeft aria-hidden className="size-4" /> Review queue
       </Link>
       {q.isPending && <Skeleton className="h-72" />}
-      {q.isError && <ErrorState error={q.error} onRetry={() => void q.refetch()} />}
+      {q.isError && (
+        <ErrorState error={q.error} onRetry={() => void q.refetch()} />
+      )}
       {q.data && <Detail c={q.data} />}
     </>
   );
@@ -56,6 +72,16 @@ const ACTION_LABELS: Record<string, string> = {
 };
 
 function Detail({ c }: { c: CaseDetail }) {
+  const [params, setParams] = useSearchParams();
+  const tabs = [
+    { id: "investigation", label: "Investigation" },
+    { id: "evidence", label: "Evidence & packets" },
+    { id: "decision", label: "Decision & approvals" },
+    { id: "activity", label: "Notes & activity" },
+  ];
+  const active = tabs.some((t) => t.id === params.get("tab"))
+    ? (params.get("tab") ?? "investigation")
+    : "investigation";
   const t = c.transaction;
   const me = useMe();
   const operator = isOperator(me.data?.role);
@@ -67,65 +93,162 @@ function Detail({ c }: { c: CaseDetail }) {
         description={
           <span className="flex flex-wrap items-center gap-2">
             <Badge tone={STATUS_TONE[c.status]}>{STATUS_LABEL[c.status]}</Badge>
-            <Badge tone={PRIORITY_TONE[c.priority]}>{c.priority.toLowerCase()} priority</Badge>
+            <Badge tone={PRIORITY_TONE[c.priority]}>
+              {c.priority.toLowerCase()} priority
+            </Badge>
             <OriginBadge origin={c.data_origin} />
             <span className="text-fg-subtle">Investigation workbench ·</span>
             <span className={overdue ? "text-critical" : undefined}>
-              {c.status === "RESOLVED" ? `Resolved ${formatDateTime(c.resolved_at)}` : `${overdue ? "Overdue since" : "Due"} ${formatDateTime(c.due_at)}`}
+              {c.status === "RESOLVED"
+                ? `Resolved ${formatDateTime(c.resolved_at)}`
+                : `${overdue ? "Overdue since" : "Due"} ${formatDateTime(c.due_at)}`}
             </span>
           </span>
         }
       />
-      <div className="grid gap-4 lg:grid-cols-3">
-        <div className="space-y-4 lg:col-span-2">
-          <Panel
-            title="Payment"
-            actions={<Link to={`/transactions/${t.id}`} className="text-sm text-accent hover:underline">Open payment</Link>}
-          >
-            <dl className="grid gap-x-6 gap-y-3 sm:grid-cols-3">
-              <Field label="Amount" value={formatMoney(t.amount_minor, t.currency)} />
-              <Field label="Status" value={<StatusBadge status={t.status} />} />
-              <Field label="Item" value={`${t.product_name ?? "Unknown item"} × ${t.quantity}`} />
-              <Field label="Payer reference" value={<span className="font-mono text-[13px]">{t.payer_reference ?? "—"}</span>} />
-              <Field label="Occurred" value={formatDateTime(t.occurred_at)} />
-              <Field label="Opened by" value={humanize(c.source)} />
-              <Field label="PayPal order" value={<span className="font-mono text-[13px]">{t.paypal_order_id ?? "—"}</span>} />
-              <Field label="PayPal capture" value={<span className="font-mono text-[13px]">{t.paypal_capture_id ?? "—"}</span>} />
-              <Field label="Data origin" value={<OriginBadge origin={t.data_origin} />} />
-            </dl>
-          </Panel>
-          <RiskPanel transactionId={t.id} scorable={t.occurred_at != null} />
-          <InvestigationPanel caseId={c.id} canRun={operator} />
+      <WorkspaceTabs
+        tabs={tabs}
+        active={active}
+        onChange={(tab) => {
+          const next = new URLSearchParams(params);
+          next.set("tab", tab);
+          setParams(next);
+        }}
+      />
+      <section
+        role="tabpanel"
+        id="workspace-panel-investigation"
+        aria-labelledby="workspace-tab-investigation"
+        hidden={active !== "investigation"}
+      >
+        <Panel
+          title="Payment"
+          actions={
+            <Link
+              to={`/app/transactions/${t.id}`}
+              className="text-sm text-accent hover:underline"
+            >
+              Open payment
+            </Link>
+          }
+        >
+          <dl className="grid gap-x-6 gap-y-3 sm:grid-cols-3">
+            <Field
+              label="Amount"
+              value={formatMoney(t.amount_minor, t.currency)}
+            />
+            <Field label="Status" value={<StatusBadge status={t.status} />} />
+            <Field
+              label="Item"
+              value={`${t.product_name ?? "Unknown item"} × ${t.quantity}`}
+            />
+            <Field
+              label="Payer reference"
+              value={
+                <span className="font-mono text-[13px]">
+                  {t.payer_reference ?? "—"}
+                </span>
+              }
+            />
+            <Field label="Occurred" value={formatDateTime(t.occurred_at)} />
+            <Field label="Opened by" value={humanize(c.source)} />
+            <Field
+              label="PayPal order"
+              value={
+                <span className="font-mono text-[13px]">
+                  {t.paypal_order_id ?? "—"}
+                </span>
+              }
+            />
+            <Field
+              label="PayPal capture"
+              value={
+                <span className="font-mono text-[13px]">
+                  {t.paypal_capture_id ?? "—"}
+                </span>
+              }
+            />
+            <Field
+              label="Data origin"
+              value={<OriginBadge origin={t.data_origin} />}
+            />
+          </dl>
+        </Panel>
+        <RiskPanel transactionId={t.id} scorable={t.occurred_at != null} />
+        <InvestigationPanel caseId={c.id} canRun={operator} />
+      </section>
+      <section
+        role="tabpanel"
+        id="workspace-panel-evidence"
+        aria-labelledby="workspace-tab-evidence"
+        hidden={active !== "evidence"}
+      >
+        <div className="workspace-evidence-board">
           <EvidencePanel caseId={c.id} canUpload={operator} />
+          <div>
+            <PacketPanel caseId={c.id} canGenerate={operator} />
+            <ChecklistPanel caseId={c.id} />
+          </div>
         </div>
-        <div className="space-y-4">
+      </section>
+      <section
+        role="tabpanel"
+        id="workspace-panel-decision"
+        aria-labelledby="workspace-tab-decision"
+        hidden={active !== "decision"}
+      >
+        <div className="workspace-decision-board">
           <Actions c={c} />
-          <Panel title="Refund and dispute workflows">
-            <p className="mb-3 text-xs text-fg-muted">Requests require independent approval. Sandbox execution is disabled by default; dispute submission is disabled.</p>
-            <div className="flex flex-wrap gap-4 text-sm">
-              <Link to={`/refunds?case=${c.id}`} className="text-accent hover:underline">Refund history and requests</Link>
-              <Link to={`/disputes?case=${c.id}`} className="text-accent hover:underline">Dispute preparation</Link>
-            </div>
-          </Panel>
-          <ApprovalsPanel caseId={c.id} me={me.data} canRequest={operator} resolved={c.status === "RESOLVED"} />
-          <PacketPanel caseId={c.id} canGenerate={operator} />
-          <ChecklistPanel caseId={c.id} />
+          <div>
+            <ApprovalsPanel
+              caseId={c.id}
+              me={me.data}
+              canRequest={operator}
+              resolved={c.status === "RESOLVED"}
+            />
+            <Panel title="Refund and dispute workflows">
+              <p className="mb-4 text-sm text-fg-muted">
+                Requests require independent approval. Sandbox execution is
+                disabled by default; dispute submission is disabled.
+              </p>
+              <div className="flex flex-wrap gap-5 text-sm">
+                <Link to={`/app/refunds?case=${c.id}`} className="text-accent">
+                  Refund history and requests
+                </Link>
+                <Link to={`/app/disputes?case=${c.id}`} className="text-accent">
+                  Dispute preparation
+                </Link>
+              </div>
+            </Panel>
+          </div>
+        </div>
+      </section>
+      <section
+        role="tabpanel"
+        id="workspace-panel-activity"
+        aria-labelledby="workspace-tab-activity"
+        hidden={active !== "activity"}
+      >
+        <div className="workspace-activity-board">
           <Notes c={c} />
           <Panel title="Activity">
-            {c.audit.length === 0 && <p className="text-sm text-fg-muted">No activity recorded yet.</p>}
+            {c.audit.length === 0 && (
+              <p className="text-sm text-fg-muted">No activity recorded yet.</p>
+            )}
             <ol className="space-y-2">
               {c.audit.map((a) => (
                 <li key={a.id} className="border-l border-line pl-3 text-sm">
                   <p>{ACTION_LABELS[a.action] ?? a.action}</p>
                   <p className="tabular text-xs text-fg-subtle">
-                    {formatDateTime(a.created_at)} · {a.actor_type === "SYSTEM" ? "SENTINEL" : "Team member"}
+                    {formatDateTime(a.created_at)} ·{" "}
+                    {a.actor_type === "SYSTEM" ? "SENTINEL" : "Team member"}
                   </p>
                 </li>
               ))}
             </ol>
-          </Panel>
+          </Panel>{" "}
         </div>
-      </div>
+      </section>
     </>
   );
 }
@@ -141,9 +264,17 @@ function Actions({ c }: { c: CaseDetail }) {
   if (c.status === "RESOLVED") {
     return (
       <Panel title="Outcome">
-        <p className="text-sm font-medium">{c.resolution ? RESOLUTION_LABEL[c.resolution] : "Resolved"}</p>
-        {c.resolution_note && <p className="mt-1 text-sm whitespace-pre-wrap text-fg-muted">{c.resolution_note}</p>}
-        <p className="mt-2 text-xs text-fg-subtle">{c.assignee ? `By ${c.assignee.email}` : null}</p>
+        <p className="text-sm font-medium">
+          {c.resolution ? RESOLUTION_LABEL[c.resolution] : "Resolved"}
+        </p>
+        {c.resolution_note && (
+          <p className="mt-1 text-sm whitespace-pre-wrap text-fg-muted">
+            {c.resolution_note}
+          </p>
+        )}
+        <p className="mt-2 text-xs text-fg-subtle">
+          {c.assignee ? `By ${c.assignee.email}` : null}
+        </p>
       </Panel>
     );
   }
@@ -151,16 +282,34 @@ function Actions({ c }: { c: CaseDetail }) {
   const operator = isOperator(me.data?.role);
   const mine = c.assignee?.id === me.data?.id;
   const free = c.assignee == null;
-  const fail = (title: string) => (e: Error) => toast.notify({ tone: "critical", title, body: e.message });
+  const fail = (title: string) => (e: Error) =>
+    toast.notify({ tone: "critical", title, body: e.message });
 
   return (
     <Panel title="Decision">
       <p className="text-sm text-fg-muted">
-        {c.assignee ? <>Assigned to <span className="text-fg">{c.assignee.email}</span>.</> : "Nobody has claimed this case yet."}
+        {c.assignee ? (
+          <>
+            Assigned to <span className="text-fg">{c.assignee.email}</span>.
+          </>
+        ) : (
+          "Nobody has claimed this case yet."
+        )}
       </p>
-      {!operator && <p className="mt-2 text-sm text-fg-subtle">Your role can view cases but not change them.</p>}
+      {!operator && (
+        <p className="mt-2 text-sm text-fg-subtle">
+          Your role can view cases but not change them.
+        </p>
+      )}
       {operator && free && (
-        <Button className="mt-3" variant="secondary" busy={claim.isPending} onClick={() => claim.mutate(undefined, { onError: fail("Could not claim case") })}>
+        <Button
+          className="mt-3"
+          variant="secondary"
+          busy={claim.isPending}
+          onClick={() =>
+            claim.mutate(undefined, { onError: fail("Could not claim case") })
+          }
+        >
           Claim for review
         </Button>
       )}
@@ -173,7 +322,12 @@ function Actions({ c }: { c: CaseDetail }) {
             resolve.mutate(
               { resolution, note: note.trim() },
               {
-                onSuccess: () => toast.notify({ tone: "positive", title: "Case resolved", body: "Your conclusion is recorded. No payment was changed." }),
+                onSuccess: () =>
+                  toast.notify({
+                    tone: "positive",
+                    title: "Case resolved",
+                    body: "Your conclusion is recorded. No payment was changed.",
+                  }),
                 onError: fail("Could not resolve case"),
               },
             );
@@ -183,18 +337,32 @@ function Actions({ c }: { c: CaseDetail }) {
             <legend className="text-sm font-medium">Conclusion</legend>
             <div className="mt-2 space-y-2">
               {(Object.keys(RESOLUTION_LABEL) as CaseResolution[]).map((r) => (
-                <label key={r} className="flex cursor-pointer items-start gap-2.5 rounded-md border border-line px-3 py-2 has-[:checked]:border-accent">
-                  <input type="radio" name="resolution" value={r} checked={resolution === r} onChange={() => setResolution(r)} className="mt-1 accent-[var(--color-accent)]" />
+                <label
+                  key={r}
+                  className="flex cursor-pointer items-start gap-2.5 rounded-md border border-line px-3 py-2 has-[:checked]:border-accent"
+                >
+                  <input
+                    type="radio"
+                    name="resolution"
+                    value={r}
+                    checked={resolution === r}
+                    onChange={() => setResolution(r)}
+                    className="mt-1 accent-[var(--color-accent)]"
+                  />
                   <span>
                     <span className="block text-sm">{RESOLUTION_LABEL[r]}</span>
-                    <span className="block text-xs text-fg-subtle">{RESOLUTION_HELP[r]}</span>
+                    <span className="block text-xs text-fg-subtle">
+                      {RESOLUTION_HELP[r]}
+                    </span>
                   </span>
                 </label>
               ))}
             </div>
           </fieldset>
           <div>
-            <label htmlFor="resolution-note" className="text-sm font-medium">Reasoning</label>
+            <label htmlFor="resolution-note" className="text-sm font-medium">
+              Reasoning
+            </label>
             <textarea
               id="resolution-note"
               required
@@ -206,8 +374,15 @@ function Actions({ c }: { c: CaseDetail }) {
               className="mt-1 w-full rounded-md border border-line-strong bg-sunken px-3 py-2 text-sm focus:border-accent focus:outline-none"
             />
           </div>
-          <p className="text-xs text-fg-subtle">Resolving records your conclusion. It does not refund, block or contact anyone.</p>
-          <Button type="submit" busy={resolve.isPending} disabled={!resolution || note.trim().length < 3}>
+          <p className="text-xs text-fg-subtle">
+            Resolving records your conclusion. It does not refund, block or
+            contact anyone.
+          </p>
+          <Button
+            type="submit"
+            busy={resolve.isPending}
+            disabled={!resolution || note.trim().length < 3}
+          >
             Resolve case
           </Button>
         </form>
@@ -223,7 +398,9 @@ function Notes({ c }: { c: CaseDetail }) {
   const [body, setBody] = useState("");
   return (
     <Panel title={`Notes (${c.notes.length})`}>
-      {c.notes.length === 0 && <p className="text-sm text-fg-muted">No notes yet.</p>}
+      {c.notes.length === 0 && (
+        <p className="text-sm text-fg-muted">No notes yet.</p>
+      )}
       <ul className="space-y-3">
         {c.notes.map((n) => (
           <li key={n.id} className="text-sm">
@@ -241,11 +418,18 @@ function Notes({ c }: { c: CaseDetail }) {
             e.preventDefault();
             add.mutate(body.trim(), {
               onSuccess: () => setBody(""),
-              onError: (err) => toast.notify({ tone: "critical", title: "Note not saved", body: err.message }),
+              onError: (err) =>
+                toast.notify({
+                  tone: "critical",
+                  title: "Note not saved",
+                  body: err.message,
+                }),
             });
           }}
         >
-          <label htmlFor="case-note" className="sr-only">Add a note</label>
+          <label htmlFor="case-note" className="sr-only">
+            Add a note
+          </label>
           <textarea
             id="case-note"
             rows={2}
@@ -255,7 +439,13 @@ function Notes({ c }: { c: CaseDetail }) {
             onChange={(e) => setBody(e.target.value)}
             className="w-full rounded-md border border-line-strong bg-sunken px-3 py-2 text-sm placeholder:text-fg-subtle focus:border-accent focus:outline-none"
           />
-          <Button type="submit" variant="secondary" className="self-start" busy={add.isPending} disabled={!body.trim()}>
+          <Button
+            type="submit"
+            variant="secondary"
+            className="self-start"
+            busy={add.isPending}
+            disabled={!body.trim()}
+          >
             Add note
           </Button>
         </form>

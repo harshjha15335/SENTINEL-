@@ -1,9 +1,9 @@
 # SENTINEL
 
 - Preserve backend, trained ML artifacts, API contracts, merchant isolation, CSRF, and server role checks.
-- V2 is a complete visual replacement implemented incrementally. During Phase 1 keep all existing screens intact. Do not restore retired presentation after migration.
-- Read `docs/sentinel-v2/00-handoff.md` and the feature/workflow matrix before V2 changes. Design and route approval are pending until explicitly authorized by the user.
-- Preview styling, providers and side effects must remain isolated. The preview must not exist in production builds.
+- V2 is a complete visual replacement implemented incrementally. Gate 1 is approved; Phase 2 reconstruction is authorized. Preserve each workflow until its replacement passes parity checks. Do not restore retired presentation after migration.
+- Read `docs/sentinel-v2/00-handoff.md` and the feature/workflow matrix before V2 changes. User approval and routing authorization are recorded in docs/sentinel-v2/12-phase2-authorization.md. Deployment remains pending.
+- Preview styling, providers and side effects must remain isolated. Experimental preview routes must not exist in production builds; the approved marketing experience may be deliberately promoted into production source under Phase 2.
 - Distinguish SIMULATED, SYNTHETIC_DEMO, MERCHANT_PROVIDED and LIVE_SANDBOX data. Never fabricate model outputs, provider events, healthy statuses or successful checks.
 - No real payments, paid inference, secrets in bundles/screenshots, production mutations, pushes, merges or deployment without explicit authorization.
 - Preserve valid existing test coverage. Verify significant UI changes in a browser, including keyboard, mobile, reduced motion, errors and API behavior.

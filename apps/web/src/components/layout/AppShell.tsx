@@ -1,126 +1,179 @@
 import { clsx } from "clsx";
-import { Activity, Gauge, LayoutDashboard, ListChecks, LogOut, Settings, ShieldCheck, ShoppingBag } from "lucide-react";
-import { lazy, Suspense } from "react";
-import { NavLink, Navigate, Outlet, useLocation } from "react-router-dom";
-
+import { ArrowUpRight, LogOut } from "lucide-react";
+import { lazy, Suspense, useRef } from "react";
+import { NavLink, Navigate, Outlet, useLocation, Link } from "react-router-dom";
+import { AppNavigation } from "./AppNavigation";
+import { ErrorState } from "@/components/ui/States";
 import { Skeleton } from "@/components/ui/States";
 import { useLogout, useMe } from "@/features/auth/session";
 import { usePayPalStatus } from "@/features/settings/usePayPalStatus";
 import { STATIC_DEMO } from "@/lib/staticDemo";
-
-// Only the GitHub Pages build renders this; keeping it lazy keeps the snapshot reader out of the main bundle.
-const StaticDemoBanner = lazy(() => import("@/features/demo/StaticDemoBanner").then((m) => ({ default: m.StaticDemoBanner })));
-
-const NAV = [
-  { to: "/", label: "Command Center", icon: LayoutDashboard, end: true },
-  { to: "/transactions", label: "Transactions", icon: Activity, end: false },
-  { to: "/cases", label: "Review Queue", icon: ListChecks, end: false },
-  { to: "/model", label: "Risk Model", icon: Gauge, end: false },
-  { to: "/checkout", label: "Sandbox Checkout", icon: ShoppingBag, end: false },
-  { to: "/demo", label: "Demo guide", icon: ShieldCheck, end: false },
-  { to: "/operations", label: "Operations", icon: Activity, end: false },
-  { to: "/refunds", label: "Refunds", icon: Activity, end: false },
-  { to: "/disputes", label: "Disputes", icon: ListChecks, end: false },
-  { to: "/policy", label: "Policy Lab", icon: Gauge, end: false },
-  { to: "/monitoring", label: "Risk Monitoring", icon: Activity, end: false },
-  { to: "/network", label: "Network Explorer", icon: Activity, end: false },
-  { to: "/settings", label: "Settings", icon: Settings, end: false },
+const StaticDemoBanner = lazy(() =>
+  import("@/features/demo/StaticDemoBanner").then((m) => ({
+    default: m.StaticDemoBanner,
+  })),
+);
+const PRIMARY = [
+  ["/app", "Command Center"],
+  ["/app/transactions", "Transactions"],
+  ["/app/cases", "Investigations"],
+  ["/app/model", "Risk Intelligence"],
+  ["/app/policy", "Policy Lab"],
+  ["/app/monitoring", "Monitoring"],
 ];
-
+const MORE = [
+  ["/app/network", "Relationship explorer"],
+  ["/app/refunds", "Refund review"],
+  ["/app/disputes", "Dispute preparation"],
+  ["/app/checkout", "Sandbox checkout"],
+  ["/app/settings", "Integration & account"],
+  ["/app/demo", "Demo guide"],
+  ["/app/operations", "Operations"],
+];
 export function AppShell() {
-  const me = useMe();
-  const location = useLocation();
-
-  if (me.isPending) {
+  const me = useMe(),
+    location = useLocation(),
+    menu = useRef<HTMLDetailsElement>(null);
+  if (me.isPending)
     return (
-      <div className="p-6">
+      <div className="workspace-session-loading" role="status">
         <Skeleton className="h-8 w-48" />
+        <p>Opening your workspace…</p>
       </div>
     );
-  }
-  if (!me.data) return <Navigate to="/login" replace state={{ from: location.pathname }} />;
-
+  if (me.isError)
+    return (
+      <div className="workspace-session-loading">
+        <ErrorState error={me.error} onRetry={() => void me.refetch()} />
+      </div>
+    );
+  if (!me.data)
+    return (
+      <Navigate
+        to="/login"
+        replace
+        state={{ from: location.pathname + location.search + location.hash }}
+      />
+    );
+  const more = MORE.filter(
+    ([to]) =>
+      (to != "/app/operations" || me.data?.role === "ADMIN") &&
+      (to != "/app/demo" || me.data?.merchant.environment === "DEMO"),
+  );
+  const nav = (items: string[][]) =>
+    items.map(([to, label]) => (
+      <NavLink
+        key={to}
+        to={to ?? "/app"}
+        end={to === "/app"}
+        onClick={() => {
+          if (menu.current) menu.current.open = false;
+        }}
+        className={({ isActive }) =>
+          clsx("workspace-nav-link", isActive && "is-active")
+        }
+      >
+        {label}
+      </NavLink>
+    ));
   return (
-    <div className="flex min-h-dvh flex-col md:flex-row">
-      <a href="#main" className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-50 focus:rounded-md focus:bg-raised focus:px-3 focus:py-2">
+    <div className="sentinel-workspace">
+      <AppNavigation />
+      <a className="workspace-skip" href="#main">
         Skip to content
       </a>
-      <aside className="border-b border-line bg-surface md:sticky md:top-0 md:h-dvh md:w-60 md:shrink-0 md:border-r md:border-b-0">
-        <div className="flex h-14 items-center gap-2.5 px-4">
-          <ShieldCheck aria-hidden className="size-5 text-accent" />
-          <span className="text-sm font-semibold tracking-[0.16em]">SENTINEL</span>
-        </div>
-        <nav aria-label="Primary" className="flex gap-1 overflow-x-auto px-2 pb-2 md:flex-col md:pb-0">
-          {NAV.filter(item => (item.to !== "/operations" || me.data?.role === "ADMIN") && (item.to !== "/demo" || me.data?.merchant.environment === "DEMO")).map(({ to, label, icon: Icon, end }) => (
-            <NavLink
-              key={to}
-              to={to}
-              end={end}
-              className={({ isActive }) =>
-                clsx(
-                  "flex h-9 shrink-0 items-center gap-2.5 rounded-md px-3 text-sm whitespace-nowrap transition-colors",
-                  isActive ? "bg-accent-soft text-fg" : "text-fg-muted hover:bg-raised hover:text-fg",
-                )
-              }
-            >
-              <Icon aria-hidden className="size-4" />
-              {label}
-            </NavLink>
-          ))}
+      <header className="workspace-global-header">
+        <Link to="/" className="workspace-brand">
+          <span>S</span>SENTINEL
+        </Link>
+        <nav aria-label="Primary" className="workspace-primary-nav">
+          {nav(PRIMARY)}
         </nav>
-      </aside>
-      <div className="flex min-w-0 flex-1 flex-col">
-        {STATIC_DEMO && (
-          <Suspense fallback={null}>
-            <StaticDemoBanner />
-          </Suspense>
-        )}
-        <TopBar email={me.data.email} role={me.data.role} merchant={me.data.merchant.name} />
-        <main id="main" className="mx-auto w-full max-w-[1400px] flex-1 px-4 py-6 md:px-8">
-          <Outlet />
-        </main>
-      </div>
+        <details className="workspace-menu" ref={menu}>
+          <summary>Explore</summary>
+          <nav aria-label="All workspaces">
+            <div className="workspace-mobile-links">{nav(PRIMARY)}</div>
+            {nav(more)}
+            <Link to="/">
+              Follow the Money <ArrowUpRight size={14} />
+            </Link>
+          </nav>
+        </details>
+      </header>
+      {STATIC_DEMO && (
+        <Suspense fallback={null}>
+          <StaticDemoBanner />
+        </Suspense>
+      )}
+      <AccountBar
+        email={me.data.email}
+        role={me.data.role}
+        merchant={me.data.merchant.name}
+      />
+      <main
+        id="main"
+        className="workspace-main"
+        data-workspace-route={location.pathname}
+      >
+        <Outlet />
+      </main>
+      <footer className="workspace-footer">
+        <span>SENTINEL / FOLLOW THE MONEY</span>
+        <span>Decision support. Human judgment.</span>
+      </footer>
     </div>
   );
 }
-
-function TopBar({ email, role, merchant }: { email: string; role: string; merchant: string }) {
-  const logout = useLogout();
-  const status = usePayPalStatus();
-  const mode = status.data?.mode;
-  const healthy = status.data?.token_check === "ok";
+function AccountBar({
+  email,
+  role,
+  merchant,
+}: {
+  email: string;
+  role: string;
+  merchant: string;
+}) {
+  const logout = useLogout(),
+    status = usePayPalStatus(),
+    mode = status.data?.mode,
+    healthy = status.data?.token_check === "ok";
   return (
-    <header className="flex h-14 items-center justify-between gap-4 border-b border-line px-4 md:px-8">
-      <div className="flex min-w-0 items-center gap-3">
-        <p className="truncate text-sm text-fg-muted">{merchant}</p>
+    <div className="workspace-account-bar">
+      <div className="workspace-merchant">
+        <span>{merchant}</span>
         {mode && (
           <span
             className={clsx(
-              "inline-flex h-6 shrink-0 items-center gap-1.5 rounded-sm border px-2 text-[11px] font-medium tracking-wide whitespace-nowrap uppercase",
-              mode === "fixture" ? "border-warning/40 text-warning" : healthy ? "border-positive/40 text-positive" : "border-critical/40 text-critical",
+              "workspace-gateway",
+              mode === "fixture"
+                ? "text-warning"
+                : healthy
+                  ? "text-positive"
+                  : "text-critical",
             )}
           >
-            <span aria-hidden className="size-1.5 rounded-full bg-current" />
-            <span className="sm:hidden">{mode === "fixture" ? "Simulated" : healthy ? "Sandbox" : "Offline"}</span>
-            <span className="hidden sm:inline">{mode === "fixture" ? "Simulated gateway" : healthy ? "PayPal sandbox connected" : "PayPal sandbox unavailable"}</span>
+            {mode === "fixture"
+              ? "Simulated gateway"
+              : healthy
+                ? "PayPal sandbox connected"
+                : "PayPal sandbox unavailable"}
           </span>
         )}
       </div>
-      <div className="flex items-center gap-3">
-        <div className="hidden text-right sm:block">
-          <p className="text-sm leading-tight">{email}</p>
-          <p className="text-[11px] tracking-wide text-fg-subtle uppercase">{role}</p>
-        </div>
+      <div className="workspace-account">
+        <span>
+          {email} <small>{role}</small>
+        </span>
         {!STATIC_DEMO && (
           <button
-            onClick={() => logout.mutate()}
-            className="inline-flex size-9 items-center justify-center rounded-md text-fg-muted hover:bg-raised hover:text-fg"
             aria-label="Sign out"
+            onClick={() => logout.mutate()}
+            disabled={logout.isPending}
           >
-            <LogOut className="size-4" />
+            <LogOut size={17} />
           </button>
         )}
       </div>
-    </header>
+    </div>
   );
 }

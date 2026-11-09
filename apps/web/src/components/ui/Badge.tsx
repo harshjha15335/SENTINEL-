@@ -11,11 +11,19 @@ const tones: Record<Tone, string> = {
   critical: "border-critical/40 bg-critical-soft text-critical",
 };
 
-export function Badge({ tone = "neutral", children, className }: { tone?: Tone; children: ReactNode; className?: string }) {
+export function Badge({
+  tone = "neutral",
+  children,
+  className,
+}: {
+  tone?: Tone;
+  children: ReactNode;
+  className?: string;
+}) {
   return (
     <span
       className={clsx(
-        "inline-flex h-5 items-center gap-1 rounded-sm border px-1.5 text-[11px] font-medium tracking-wide whitespace-nowrap uppercase",
+        "inline-flex min-h-6 items-center gap-1 rounded-full border px-2.5 text-[11px] font-medium tracking-normal whitespace-nowrap",
         tones[tone],
         className,
       )}

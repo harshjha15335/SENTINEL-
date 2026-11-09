@@ -1,3 +1,7 @@
+# Current authority — Gate 1 APPROVED, Phase 2 authorized
+
+Read [12-phase2-authorization.md](12-phase2-authorization.md). User approval on 10 November 2026 supersedes historical design-PENDING markers below. DESIGN APPROVAL: APPROVED. DEPLOYMENT APPROVAL: PENDING. Complete frontend reconstruction is authorized; publication is not.
+
 # Current checkpoint — final Gate 1 visual polish
 
 Read [11-gate1-polish.md](11-gate1-polish.md) first. It supersedes the miniature/scaled workspace reveal in the earlier Follow the Money prototype. The preferred direction is accepted subject to review; DESIGN APPROVAL and DEPLOYMENT APPROVAL remain PENDING. Phase 2 has not begun.
