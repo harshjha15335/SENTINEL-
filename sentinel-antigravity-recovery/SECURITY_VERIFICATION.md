@@ -26,3 +26,4 @@ SENTINEL operates strictly as a decision support system:
 1. **Analyst Review**: High-risk cases flagged by the calibrated XGBoost model generate investigation cases for human analysts.
 2. **AI Findings as Recommendations**: Gemini / AI findings are presented as structured evidence citations with confidence scores. They do not trigger automated actions.
 3. **Four-Eyes Principle**: Refund preparation and dispute responses require secondary approval by an authorized analyst or merchant supervisor before any action can be marked approved.
+

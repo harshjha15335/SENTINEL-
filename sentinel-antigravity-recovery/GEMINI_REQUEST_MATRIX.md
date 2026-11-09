@@ -39,3 +39,4 @@ To diagnose the exact source of `HTTP 400 INVALID_ARGUMENT` emitted by `generati
    - `GoogleModel._build_content_and_config` in PydanticAI v2.55.0 incorrectly assumes that only models with `supports_image_output=True` need `TEXT` removed from `responseModalities`.
    - For `gemini-3.1-flash-lite`, `supports_image_output` is `False`.
    - As a result, `responseModalities: ["TEXT"]` is unconditionally included in `generationConfig`, contradicting the forced function-calling instruction.
+

@@ -59,3 +59,4 @@ Inspect the output logs for the following success markers:
 If the live call encounters a temporary Google rate limit (`HTTP 429`):
 - Confirm that SENTINEL immediately switches to the deterministic fallback finding without crashing or hanging.
 - Confirm that `run.usage["diagnostic"]` registers `{"error": "rate_limit_exceeded"}` via `extract_safe_diagnostics`.
+

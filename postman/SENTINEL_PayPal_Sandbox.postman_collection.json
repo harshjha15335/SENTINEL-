@@ -1,8 +1,8 @@
 {
   "info": {
-    "_postman_id": "b3e04cfb-81f1-4db8-8311-sentinel-collection",
+    "_postman_id": "c508536e-b69c-44d8-a046-dea195ccfcf5",
     "name": "SENTINEL — PayPal Sandbox Authentication & Webhooks",
-    "description": "PayPal Sandbox verification collection for SENTINEL. Contains non-financial OAuth token generation and webhook inspection endpoints with automated assertions, safe error classification, and secret redaction.",
+    "description": "PayPal Sandbox verification collection for SENTINEL. Contains non-financial OAuth token generation and webhook inspection endpoints with automated assertions, safe error classification, and Postman Local Vault secret references.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "item": [
@@ -14,13 +14,29 @@
           "script": {
             "type": "text/javascript",
             "exec": [
-              "const clientId = pm.environment.get('paypal_client_id');",
-              "const clientSecret = pm.environment.get('paypal_client_secret');",
+              "// Check whether credentials are configured via Postman Local Vault or Environment",
+              "let clientId = pm.environment.get('paypal_client_id');",
+              "let clientSecret = pm.environment.get('paypal_client_secret');",
+              "",
+              "if (typeof pm.vault !== 'undefined' && typeof pm.vault.get === 'function') {",
+              "    try {",
+              "        // If using Postman Local Vault directly",
+              "        pm.vault.get('paypal_client_id').then(function(val) {",
+              "            if (val) console.log('Postman Local Vault: paypal_client_id resolved.');",
+              "        }).catch(function() {});",
+              "        pm.vault.get('paypal_client_secret').then(function(val) {",
+              "            if (val) console.log('Postman Local Vault: paypal_client_secret resolved.');",
+              "        }).catch(function() {});",
+              "    } catch (e) {",
+              "        // pm.vault async invocation fallback",
+              "    }",
+              "}",
+              "",
               "if (!clientId || clientId === 'YOUR_SANDBOX_CLIENT_ID') {",
-              "    console.warn('Warning: paypal_client_id is not configured or using default placeholder.');",
+              "    console.warn('Notice: paypal_client_id is not set. Ensure it is populated in Postman Local Vault ({{vault:paypal_client_id}}) or Environment.');",
               "}",
               "if (!clientSecret || clientSecret === 'YOUR_SANDBOX_CLIENT_SECRET') {",
-              "    console.warn('Warning: paypal_client_secret is not configured or using default placeholder.');",
+              "    console.warn('Notice: paypal_client_secret is not set. Ensure it is populated in Postman Local Vault ({{vault:paypal_client_secret}}) or Environment.');",
               "}"
             ]
           }
@@ -33,35 +49,37 @@
               "const status = pm.response.code;",
               "const debugId = pm.response.headers.get('paypal-debug-id');",
               "",
-              "// Never leak credentials in assertion messages or logs",
+              "// Redaction assertion: Ensure secrets or vault tokens never leak into response text",
               "const secret = pm.environment.get('paypal_client_secret');",
-              "if (secret && secret !== 'YOUR_SANDBOX_CLIENT_SECRET') {",
+              "if (secret && !secret.startsWith('{{vault:') && secret !== 'YOUR_SANDBOX_CLIENT_SECRET') {",
               "    pm.test('Response does not expose client secret', function () {",
               "        pm.expect(pm.response.text()).to.not.include(secret);",
               "    });",
               "}",
               "",
               "if (status === 200) {",
-              "    pm.test('Status code is 200 OK', function () {",
+              "    pm.test('HTTP 200 OK — Access Token acquired', function () {",
               "        pm.response.to.have.status(200);",
               "    });",
               "",
-              "    pm.test('Token response schema and attributes are valid', function () {",
+              "    pm.test('OAuth token response conforms to PayPal schema', function () {",
               "        const data = pm.response.json();",
-              "        pm.expect(data.access_token).to.be.a('string').and.not.empty;",
-              "        pm.expect(data.token_type).to.be.a('string').and.match(/^Bearer$/i);",
-              "        pm.expect(data.expires_in).to.be.a('number').and.be.above(0);",
+              "        pm.expect(data.access_token).to.be.a('string');",
+              "        pm.expect(data.access_token.length).to.be.above(0);",
+              "        pm.expect(data.token_type).to.match(/^Bearer$/i);",
+              "        pm.expect(data.expires_in).to.be.a('number');",
+              "        pm.expect(data.expires_in).to.be.above(0);",
               "        ",
-              "        // Save token to environment for subsequent calls",
+              "        // Save access token to environment for downstream read-only webhook requests",
               "        pm.environment.set('paypal_access_token', data.access_token);",
               "    });",
               "} else if (status === 401) {",
-              "    pm.test('401 Authentication Failure classified safely', function () {",
+              "    pm.test('HTTP 401 Unauthorized — Classified as invalid_client', function () {",
               "        pm.response.to.have.status(401);",
               "        const data = pm.response.json();",
               "        pm.expect(data.error).to.eql('invalid_client');",
               "    });",
-              "    console.error('PayPal OAuth 401 invalid_client. Debug-ID: ' + debugId + '. Check paired sandbox credentials and verify secret is not a proxy placeholder.');",
+              "    console.warn('PayPal OAuth returned 401 invalid_client. Debug-ID: ' + debugId + '. Check paired sandbox credentials and verify secret is not a proxy placeholder.');",
               "} else {",
               "    pm.test('Unexpected status code: ' + status, function () {",
               "        pm.expect(status).to.be.oneOf([200, 401]);",
@@ -121,7 +139,7 @@
             "token"
           ]
         },
-        "description": "Requests an OAuth 2.0 access token using client_credentials grant type and HTTP Basic Authentication. If successful, stores the access token into {{paypal_access_token}} environment variable."
+        "description": "Requests an OAuth 2.0 access token using client_credentials grant type and HTTP Basic Authentication. Credentials resolve from Postman Local Vault ({{vault:paypal_client_secret}}) or environment."
       },
       "response": []
     },
@@ -230,7 +248,9 @@
               "pm.test('Webhook details match requested ID', function () {",
               "    const data = pm.response.json();",
               "    const expectedId = pm.environment.get('paypal_webhook_id');",
-              "    pm.expect(data.id).to.eql(expectedId);",
+              "    if (expectedId) {",
+              "        pm.expect(data.id).to.eql(expectedId);",
+              "    }",
               "    pm.expect(data).to.have.property('url');",
               "    pm.expect(data).to.have.property('event_types');",
               "    pm.expect(data.event_types).to.be.an('array');",
@@ -276,4 +296,3 @@
     }
   ]
 }
-

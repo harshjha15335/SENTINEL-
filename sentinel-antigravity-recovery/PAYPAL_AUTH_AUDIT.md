@@ -67,3 +67,4 @@ To achieve a green live PayPal sandbox connection in staging or production:
    PAYPAL_MODE="sandbox"
    ```
 5. If running behind an egress corporate proxy, ensure the proxy whitelists `api-m.sandbox.paypal.com:443` without stripping or modifying the `Authorization` header.
+

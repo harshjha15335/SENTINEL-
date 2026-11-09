@@ -49,3 +49,4 @@ Using an offline mock-transport interception harness with the exact installed SD
    - Cleans `response_modalities` when tools are present, removing the contradictory `TEXT` modality.
    - Upgrades `mode: ANY` to `FunctionCallingConfigMode.VALIDATED` (or `AUTO`).
    - Uses `temperature=1.0` for Gemini 3.1 models.
+

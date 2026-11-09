@@ -76,3 +76,4 @@ python scripts/wait-for-readiness.py --host 127.0.0.1 --port ${PORT:-8000} --tim
 ```
 
 This guarantees that external ingress traffic and automated test runners will never hit half-initialized containers.
+

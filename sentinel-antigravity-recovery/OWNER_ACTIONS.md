@@ -14,3 +14,4 @@ The following actions require external system credentials, human authorization, 
 | **P1** | **Review and Merge Git Changes** | Review the local branch `fix/gemini-400-recovery` and push to GitHub remote. | A local backup branch `backup/baseline-410109c` and a self-contained Git bundle `sentinel-recovery-bundle.bundle` have been created. Run `git push origin fix/gemini-400-recovery` when ready. |
 | **P2** | **Verify Supabase Bridge Ingress** | Confirm webhook signing secret on Supabase edge function matching the backend receiver. | Ensure `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` are populated in the hosted deployment. |
 | **P2** | **Trigger Production Deploy on Render** | Deploy the unified Docker container on Render according to `render.yaml`. | Ensure migrations (`alembic upgrade head`) execute prior to traffic ingress, verified via `scripts/wait-for-readiness.py`. |
+

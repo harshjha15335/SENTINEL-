@@ -92,3 +92,4 @@ The implementation was verified using comprehensive automated tests:
 - While unit and serialization tests confirm that the serialized JSON payload conforms to Google's OpenAPI 3.0 schema parser, an actual live HTTP response from `generativelanguage.googleapis.com` requires external internet access and an active `GEMINI_API_KEY`.
 - Under the standing instructions of this audit, **zero live calls were made**.
 - A controlled 1-request live test plan has been prepared in [`MINIMAL_LIVE_RETEST_PLAN.md`](file:///C:/Users/ranja/Sentinel/SENTINEL-/sentinel-antigravity-recovery/MINIMAL_LIVE_RETEST_PLAN.md) for execution by the repository owner.
+

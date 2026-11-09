@@ -48,3 +48,4 @@
 | `pydantic` | 2.14.0 | Pinned |
 | PostgreSQL | Running on localhost:5432 | Role `sentinel` and test db `sentinel_test` provisioned |
 | Node.js / npm | v24.16.0 / 11.13.0 | `apps/web` dependencies installed via `npm ci` |
+

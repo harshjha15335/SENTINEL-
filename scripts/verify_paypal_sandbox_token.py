@@ -42,9 +42,22 @@ def _check_credential_shape(client_id: str, client_secret: str) -> list[str]:
     return warnings
 
 
+def _get_env_val(name: str) -> str:
+    val = os.environ.get(name, "").strip()
+    if val:
+        return val
+    try:
+        import subprocess
+        cmd = ["powershell", "-NoProfile", "-Command", f'[Environment]::GetEnvironmentVariable("{name}", "User")']
+        res = subprocess.run(cmd, capture_output=True, text=True, check=True)
+        return res.stdout.strip()
+    except Exception:
+        return ""
+
+
 def verify_paypal_sandbox(execute: bool = False) -> int:
-    client_id = os.environ.get("SENTINEL_PAYPAL_CLIENT_ID", "").strip()
-    client_secret = os.environ.get("SENTINEL_PAYPAL_CLIENT_SECRET", "").strip()
+    client_id = _get_env_val("SENTINEL_PAYPAL_CLIENT_ID")
+    client_secret = _get_env_val("SENTINEL_PAYPAL_CLIENT_SECRET")
 
     print("=" * 70)
     print("SENTINEL — PayPal Sandbox OAuth Token Verification")

@@ -67,3 +67,4 @@ flowchart TD
 - Tool Isolation: 11 read-only case tools bound to pre-authorized case context (`CaseToolbox`); signatures do not expose merchant ID or case ID arguments to prevent model escape.
 - Guarded Output: `InvestigationFindings` structured model enforced by `@agent.output_validator` and post-run `validate_findings()` verifying citations, verbatim excerpts, and grounding.
 - Deterministic Fallback: Available offline or on provider failure, explicitly labeled as non-AI output.
+
