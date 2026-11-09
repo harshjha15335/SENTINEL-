@@ -39,7 +39,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app.auth.deps import Principal
-from app.core.config import get_settings
+from app.core.config import Settings, get_settings
 from app.core.errors import ConflictError, NotFoundError
 from app.db.session import get_sessionmaker
 from app.models import InvestigationRun
@@ -241,9 +241,13 @@ def execute(run_id: uuid.UUID) -> None:
 
 
 def _run_agent(
-    box: CaseToolbox, spec: ProviderSpec
+    box: CaseToolbox,
+    spec: ProviderSpec,
+    *,
+    request_limit: int | None = None,
+    settings: Settings | None = None,
 ) -> tuple[InvestigationFindings, dict[str, Any], list[dict[str, Any]]]:
-    settings = get_settings()
+    settings = settings or get_settings()
     model = _InputBudgetModel(
         spec.build(),
         max_input_bytes=settings.ai_max_input_bytes,
@@ -253,7 +257,7 @@ def _run_agent(
     run_usage = RunUsage()
     deps = AgentDeps(box=box)
     limits = UsageLimits(
-        request_limit=settings.ai_request_limit,
+        request_limit=request_limit if request_limit is not None else settings.ai_request_limit,
         tool_calls_limit=settings.ai_tool_calls_limit,
         total_tokens_limit=settings.ai_total_tokens_limit,
     )
