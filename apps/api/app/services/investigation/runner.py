@@ -58,6 +58,7 @@ from app.services.investigation.agent import (
     build_agent,
 )
 from app.services.investigation.deterministic import build_summary
+from app.services.investigation.diagnostics import extract_safe_diagnostics
 from app.services.investigation.provider import ProviderSpec, resolve_provider
 from app.services.investigation.schemas import InvestigationFindings
 from app.services.investigation.toolbox import CaseToolbox
@@ -266,7 +267,7 @@ def _run_agent(
                 usage=run_usage,
                 model_settings={
                     "timeout": settings.ai_timeout_seconds,
-                    "temperature": 0.0,
+                    "temperature": 1.0 if spec.provider == "google" else 0.0,
                     "max_tokens": settings.ai_max_output_tokens,
                 },
             ),
@@ -295,14 +296,17 @@ def _run_agent(
                     "The investigation exceeded its request, tool-call, token or input budget.",
                 ) from exc
             except ModelHTTPError as exc:
+                safe_diag = extract_safe_diagnostics(exc, spec.provider)
                 category = (
                     InvestigationErrorCategory.PROVIDER_UNAVAILABLE
                     if exc.status_code in (401, 403)
                     else InvestigationErrorCategory.PROVIDER_ERROR
                 )
-                raise InvestigationFailed(
+                fail = InvestigationFailed(
                     category, f"The AI provider returned HTTP {exc.status_code}."
-                ) from exc
+                )
+                fail.usage["diagnostic"] = safe_diag
+                raise fail from exc
             except ModelAPIError as exc:
                 raise InvestigationFailed(
                     InvestigationErrorCategory.PROVIDER_ERROR,

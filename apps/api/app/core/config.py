@@ -107,7 +107,9 @@ class Settings(BaseSettings):
         if value is None:
             return None
         value = value.strip()
-        if not value or any(char.isspace() for char in value):
+        if not value:
+            return None
+        if any(char.isspace() for char in value):
             raise ValueError("PayPal client ID must be nonempty without embedded whitespace")
         return value
 
@@ -117,7 +119,9 @@ class Settings(BaseSettings):
         if value is None:
             return None
         normalized = value.get_secret_value().strip()
-        if not normalized or any(char.isspace() for char in normalized):
+        if not normalized:
+            return None
+        if any(char.isspace() for char in normalized):
             raise ValueError("PayPal secret must be nonempty without embedded whitespace")
         return SecretStr(normalized)
 

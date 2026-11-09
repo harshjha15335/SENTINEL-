@@ -1,0 +1,279 @@
+{
+  "info": {
+    "_postman_id": "b3e04cfb-81f1-4db8-8311-sentinel-collection",
+    "name": "SENTINEL — PayPal Sandbox Authentication & Webhooks",
+    "description": "PayPal Sandbox verification collection for SENTINEL. Contains non-financial OAuth token generation and webhook inspection endpoints with automated assertions, safe error classification, and secret redaction.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "PayPal Sandbox — Generate Access Token",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const clientId = pm.environment.get('paypal_client_id');",
+              "const clientSecret = pm.environment.get('paypal_client_secret');",
+              "if (!clientId || clientId === 'YOUR_SANDBOX_CLIENT_ID') {",
+              "    console.warn('Warning: paypal_client_id is not configured or using default placeholder.');",
+              "}",
+              "if (!clientSecret || clientSecret === 'YOUR_SANDBOX_CLIENT_SECRET') {",
+              "    console.warn('Warning: paypal_client_secret is not configured or using default placeholder.');",
+              "}"
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const status = pm.response.code;",
+              "const debugId = pm.response.headers.get('paypal-debug-id');",
+              "",
+              "// Never leak credentials in assertion messages or logs",
+              "const secret = pm.environment.get('paypal_client_secret');",
+              "if (secret && secret !== 'YOUR_SANDBOX_CLIENT_SECRET') {",
+              "    pm.test('Response does not expose client secret', function () {",
+              "        pm.expect(pm.response.text()).to.not.include(secret);",
+              "    });",
+              "}",
+              "",
+              "if (status === 200) {",
+              "    pm.test('Status code is 200 OK', function () {",
+              "        pm.response.to.have.status(200);",
+              "    });",
+              "",
+              "    pm.test('Token response schema and attributes are valid', function () {",
+              "        const data = pm.response.json();",
+              "        pm.expect(data.access_token).to.be.a('string').and.not.empty;",
+              "        pm.expect(data.token_type).to.be.a('string').and.match(/^Bearer$/i);",
+              "        pm.expect(data.expires_in).to.be.a('number').and.be.above(0);",
+              "        ",
+              "        // Save token to environment for subsequent calls",
+              "        pm.environment.set('paypal_access_token', data.access_token);",
+              "    });",
+              "} else if (status === 401) {",
+              "    pm.test('401 Authentication Failure classified safely', function () {",
+              "        pm.response.to.have.status(401);",
+              "        const data = pm.response.json();",
+              "        pm.expect(data.error).to.eql('invalid_client');",
+              "    });",
+              "    console.error('PayPal OAuth 401 invalid_client. Debug-ID: ' + debugId + '. Check paired sandbox credentials and verify secret is not a proxy placeholder.');",
+              "} else {",
+              "    pm.test('Unexpected status code: ' + status, function () {",
+              "        pm.expect(status).to.be.oneOf([200, 401]);",
+              "    });",
+              "}"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "basic",
+          "basic": [
+            {
+              "key": "username",
+              "value": "{{paypal_client_id}}",
+              "type": "string"
+            },
+            {
+              "key": "password",
+              "value": "{{paypal_client_secret}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json",
+            "type": "text"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/x-www-form-urlencoded",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "urlencoded",
+          "urlencoded": [
+            {
+              "key": "grant_type",
+              "value": "client_credentials",
+              "type": "text"
+            }
+          ]
+        },
+        "url": {
+          "raw": "{{paypal_base_url}}/v1/oauth2/token",
+          "host": [
+            "{{paypal_base_url}}"
+          ],
+          "path": [
+            "v1",
+            "oauth2",
+            "token"
+          ]
+        },
+        "description": "Requests an OAuth 2.0 access token using client_credentials grant type and HTTP Basic Authentication. If successful, stores the access token into {{paypal_access_token}} environment variable."
+      },
+      "response": []
+    },
+    {
+      "name": "PayPal Sandbox — List Webhooks",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const token = pm.environment.get('paypal_access_token');",
+              "if (!token) {",
+              "    console.warn('Warning: paypal_access_token is missing. Execute Generate Access Token first.');",
+              "}"
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status code is 200 OK', function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test('Webhooks array is returned', function () {",
+              "    const data = pm.response.json();",
+              "    pm.expect(data).to.have.property('webhooks');",
+              "    pm.expect(data.webhooks).to.be.an('array');",
+              "    ",
+              "    // If webhook id is not set and webhooks exist, save the first one",
+              "    const currentWebhookId = pm.environment.get('paypal_webhook_id');",
+              "    if ((!currentWebhookId || currentWebhookId === 'YOUR_SANDBOX_WEBHOOK_ID') && data.webhooks.length > 0) {",
+              "        pm.environment.set('paypal_webhook_id', data.webhooks[0].id);",
+              "        console.log('Discovered webhook id: ' + data.webhooks[0].id);",
+              "    }",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{paypal_access_token}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "{{paypal_base_url}}/v1/notifications/webhooks",
+          "host": [
+            "{{paypal_base_url}}"
+          ],
+          "path": [
+            "v1",
+            "notifications",
+            "webhooks"
+          ]
+        },
+        "description": "Lists subscribed webhooks for the configured PayPal sandbox account using the Bearer token."
+      },
+      "response": []
+    },
+    {
+      "name": "PayPal Sandbox — Show Webhook Details",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const token = pm.environment.get('paypal_access_token');",
+              "const webhookId = pm.environment.get('paypal_webhook_id');",
+              "if (!token) {",
+              "    console.warn('Warning: paypal_access_token is missing. Execute Generate Access Token first.');",
+              "}",
+              "if (!webhookId || webhookId === 'YOUR_SANDBOX_WEBHOOK_ID') {",
+              "    console.warn('Warning: paypal_webhook_id is not set. Execute List Webhooks or set manually.');",
+              "}"
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status code is 200 OK', function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test('Webhook details match requested ID', function () {",
+              "    const data = pm.response.json();",
+              "    const expectedId = pm.environment.get('paypal_webhook_id');",
+              "    pm.expect(data.id).to.eql(expectedId);",
+              "    pm.expect(data).to.have.property('url');",
+              "    pm.expect(data).to.have.property('event_types');",
+              "    pm.expect(data.event_types).to.be.an('array');",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{paypal_access_token}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "{{paypal_base_url}}/v1/notifications/webhooks/{{paypal_webhook_id}}",
+          "host": [
+            "{{paypal_base_url}}"
+          ],
+          "path": [
+            "v1",
+            "notifications",
+            "webhooks",
+            "{{paypal_webhook_id}}"
+          ]
+        },
+        "description": "Retrieves configuration details and subscribed event types for a specific webhook ID."
+      },
+      "response": []
+    }
+  ]
+}
+
