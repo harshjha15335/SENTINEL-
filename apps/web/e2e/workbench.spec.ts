@@ -39,9 +39,9 @@ async function signIn(page: Page, who: { email: string; password: string }) {
   await page.getByLabel("Work email").fill(who.email);
   await page.getByLabel("Password").fill(who.password);
   await page.getByRole("button", { name: "Sign in" }).click();
-  await expect(
-    page.getByRole("heading", { name: "Command Center" }),
-  ).toBeVisible();
+  // A sign-in after expiry/logout may correctly return to the requested case.
+  await expect(page.getByRole("button", { name: "Sign out" })).toBeVisible();
+  await expect(page.locator(".workspace-account")).toContainText(who.email);
 }
 
 async function audit(page: Page, name: string) {
