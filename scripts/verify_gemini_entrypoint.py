@@ -32,15 +32,47 @@ from app.services.investigation.schemas import InvestigationFindings  # noqa: E4
 from app.services.investigation.toolbox import CaseToolbox  # noqa: E402
 
 
-def verify_configuration() -> tuple[bool, str]:
+def get_api_key_securely(prompt_if_missing: bool = False) -> str:
+    """Fetch API key from process env, Windows user registry, or hidden interactive prompt."""
+    key = os.environ.get("SENTINEL_AI_API_KEY") or os.environ.get("SENTINEL_IT_AI_API_KEY") or ""
+    key = key.strip()
+    if key:
+        return key
+
+    # Check Windows User-level environment without echoing
+    if sys.platform == "win32":
+        try:
+            import winreg
+
+            with winreg.OpenKey(winreg.HKEY_CURRENT_USER, r"Environment") as env_key:
+                val, _ = winreg.QueryValueEx(env_key, "SENTINEL_AI_API_KEY")
+                if val and str(val).strip():
+                    return str(val).strip()
+        except Exception:
+            pass
+
+    if prompt_if_missing and sys.stdin.isatty():
+        import getpass
+
+        print("\n[SECURE PROMPT] SENTINEL_AI_API_KEY not found in environment.")
+        print("Input will NOT be echoed to screen or stored in shell history.")
+        entered = getpass.getpass("Enter Google Gemini API Key: ").strip()
+        if entered:
+            # Inject into current process memory only
+            os.environ["SENTINEL_AI_API_KEY"] = entered
+            return entered
+
+    return ""
+
+
+def verify_configuration(prompt_if_missing: bool = False) -> tuple[bool, str]:
     """Verify that settings securely load SENTINEL_AI_API_KEY and provider config."""
-    # Check if key is available in environment
-    raw_key = os.environ.get("SENTINEL_AI_API_KEY") or os.environ.get("SENTINEL_IT_AI_API_KEY")
+    raw_key = get_api_key_securely(prompt_if_missing=prompt_if_missing)
     provider_name = os.environ.get("SENTINEL_AI_PROVIDER") or os.environ.get("SENTINEL_IT_AI_PROVIDER") or "google"
     model_name = os.environ.get("SENTINEL_AI_MODEL") or os.environ.get("SENTINEL_IT_AI_MODEL") or "gemini-3.1-flash-lite"
 
     if not raw_key:
-        return False, "SENTINEL_AI_API_KEY (or SENTINEL_IT_AI_API_KEY) is not set in environment."
+        return False, "SENTINEL_AI_API_KEY is not set in environment (safe: secret not required for offline dry-run)."
 
     test_settings = Settings(
         ai_provider=AIProvider(provider_name.lower()),
@@ -154,7 +186,7 @@ def main() -> int:
     print("=" * 70)
 
     # 1. Verify configuration
-    cfg_ok, cfg_msg = verify_configuration()
+    cfg_ok, cfg_msg = verify_configuration(prompt_if_missing=args.execute)
     if cfg_ok:
         print(f"[OK] Configuration: {cfg_msg}")
     else:

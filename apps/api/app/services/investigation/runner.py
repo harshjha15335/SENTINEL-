@@ -326,7 +326,9 @@ def _run_agent(
         # Preserve attempted mutation/unknown tools even when the agent fails or exhausts
         # its budget; failed runs need the same read-only audit trail as completed runs.
         exc.denied_calls = _denied_calls(box, list(messages))
-        exc.usage = _usage_snapshot(run_usage, model, complete=False)
+        snapshot = _usage_snapshot(run_usage, model, complete=False)
+        snapshot.update(exc.usage)
+        exc.usage = snapshot
         raise
     denied = _denied_calls(box, list(messages))
 

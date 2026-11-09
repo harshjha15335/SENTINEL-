@@ -207,6 +207,7 @@ const listWebhooksCode = listWebhooksItem.event.find(e => e.listen === 'test').s
 
 const mockList = createMockPm({
   status: 200,
+  initialEnv: { paypal_webhook_id: '' },
   body: {
     webhooks: [
       { id: 'WH-001', url: 'https://example.com/webhook', event_types: [{ name: 'CHECKOUT.ORDER.APPROVED' }] }
@@ -222,7 +223,7 @@ mockList.testResults.forEach(r => {
   }
 });
 if (mockList.envStore.get('paypal_webhook_id') !== 'WH-001') {
-  throw new Error('Webhook ID was not auto-discovered!');
+  throw new Error('Webhook ID was not auto-discovered when unset!');
 }
 console.log('  [PASS] Discovered webhook ID saved to environment: WH-001');
 
