@@ -18,6 +18,13 @@ def database_connect_args(settings: Settings) -> dict[str, str]:
     if not settings.hosted_deployment:
         return {}
     root = settings.database_ssl_root_cert or ssl.get_default_verify_paths().cafile
+    if root is None:
+        try:
+            import certifi
+
+            root = certifi.where()
+        except ImportError:
+            pass
     if root is None or not Path(root).is_file():
         raise RuntimeError("Hosted database requires an available trusted CA bundle")
     return {"sslmode": "verify-full", "sslrootcert": root}

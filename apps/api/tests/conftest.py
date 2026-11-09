@@ -66,6 +66,7 @@ def _clean_tables() -> Iterator[None]:
 
     _limiter.clear()
     yield
+    get_engine().dispose()
     with get_engine().begin() as conn:
         conn.execute(
             text(
@@ -82,8 +83,12 @@ def _clean_tables() -> Iterator[None]:
 
 @pytest.fixture
 def db() -> Iterator[Session]:
-    with get_sessionmaker()() as session:
+    session = get_sessionmaker()()
+    try:
         yield session
+    finally:
+        session.rollback()
+        session.close()
 
 
 @dataclass

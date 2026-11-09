@@ -12,9 +12,7 @@ Verifies:
 """
 
 import base64
-import json
 import logging
-from typing import Any
 
 import httpx
 import pytest
@@ -124,9 +122,8 @@ def test_6_and_7_401_error_classification_and_secret_redaction(caplog):
         "client_id", secret, transport=httpx.MockTransport(fail_401)
     )
 
-    with caplog.at_level(logging.DEBUG):
-        with pytest.raises(PayPalError) as exc_info:
-            gw.check_credentials()
+    with caplog.at_level(logging.DEBUG), pytest.raises(PayPalError) as exc_info:
+        gw.check_credentials()
 
     err = exc_info.value
     # 6. Error classification
