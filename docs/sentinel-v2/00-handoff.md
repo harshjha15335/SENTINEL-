@@ -1,6 +1,6 @@
 # Current direction — Follow the Money
 
-The user rejected the reel and graphite/lime identity. Read [09-money-trail-reset.md](09-money-trail-reset.md) for the replacement wallet narrative, ivory/purple identity, horizontal navigation, casefile layout and explicit prototype scope. Earlier descriptions below are historical and superseded for visual direction.
+The user rejected the reel and graphite/lime identity. Read [09-money-trail-reset.md](09-money-trail-reset.md) and [10-money-trail-qa.md](10-money-trail-qa.md) for the executed verification and review limits. Document 09 covers the replacement wallet narrative, ivory/purple identity, horizontal navigation, casefile layout and explicit prototype scope. Earlier descriptions below are historical and superseded for visual direction.
 
 DESIGN APPROVAL: PENDING
 

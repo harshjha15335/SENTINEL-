@@ -151,9 +151,14 @@ function DesktopStory() {
           copy.inert = p > 0.82;
         }
         stages.forEach((n, i) => {
+          // Fade out before the boundary, then fade in the next chapter: never stack headlines.
           const next = chapters[s.stage + 1],
-            blend = next === undefined ? 0 : ease(phase(p, next - 0.025, next));
-          const a = i === s.stage ? 1 - blend : i === s.stage + 1 ? blend : 0;
+            start = chapters[s.stage] ?? 0;
+          const out =
+            next === undefined ? 1 : 1 - ease(phase(p, next - 0.02, next));
+          const incoming =
+            s.stage === 0 ? 1 : ease(phase(p, start, start + 0.015));
+          const a = i === s.stage ? out * incoming : 0;
           n.style.opacity = String(a);
           n.style.visibility = a > 0 ? "visible" : "hidden";
           n.inert = i !== s.stage;
@@ -224,7 +229,7 @@ function DesktopStory() {
       scrollTo({
         top:
           t.start +
-          (t.end - t.start) * (i === 6 ? 0.999 : (chapters[i] ?? 0) + 0.003),
+          (t.end - t.start) * (i === 6 ? 0.999 : (chapters[i] ?? 0) + 0.02),
         behavior: "instant",
       });
   };

@@ -102,6 +102,10 @@ test("wallet, main payment and field advance continuously and reverse exactly", 
   await expect(
     page.locator("[data-secondary-receipt] [data-receipt-accent]"),
   ).toHaveAttribute("fill", "#7547EB");
+  await sample(0.565);
+  await expect(
+    page.locator(".v2-scene-copy [data-story-stage]:visible"),
+  ).toHaveCount(1);
   const mid = await sample(0.65);
   expect(mid.field).toContain("opacity: 1");
   await sample(0.99);
