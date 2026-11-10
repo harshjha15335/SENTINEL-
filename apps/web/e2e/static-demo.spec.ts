@@ -47,6 +47,12 @@ test("opens read-only without signing in, with the static demo banner", async ({
     page.getByRole("heading", { name: "Command Center" }),
   ).toBeVisible();
   await expectBanner(page);
+  await page.getByRole("link", { name: "Skip to content" }).focus();
+  await page.keyboard.press("Enter");
+  await expect(page.getByRole("main")).toBeFocused();
+  await expect(
+    page.getByRole("heading", { name: "Command Center" }),
+  ).toBeVisible();
   await expect(page.getByRole("button", { name: "Sign out" })).toHaveCount(0);
   await audit(page, "command center");
   await noHorizontalOverflow(page);

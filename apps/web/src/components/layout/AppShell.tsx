@@ -82,7 +82,16 @@ export function AppShell() {
   return (
     <div className="sentinel-workspace">
       <AppNavigation />
-      <a className="workspace-skip" href="#main">
+      <a
+        className="workspace-skip"
+        href="#main"
+        onClick={(event) => {
+          event.preventDefault();
+          const main = document.getElementById("main");
+          main?.focus({ preventScroll: true });
+          main?.scrollIntoView({ block: "start" });
+        }}
+      >
         Skip to content
       </a>
       <header className="workspace-global-header">
@@ -115,6 +124,7 @@ export function AppShell() {
       />
       <main
         id="main"
+        tabIndex={-1}
         className="workspace-main"
         data-workspace-route={location.pathname}
       >
