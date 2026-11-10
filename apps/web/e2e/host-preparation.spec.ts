@@ -42,6 +42,7 @@ test("enforced CSP supports real wallet scrolling, rewind, reduced motion and ke
       )
       .toBeGreaterThan(0);
     const mid = await sample(0.35);
+    await page.screenshot({ path: info.outputPath("wallet-under-csp.png") });
     expect(mid).not.toBe(initial);
     for (const p of [0.5, 0.65, 0.75, 0.999]) await sample(p);
     await expect(page.locator("[data-dossier-frame]")).toBeVisible();
@@ -57,6 +58,9 @@ test("enforced CSP supports real wallet scrolling, rewind, reduced motion and ke
         .getByRole("link", { name: "Explore simulated demo" }),
     ).toBeInViewport();
     await expect(page.locator(".pin-spacer")).toHaveCount(0);
+    await page.screenshot({
+      path: info.outputPath("mobile-wallet-under-csp.png"),
+    });
     const initial = await page
       .locator("[data-wallet-fold]")
       .getAttribute("style");
@@ -111,13 +115,31 @@ test("supported views render without CSP violations or external/API/write reques
   for (const [route, selector] of [
     ["/demo-payment", ".v2-dossier"],
     ["/app/transactions", ".ag-row"],
-    ["/app/transactions/1e054580-49f1-48be-a7a4-a4d4cf23647d", ".risk-record"],
+    [
+      "/app/transactions/1e054580-49f1-48be-a7a4-a4d4cf23647d",
+      ".risk-assessment-layout",
+    ],
     ["/app/cases/73823607-ce2b-4090-9fd4-d1e3119f28d6", "[role=tabpanel]"],
     ["/app/model", "main"],
     ["/app/policy", "main"],
   ]) {
     await page.goto(`/#${route}`);
     await expect(page.locator(selector).first()).toBeVisible();
+    if (route === "/app/transactions") {
+      await page
+        .getByLabel("Search by PayPal order or capture ID")
+        .fill("SIM-ORDER-1D6383BB55B0BF");
+      await page.getByRole("button", { name: "Search", exact: true }).click();
+      await expect(page.locator(".ag-row")).toHaveCount(1);
+    }
+    if (route.startsWith("/app/cases/"))
+      await expect(
+        page.getByRole("list", { name: "Main factors behind this score" }),
+      ).toBeVisible();
+    if (route === "/app/model")
+      await expect(
+        page.getByText("Trained and tested on synthetic data only."),
+      ).toBeVisible();
     if (route !== "/demo-payment")
       await expect(
         page.getByRole("note", { name: "Static demo" }),
