@@ -2,6 +2,7 @@ import { ArrowLeft } from "lucide-react";
 import { useState } from "react";
 import { Link, useParams, useSearchParams } from "react-router-dom";
 
+import { CapabilityBoundary } from "@/components/layout/CapabilityBoundary";
 import { WorkspaceTabs } from "@/components/layout/WorkspaceTabs";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { Badge } from "@/components/ui/Badge";
@@ -175,7 +176,9 @@ function Detail({ c }: { c: CaseDetail }) {
           </dl>
         </Panel>
         <RiskPanel transactionId={t.id} scorable={t.occurred_at != null} />
-        <InvestigationPanel caseId={c.id} canRun={operator} />
+        <CapabilityBoundary capability="investigation">
+          <InvestigationPanel caseId={c.id} canRun={operator} />
+        </CapabilityBoundary>
       </section>
       <section
         role="tabpanel"
@@ -183,13 +186,15 @@ function Detail({ c }: { c: CaseDetail }) {
         aria-labelledby="workspace-tab-evidence"
         hidden={active !== "evidence"}
       >
-        <div className="workspace-evidence-board">
-          <EvidencePanel caseId={c.id} canUpload={operator} />
-          <div>
-            <PacketPanel caseId={c.id} canGenerate={operator} />
-            <ChecklistPanel caseId={c.id} />
+        <CapabilityBoundary capability="evidence">
+          <div className="workspace-evidence-board">
+            <EvidencePanel caseId={c.id} canUpload={operator} />
+            <div>
+              <PacketPanel caseId={c.id} canGenerate={operator} />
+              <ChecklistPanel caseId={c.id} />
+            </div>
           </div>
-        </div>
+        </CapabilityBoundary>
       </section>
       <section
         role="tabpanel"
@@ -197,31 +202,39 @@ function Detail({ c }: { c: CaseDetail }) {
         aria-labelledby="workspace-tab-decision"
         hidden={active !== "decision"}
       >
-        <div className="workspace-decision-board">
-          <Actions c={c} />
-          <div>
-            <ApprovalsPanel
-              caseId={c.id}
-              me={me.data}
-              canRequest={operator}
-              resolved={c.status === "RESOLVED"}
-            />
-            <Panel title="Refund and dispute workflows">
-              <p className="mb-4 text-sm text-fg-muted">
-                Requests require independent approval. Sandbox execution is
-                disabled by default; dispute submission is disabled.
-              </p>
-              <div className="flex flex-wrap gap-5 text-sm">
-                <Link to={`/app/refunds?case=${c.id}`} className="text-accent">
-                  Refund history and requests
-                </Link>
-                <Link to={`/app/disputes?case=${c.id}`} className="text-accent">
-                  Dispute preparation
-                </Link>
-              </div>
-            </Panel>
+        <CapabilityBoundary capability="decision">
+          <div className="workspace-decision-board">
+            <Actions c={c} />
+            <div>
+              <ApprovalsPanel
+                caseId={c.id}
+                me={me.data}
+                canRequest={operator}
+                resolved={c.status === "RESOLVED"}
+              />
+              <Panel title="Refund and dispute workflows">
+                <p className="mb-4 text-sm text-fg-muted">
+                  Requests require independent approval. Sandbox execution is
+                  disabled by default; dispute submission is disabled.
+                </p>
+                <div className="flex flex-wrap gap-5 text-sm">
+                  <Link
+                    to={`/app/refunds?case=${c.id}`}
+                    className="text-accent"
+                  >
+                    Refund history and requests
+                  </Link>
+                  <Link
+                    to={`/app/disputes?case=${c.id}`}
+                    className="text-accent"
+                  >
+                    Dispute preparation
+                  </Link>
+                </div>
+              </Panel>
+            </div>
           </div>
-        </div>
+        </CapabilityBoundary>
       </section>
       <section
         role="tabpanel"

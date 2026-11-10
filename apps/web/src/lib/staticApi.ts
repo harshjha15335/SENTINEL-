@@ -1,3 +1,4 @@
+import { FULL_APPLICATION_REQUIRED } from "./capabilities";
 import { ApiError } from "./api";
 import { STATIC_DEMO_REFUSAL } from "./staticDemo";
 
@@ -112,7 +113,7 @@ export async function staticApi<T>(path: string, method: string): Promise<T> {
     if (kind === "transactions" && sub === "risk") return pick<T>("risk", id, "Risk assessment");
     if (kind === "cases" && sub === undefined) return pick<T>("case-details", id, "Case");
   }
-  throw notFound("Resource");
+  throw new ApiError(501, "static_unavailable", FULL_APPLICATION_REQUIRED, {}, null);
 }
 
 export type Snapshot = {

@@ -15,6 +15,7 @@ import {
   useLocation,
 } from "react-router-dom";
 
+import { CapabilityBoundary } from "@/components/layout/CapabilityBoundary";
 import { AppShell } from "@/components/layout/AppShell";
 import { Skeleton } from "@/components/ui/States";
 import { ToastProvider } from "@/components/ui/Toast";
@@ -223,7 +224,9 @@ export function AppRoutes() {
           path="checkout"
           element={
             <Suspense fallback={fallback}>
-              <CheckoutPage />
+              <CapabilityBoundary capability="checkout">
+                <CheckoutPage />
+              </CapabilityBoundary>
             </Suspense>
           }
         />
@@ -231,7 +234,9 @@ export function AppRoutes() {
           path="demo"
           element={
             <Suspense fallback={fallback}>
-              <DemoGuidePage />
+              <CapabilityBoundary capability="demo">
+                <DemoGuidePage />
+              </CapabilityBoundary>
             </Suspense>
           }
         />
@@ -239,7 +244,9 @@ export function AppRoutes() {
           path="operations"
           element={
             <Suspense fallback={fallback}>
-              <OperationsPage />
+              <CapabilityBoundary capability="operations">
+                <OperationsPage />
+              </CapabilityBoundary>
             </Suspense>
           }
         />
@@ -247,7 +254,9 @@ export function AppRoutes() {
           path="refunds"
           element={
             <Suspense fallback={fallback}>
-              <RefundsPage />
+              <CapabilityBoundary capability="refunds">
+                <RefundsPage />
+              </CapabilityBoundary>
             </Suspense>
           }
         />
@@ -255,7 +264,9 @@ export function AppRoutes() {
           path="disputes"
           element={
             <Suspense fallback={fallback}>
-              <DisputesPage />
+              <CapabilityBoundary capability="disputes">
+                <DisputesPage />
+              </CapabilityBoundary>
             </Suspense>
           }
         />
@@ -263,7 +274,9 @@ export function AppRoutes() {
           path="policy"
           element={
             <Suspense fallback={fallback}>
-              <PolicyLabPage />
+              <CapabilityBoundary capability="policy">
+                <PolicyLabPage />
+              </CapabilityBoundary>
             </Suspense>
           }
         />
@@ -271,7 +284,9 @@ export function AppRoutes() {
           path="monitoring"
           element={
             <Suspense fallback={fallback}>
-              <MonitoringPage />
+              <CapabilityBoundary capability="monitoring">
+                <MonitoringPage />
+              </CapabilityBoundary>
             </Suspense>
           }
         />
@@ -279,11 +294,20 @@ export function AppRoutes() {
           path="network"
           element={
             <Suspense fallback={fallback}>
-              <NetworkPage />
+              <CapabilityBoundary capability="network">
+                <NetworkPage />
+              </CapabilityBoundary>
             </Suspense>
           }
         />
-        <Route path="settings" element={<SettingsPage />} />
+        <Route
+          path="settings"
+          element={
+            <CapabilityBoundary capability="settings">
+              <SettingsPage />
+            </CapabilityBoundary>
+          }
+        />
         <Route path="*" element={<NotFoundPage />} />
       </Route>
       {[

@@ -100,3 +100,112 @@ test("deep links load through the Pages 404 fallback", async ({ page }) => {
   await page.goto(staticRoute("/cases/00000000-0000-0000-0000-000000000000"));
   await expect(page.getByText(/not found/i).first()).toBeVisible();
 });
+
+const SERVICE_ROUTES = [
+  "policy",
+  "monitoring",
+  "disputes",
+  "refunds",
+  "network",
+  "checkout",
+  "settings",
+  "demo",
+  "operations",
+];
+
+test("service-only deep links explain availability without API calls or writes", async ({
+  page,
+}) => {
+  const requests: string[] = [];
+  page.on("request", (request) => {
+    if (request.url().includes("/api/") || request.method() !== "GET")
+      requests.push(`${request.method()} ${request.url()}`);
+  });
+  for (const route of SERVICE_ROUTES) {
+    await page.goto(staticRoute(`/${route}?case=demo&review=1`));
+    await expect(page.getByText(/Requires the full application/)).toBeVisible();
+    await expect(
+      page.getByText("Resource not found", { exact: true }),
+    ).toHaveCount(0);
+    expect(page.url()).toContain("case=demo&review=1");
+    await expect(
+      page.getByRole("link", { name: "Return to Command Center" }),
+    ).toBeVisible();
+    await noHorizontalOverflow(page);
+  }
+  await audit(page, "unavailable service");
+  await page.getByRole("link", { name: "Return to Command Center" }).click();
+  await expect(
+    page.getByRole("heading", { name: "Command Center" }),
+  ).toBeVisible();
+  await page.goBack();
+  await expect(page.getByText(/Requires the full application/)).toBeVisible();
+  await page.goForward();
+  await expect(
+    page.getByRole("heading", { name: "Command Center" }),
+  ).toBeVisible();
+  expect(requests).toEqual([]);
+});
+
+test("original missing-reference case opens its payment and safe case tabs", async ({
+  page,
+}) => {
+  const requests: string[] = [];
+  page.on("request", (r) => {
+    if (r.url().includes("/api/") || r.method() !== "GET")
+      requests.push(r.url());
+  });
+  await page.goto(
+    staticRoute("/app/cases/73823607-ce2b-4090-9fd4-d1e3119f28d6?tab=evidence"),
+  );
+  await expect(
+    page.getByText(/Requires the full application/).filter({ visible: true }),
+  ).toBeVisible();
+  await page.getByRole("tab", { name: "Decision & approvals" }).click();
+  await expect(
+    page.getByText(/Requires the full application/).filter({ visible: true }),
+  ).toBeVisible();
+  await page.getByRole("tab", { name: "Notes & activity" }).click();
+  await expect(
+    page.getByRole("heading", { name: "Activity", exact: true }),
+  ).toBeVisible();
+  await page.getByRole("tab", { name: "Investigation", exact: true }).click();
+  await page.getByRole("link", { name: "Open payment", exact: true }).click();
+  await expect(
+    page.getByRole("heading", { name: "Payment dossier." }),
+  ).toBeVisible();
+  await expect(
+    page.getByText("SIM-ORDER-1D6383BB55B0BF", { exact: true }),
+  ).toBeVisible();
+  await page.reload();
+  await expect(
+    page.getByRole("heading", { name: "Payment dossier." }),
+  ).toBeVisible();
+  await noHorizontalOverflow(page);
+  expect(requests).toEqual([]);
+});
+
+test("public homepage and demo never load merchant data; unknown routes offer recovery", async ({
+  page,
+}) => {
+  const merchantRequests: string[] = [];
+  page.on("request", (r) => {
+    if (/\/api\/|\/demo-data\//.test(r.url())) merchantRequests.push(r.url());
+  });
+  await page.goto(staticRoute("/"));
+  await expect(
+    page.getByRole("heading", { name: /Every payment/ }),
+  ).toBeVisible();
+  await page.goto(staticRoute("/demo-payment"));
+  await expect(
+    page.getByRole("heading", { name: "Payment dossier." }),
+  ).toBeVisible();
+  expect(merchantRequests).toEqual([]);
+  await page.goto(staticRoute("/app/unknown-workspace"));
+  await expect(
+    page.getByText("The address does not match a SENTINEL workspace."),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("link", { name: "Back to Command Center" }),
+  ).toBeVisible();
+});

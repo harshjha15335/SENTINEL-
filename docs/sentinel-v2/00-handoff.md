@@ -1,3 +1,7 @@
+# Current Gate 2A static corrections
+
+See [15-gate2a-static-remediation.md](15-gate2a-static-remediation.md) for snapshot consistency, build gates and static capability boundaries. Design remains APPROVED; deployment remains PENDING. The private review Site is unchanged.
+
 # Current private preview correction
 
 See [14-private-preview-overlap.md](14-private-preview-overlap.md). The owner-private read-only Site is authorized for review; operational deployment remains PENDING. The dossier-entry overlap correction moves its CTA below the pinned reveal. Historical publication restrictions below refer to the earlier delivery and the operational app.

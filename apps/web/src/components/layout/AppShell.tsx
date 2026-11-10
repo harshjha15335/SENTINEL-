@@ -7,28 +7,29 @@ import { ErrorState } from "@/components/ui/States";
 import { Skeleton } from "@/components/ui/States";
 import { useLogout, useMe } from "@/features/auth/session";
 import { usePayPalStatus } from "@/features/settings/usePayPalStatus";
+import { supports, type Capability } from "@/lib/capabilities";
 import { STATIC_DEMO } from "@/lib/staticDemo";
 const StaticDemoBanner = lazy(() =>
   import("@/features/demo/StaticDemoBanner").then((m) => ({
     default: m.StaticDemoBanner,
   })),
 );
-const PRIMARY = [
-  ["/app", "Command Center"],
-  ["/app/transactions", "Transactions"],
-  ["/app/cases", "Investigations"],
-  ["/app/model", "Risk Intelligence"],
-  ["/app/policy", "Policy Lab"],
-  ["/app/monitoring", "Monitoring"],
+const PRIMARY: [string, string, Capability][] = [
+  ["/app", "Command Center", "dashboard"],
+  ["/app/transactions", "Transactions", "transactions"],
+  ["/app/cases", "Investigations", "cases"],
+  ["/app/model", "Risk Intelligence", "model"],
+  ["/app/policy", "Policy Lab", "policy"],
+  ["/app/monitoring", "Monitoring", "monitoring"],
 ];
-const MORE = [
-  ["/app/network", "Relationship explorer"],
-  ["/app/refunds", "Refund review"],
-  ["/app/disputes", "Dispute preparation"],
-  ["/app/checkout", "Sandbox checkout"],
-  ["/app/settings", "Integration & account"],
-  ["/app/demo", "Demo guide"],
-  ["/app/operations", "Operations"],
+const MORE: [string, string, Capability][] = [
+  ["/app/network", "Relationship explorer", "network"],
+  ["/app/refunds", "Refund review", "refunds"],
+  ["/app/disputes", "Dispute preparation", "disputes"],
+  ["/app/checkout", "Sandbox checkout", "checkout"],
+  ["/app/settings", "Integration & account", "settings"],
+  ["/app/demo", "Demo guide", "demo"],
+  ["/app/operations", "Operations", "operations"],
 ];
 export function AppShell() {
   const me = useMe(),
@@ -60,22 +61,24 @@ export function AppShell() {
       (to != "/app/operations" || me.data?.role === "ADMIN") &&
       (to != "/app/demo" || me.data?.merchant.environment === "DEMO"),
   );
-  const nav = (items: string[][]) =>
-    items.map(([to, label]) => (
-      <NavLink
-        key={to}
-        to={to ?? "/app"}
-        end={to === "/app"}
-        onClick={() => {
-          if (menu.current) menu.current.open = false;
-        }}
-        className={({ isActive }) =>
-          clsx("workspace-nav-link", isActive && "is-active")
-        }
-      >
-        {label}
-      </NavLink>
-    ));
+  const nav = (items: [string, string, Capability][]) =>
+    items
+      .filter(([, , capability]) => supports(capability))
+      .map(([to, label]) => (
+        <NavLink
+          key={to}
+          to={to ?? "/app"}
+          end={to === "/app"}
+          onClick={() => {
+            if (menu.current) menu.current.open = false;
+          }}
+          className={({ isActive }) =>
+            clsx("workspace-nav-link", isActive && "is-active")
+          }
+        >
+          {label}
+        </NavLink>
+      ));
   return (
     <div className="sentinel-workspace">
       <AppNavigation />
