@@ -85,3 +85,4 @@ Query Transaction WHERE paypal_capture_id = capture_id OR paypal_order_id = orde
    If `resource.amount` does not match `txn.amount_minor` and `txn.currency`, the transition is aborted with a `ValueError`.
 3. **Audit Trail Preservation:**
    Every status transition records an immutable `AuditEvent` with actor type `PAYPAL_WEBHOOK`, containing the previous status, new status, and PayPal event ID.
+

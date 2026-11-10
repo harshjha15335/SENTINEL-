@@ -62,3 +62,4 @@ To establish with certainty whether any genuine PayPal Sandbox events exist, Ant
 There are no existing genuine PayPal Sandbox events available to trace.  
 No genuine event has been delivered to Supabase or forwarded to SENTINEL.  
 To verify the complete pipeline, a single controlled Sandbox payment capture must be generated.
+

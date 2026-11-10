@@ -69,3 +69,4 @@
 | **11. Risk Assessment** | Assessment stored in DB | Tested across full lifecycle | **READY** |
 | **12. High-Risk Case Creation** | Conditional case opened | Opens case if threshold met, audited in DB | **READY** |
 | **13. AI Investigation** | Gemini multi-turn run | Successfully verified live on synthetic demo case | **HISTORICALLY VERIFIED** |
+

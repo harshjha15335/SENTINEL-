@@ -78,3 +78,4 @@ The bridge worker polls Supabase and forwards receipts to FastAPI:
 The entire lifecycle (claiming, lease renewal, raw forwarding, acknowledgment, lease expiry, and retry backoff) is covered by 28 passing integration tests in:
 - `apps/api/tests/test_supabase_inbox.py`
 - `apps/api/tests/test_webhooks.py`
+

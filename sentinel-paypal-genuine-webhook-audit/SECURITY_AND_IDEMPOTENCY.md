@@ -62,3 +62,4 @@ Webhooks are untrusted, inherently at-least-once networks where duplicate delive
 | **Transaction Status** | Monotonic Status Precedence (`_RANK`) | Out-of-order events cannot regress a `CAPTURED` transaction back to `PENDING`. |
 
 All idempotency and deduplication mechanisms passed testing in `apps/api/tests/test_webhooks.py` and `apps/api/tests/test_supabase_inbox.py`.
+

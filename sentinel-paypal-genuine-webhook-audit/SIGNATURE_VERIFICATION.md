@@ -79,3 +79,4 @@ The verification logic was executed against the following test cases in `apps/ap
 | `test_simulator_rejected_when_disabled` | Simulator payload when `accept_simulator=False` | `WebhookVerificationError` (400) | **PASS** |
 | `test_non_paypal_cert_host_rejected` | Malicious host `https://evil.example/cert.pem` | `WebhookVerificationError` (400) | **PASS** |
 | `test_duplicate_delivery_is_idempotent` | Re-delivery of identical transmission | Returns existing event, 0 duplicates | **PASS** |
+

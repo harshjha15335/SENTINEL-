@@ -81,3 +81,4 @@ The Supabase Edge Function receiver represents an exemplary defensive design:
 2. It verifies cryptographic signatures via PayPal Sandbox API.
 3. It preserves raw bytes and signature headers for downstream re-verification in FastAPI.
 4. It ensures at-least-once durable ingestion into PostgreSQL before acknowledging the webhook.
+

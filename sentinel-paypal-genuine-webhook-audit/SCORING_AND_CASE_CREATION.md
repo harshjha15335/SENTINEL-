@@ -87,3 +87,4 @@ if open_case_on_high and assessment.risk_band is RiskBand.HIGH:
 ## 5. Verification Status
 
 All 14 unit and integration tests in `apps/api/tests/test_risk_cases.py` and `apps/api/tests/test_scoring_jobs.py` passed with 100% success.
+

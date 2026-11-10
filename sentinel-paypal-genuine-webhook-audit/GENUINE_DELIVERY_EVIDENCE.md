@@ -56,3 +56,4 @@ SENTINEL's code, schema, cryptography, bridge, and ML pipeline are release-ready
 However, **no genuine PayPal Sandbox event has been delivered yet**, because no transaction has ever been executed in the Sandbox environment.
 
 Claiming that genuine webhook delivery has passed based on successful OAuth, webhook registration, or offline mocks would be false. The final validation requires creating one genuine Sandbox transaction under controlled conditions.
+
