@@ -31,7 +31,17 @@ def test_export_closure_and_original_regression(snapshot):
 
 @pytest.mark.parametrize(
     "corruption",
-    ["orphan", "risk", "details", "extras", "dashboard", "counts", "origin", "sensitive"],
+    [
+        "orphan",
+        "risk",
+        "details",
+        "extras",
+        "dashboard",
+        "counts",
+        "origin",
+        "sensitive",
+        "assessment_identity",
+    ],
 )
 def test_reject_corrupt_export(snapshot, corruption):
     data = copy.deepcopy(snapshot)
@@ -46,6 +56,13 @@ def test_reject_corrupt_export(snapshot, corruption):
         data["transaction-extras"][tid]["id"] = tid
     elif corruption == "dashboard":
         data["dashboard"]["recent"][0]["id"] = "bad"
+    elif corruption == "assessment_identity":
+        case = data["cases"][0]
+        detail = data["case-details"][case["id"]]
+        foreign = next(r for r in data["risk"].values() if r["transaction_id"] != tid)
+        case["risk_assessment_id"] = foreign["id"]
+        detail["risk_assessment_id"] = foreign["id"]
+        detail["assessment"]["id"] = foreign["id"]
     elif corruption == "counts":
         data["snapshot"]["counts"]["transactions"] += 1
     elif corruption == "origin":

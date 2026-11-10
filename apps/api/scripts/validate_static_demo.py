@@ -52,6 +52,7 @@ def validate(data):
         for field in ("risk_band", "risk_score", "data_origin"):
             require(assessment[field] == row[field], f"Assessment {field} mismatch")
     require(len({r["id"] for r in risk.values()}) == len(risk), "Duplicate assessment identifiers")
+    assessments_by_id = {r["id"]: r for r in risk.values()}
     for identifier, extra in extras.items():
         require(not (set(extra) & set(tx[identifier])), "Extras override transaction fields")
         for event in extra.get("events", []):
@@ -87,6 +88,9 @@ def validate(data):
             )
         else:
             require(assessment is None, "Unexpected case assessment")
+        if assessment is not None:
+            previous = assessments_by_id.setdefault(assessment["id"], assessment)
+            require(previous == assessment, "Recorded assessment identity/content mismatch")
         for note in detail.get("notes", []):
             if "case_id" in note:
                 require(note["case_id"] == identifier, "Case note reference mismatch")
