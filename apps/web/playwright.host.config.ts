@@ -7,7 +7,11 @@ if (!["127.0.0.1", "localhost"].includes(new URL(baseURL).hostname)) {
 }
 export default defineConfig({
   testDir: "./e2e",
-  testMatch: ["static-demo.spec.ts", "host-preparation.spec.ts"],
+  testMatch: [
+    "static-demo.spec.ts",
+    "host-preparation.spec.ts",
+    "loading-stability.spec.ts",
+  ],
   timeout: 90000,
   workers: 1,
   reporter: [["list"]],

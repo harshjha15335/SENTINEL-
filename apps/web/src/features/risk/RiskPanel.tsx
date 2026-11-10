@@ -75,31 +75,33 @@ export function RiskPanel({
         ) : undefined
       }
     >
-      {q.isPending && <Skeleton className="h-40" />}
-      {q.isError && (
-        <ErrorState error={q.error} onRetry={() => void q.refetch()} />
-      )}
-      {q.data === null && (
-        <div>
-          <Badge>Not scored</Badge>
-          <p className="mt-3 text-sm text-fg-muted">
-            {scorable
-              ? "No assessment has been recorded for this payment yet."
-              : "Only payments with a capture attempt can be scored. SENTINEL shows no score rather than a placeholder number."}
-          </p>
-          {canScore && (
-            <Button
-              className="mt-3"
-              variant="secondary"
-              busy={rescore.isPending}
-              onClick={run}
-            >
-              Score this payment
-            </Button>
-          )}
-        </div>
-      )}
-      {q.data && <Assessment a={q.data} />}
+      <div className={q.isPending || q.data ? "risk-content" : undefined}>
+        {q.isPending && <Skeleton className="h-40" />}
+        {q.isError && (
+          <ErrorState error={q.error} onRetry={() => void q.refetch()} />
+        )}
+        {q.data === null && (
+          <div>
+            <Badge>Not scored</Badge>
+            <p className="mt-3 text-sm text-fg-muted">
+              {scorable
+                ? "No assessment has been recorded for this payment yet."
+                : "Only payments with a capture attempt can be scored. SENTINEL shows no score rather than a placeholder number."}
+            </p>
+            {canScore && (
+              <Button
+                className="mt-3"
+                variant="secondary"
+                busy={rescore.isPending}
+                onClick={run}
+              >
+                Score this payment
+              </Button>
+            )}
+          </div>
+        )}
+        {q.data && <Assessment a={q.data} />}
+      </div>
       {caseSlot}
     </Panel>
   );

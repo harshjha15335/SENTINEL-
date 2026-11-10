@@ -14,7 +14,11 @@ test("enforced CSP supports real wallet scrolling, rewind, reduced motion and ke
   const unexpected: string[] = [];
   page.on("request", (r) => {
     if (
-      !r.url().startsWith("https://127.0.0.1:9448/") ||
+      !r
+        .url()
+        .startsWith(
+          `${new URL(process.env.SENTINEL_WEB_URL ?? "https://127.0.0.1:9448/").origin}/`,
+        ) ||
       r.method() !== "GET" ||
       r.url().includes("/api/") ||
       r.url().includes("/demo-data/")
@@ -106,7 +110,11 @@ test("supported views render without CSP violations or external/API/write reques
   page.on("pageerror", (e) => errors.push(e.message));
   page.on("request", (r) => {
     if (
-      !r.url().startsWith("https://127.0.0.1:9448/") ||
+      !r
+        .url()
+        .startsWith(
+          `${new URL(process.env.SENTINEL_WEB_URL ?? "https://127.0.0.1:9448/").origin}/`,
+        ) ||
       r.method() !== "GET" ||
       r.url().includes("/api/")
     )

@@ -1,3 +1,7 @@
+# Current Gate 2C loading stability
+
+See [17-gate2c-loading-stability.md](17-gate2c-loading-stability.md). Targeted frontend loading geometry and font timing only; design remains APPROVED and deployment remains PENDING. No host publication is authorized.
+
 # Current Gate 2B host preparation
 
 See [16-gate2b-host-preparation.md](16-gate2b-host-preparation.md). Cloudflare Pages configuration is isolated from the approved portable application. Preparation and local validation only; deployment remains PENDING.

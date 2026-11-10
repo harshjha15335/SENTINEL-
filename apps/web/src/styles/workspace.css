@@ -1008,3 +1008,45 @@ button {
   padding: 0 13px;
   font-size: 12px;
 }
+
+/* Stable loading geometry: these frames match the visible record/grid workspaces. */
+.workspace-record-loading {
+  min-block-size: 760px;
+}
+.static-snapshot-time {
+  display: inline-block;
+  inline-size: 16ch;
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 11px;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+.transaction-grid {
+  block-size: clamp(460px, 65vh, 720px);
+}
+.workspace-section-title {
+  line-height: 1.4;
+}
+.risk-content {
+  min-block-size: 465px;
+}
+@media (max-width: 650px) {
+  .risk-content {
+    min-block-size: 780px;
+  }
+}
+
+.payment-amount-placeholder {
+  block-size: calc(clamp(38px, 4.5vw, 66px) * 1.12);
+}
+.casefile-timeline .workspace-section-body {
+  min-block-size: 122px;
+}
+@media (max-width: 650px) {
+  .payment-amount-placeholder {
+    block-size: calc(43px * 1.12);
+  }
+  .casefile-timeline .workspace-section-body {
+    min-block-size: 142px;
+  }
+}

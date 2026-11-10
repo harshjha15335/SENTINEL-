@@ -5,8 +5,14 @@ import { request as httpRequest } from "node:http";
 import { readFileSync, writeFileSync } from "node:fs";
 import { createHash } from "node:crypto";
 import { brotliDecompressSync, gunzipSync } from "node:zlib";
-const [release, output = "/tmp/sentinel-host-headers.json"] =
-  process.argv.slice(2);
+const [
+  release,
+  output = "/tmp/sentinel-host-headers.json",
+  origin = "https://127.0.0.1:9448",
+] = process.argv.slice(2);
+const address = new URL(origin);
+if (address.hostname !== "127.0.0.1")
+  throw Error("Local certificate exception is loopback only");
 const manifest = JSON.parse(
   readFileSync(`${release}/HOST-MANIFEST.json`, "utf8"),
 );
@@ -15,7 +21,7 @@ const request = (path, headers = {}, plain = false) =>
     const req = (plain ? httpRequest : httpsRequest)(
       {
         hostname: "127.0.0.1",
-        port: plain ? 9447 : 9448,
+        port: plain ? Number(address.port) - 1 : Number(address.port),
         path,
         headers,
         rejectUnauthorized: false,
@@ -38,7 +44,7 @@ const request = (path, headers = {}, plain = false) =>
 const results = [];
 const redirect = await request("/", {}, true);
 assert.equal(redirect.status, 308);
-assert.equal(redirect.headers.location, "https://127.0.0.1:9448/");
+assert.equal(redirect.headers.location, `${address.origin}/`);
 for (const [name, file] of Object.entries(manifest.files)) {
   if (name === "_headers") continue;
   const path = name === "index.html" ? "/" : `/${name}`;

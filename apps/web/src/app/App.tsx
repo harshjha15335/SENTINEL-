@@ -16,6 +16,7 @@ import {
 } from "react-router-dom";
 
 import { CapabilityBoundary } from "@/components/layout/CapabilityBoundary";
+import { RecordLoading } from "@/components/layout/RecordLoading";
 import { AppShell } from "@/components/layout/AppShell";
 import { Skeleton } from "@/components/ui/States";
 import { ToastProvider } from "@/components/ui/Toast";
@@ -183,7 +184,7 @@ export function AppRoutes() {
         <Route
           path="transactions"
           element={
-            <Suspense fallback={fallback}>
+            <Suspense fallback={<RecordLoading />}>
               <TransactionsPage />
             </Suspense>
           }
@@ -191,7 +192,7 @@ export function AppRoutes() {
         <Route
           path="transactions/:id"
           element={
-            <Suspense fallback={fallback}>
+            <Suspense fallback={<RecordLoading payment navigation />}>
               <TransactionDetailPage />
             </Suspense>
           }

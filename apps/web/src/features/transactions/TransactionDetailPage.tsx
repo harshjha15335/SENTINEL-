@@ -1,10 +1,13 @@
-import { ArrowLeft } from "lucide-react";
-import { Link, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 
+import {
+  RecordLoading,
+  PaymentBackLink,
+} from "@/components/layout/RecordLoading";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { OriginBadge } from "@/components/ui/OriginBadge";
 import { Panel } from "@/components/ui/Panel";
-import { ErrorState, Skeleton } from "@/components/ui/States";
+import { ErrorState } from "@/components/ui/States";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { TransactionCases } from "@/features/cases/TransactionCases";
 import { RiskPanel } from "@/features/risk/RiskPanel";
@@ -18,13 +21,8 @@ export function TransactionDetailPage() {
   const q = useTransaction(id);
   return (
     <>
-      <Link
-        to="/app/transactions"
-        className="mb-4 inline-flex items-center gap-1.5 text-sm text-fg-muted hover:text-fg"
-      >
-        <ArrowLeft aria-hidden className="size-4" /> Transactions
-      </Link>
-      {q.isPending && <Skeleton className="h-72" />}
+      <PaymentBackLink />
+      {q.isPending && <RecordLoading payment />}
       {q.isError && (
         <ErrorState error={q.error} onRetry={() => void q.refetch()} />
       )}
@@ -124,7 +122,10 @@ function Detail({ t }: { t: TransactionDetail }) {
           className="risk-record"
           caseSlot={<TransactionCases transactionId={t.id} />}
         />
-        <Panel title="Event timeline" className="casefile-facts">
+        <Panel
+          title="Event timeline"
+          className="casefile-facts casefile-timeline"
+        >
           {timeline(t).length === 0 && (
             <p className="text-sm text-fg-muted">
               No recorded audit or provider events for this payment.

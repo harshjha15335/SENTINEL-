@@ -1,6 +1,6 @@
 import { clsx } from "clsx";
 import { ArrowUpRight, LogOut } from "lucide-react";
-import { lazy, Suspense, useRef } from "react";
+import { useRef } from "react";
 import { NavLink, Navigate, Outlet, useLocation, Link } from "react-router-dom";
 import { AppNavigation } from "./AppNavigation";
 import { ErrorState } from "@/components/ui/States";
@@ -9,11 +9,8 @@ import { useLogout, useMe } from "@/features/auth/session";
 import { usePayPalStatus } from "@/features/settings/usePayPalStatus";
 import { supports, type Capability } from "@/lib/capabilities";
 import { STATIC_DEMO } from "@/lib/staticDemo";
-const StaticDemoBanner = lazy(() =>
-  import("@/features/demo/StaticDemoBanner").then((m) => ({
-    default: m.StaticDemoBanner,
-  })),
-);
+import { StaticDemoBanner } from "@/features/demo/StaticDemoBanner";
+import { WorkspaceFonts } from "./WorkspaceFonts";
 const PRIMARY: [string, string, Capability][] = [
   ["/app", "Command Center", "dashboard"],
   ["/app/transactions", "Transactions", "transactions"],
@@ -32,6 +29,14 @@ const MORE: [string, string, Capability][] = [
   ["/app/operations", "Operations", "operations"],
 ];
 export function AppShell() {
+  return (
+    <>
+      <WorkspaceFonts />
+      <WorkspaceSession />
+    </>
+  );
+}
+function WorkspaceSession() {
   const me = useMe(),
     location = useLocation(),
     menu = useRef<HTMLDetailsElement>(null);
@@ -112,11 +117,7 @@ export function AppShell() {
           </nav>
         </details>
       </header>
-      {STATIC_DEMO && (
-        <Suspense fallback={null}>
-          <StaticDemoBanner />
-        </Suspense>
-      )}
+      {STATIC_DEMO && <StaticDemoBanner />}
       <AccountBar
         email={me.data.email}
         role={me.data.role}

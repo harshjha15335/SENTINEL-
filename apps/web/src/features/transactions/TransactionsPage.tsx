@@ -221,7 +221,7 @@ export function TransactionsPage() {
           </EmptyState>
         </div>
       ) : (
-        <div className="sentinel-grid w-full">
+        <div className="sentinel-grid transaction-grid w-full">
           <AgGridReact<Transaction>
             theme={sentinelGridTheme}
             rowData={q.data?.items}
@@ -237,7 +237,9 @@ export function TransactionsPage() {
               if (ke?.key === "Enter" && e.data)
                 navigate(`/app/transactions/${e.data.id}`);
             }}
-            domLayout="autoHeight"
+            // Keep the original 25-row page mounted so Home/End never loses focus.
+            suppressRowVirtualisation
+            domLayout="normal"
             rowHeight={54}
             headerHeight={46}
             suppressCellFocus={false}
