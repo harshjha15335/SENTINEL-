@@ -99,6 +99,10 @@ test("deep links load through the Pages 404 fallback", async ({ page }) => {
   await expect(page.getByRole("heading", { name: "Risk model" })).toBeVisible();
   await page.goto(staticRoute("/cases/00000000-0000-0000-0000-000000000000"));
   await expect(page.getByText(/not found/i).first()).toBeVisible();
+  await page.goto(staticRoute("/app/transactions/invalid-id"));
+  await expect(
+    page.getByText("Transaction not found", { exact: true }),
+  ).toBeVisible();
 });
 
 const SERVICE_ROUTES = [
@@ -172,14 +176,14 @@ test("original missing-reference case opens its payment and safe case tabs", asy
   await page.getByRole("tab", { name: "Investigation", exact: true }).click();
   await page.getByRole("link", { name: "Open payment", exact: true }).click();
   await expect(
-    page.getByRole("heading", { name: "Payment dossier." }),
+    page.getByRole("heading", { name: "$249.00", exact: true }),
   ).toBeVisible();
   await expect(
     page.getByText("SIM-ORDER-1D6383BB55B0BF", { exact: true }),
   ).toBeVisible();
   await page.reload();
   await expect(
-    page.getByRole("heading", { name: "Payment dossier." }),
+    page.getByRole("heading", { name: "$249.00", exact: true }),
   ).toBeVisible();
   await noHorizontalOverflow(page);
   expect(requests).toEqual([]);
