@@ -39,6 +39,12 @@ Operational builds pass through every boundary, retain all original navigation/r
 
 ## Verification and delivery
 
+The consistent fixture view contains 9,064 transactions and 179 cases. All 9,059 historical transaction IDs and all 176 historical case IDs remain. Five additional simulated payments and three cases were already in the approved fixture database, created on 9 November between 20:49 and 21:03 UTC, before this remediation. These include the missing payment. They are recovered source records, not invented repairs. Their IDs/timestamps and zero removed IDs are recorded in `evidence/dataset-diff.json`.
+
+The export records its own source revision in `snapshot.commit`; the candidate manifest separately records the build/package revision. Later validation and packaging changes do not rewrite historical export provenance.
+
+Reproduce the clean alternative-root ZIP with `python scripts/package-static-candidate.py /path/to/portable /path/to/pages /path/to/new.zip`. The script validates both snapshots, checks asset bases and Pages fallback, rejects symlinks and unexpected files using an allowlist, scans credential patterns, and emits deterministic ZIP entries, a manifest and SHA256 checksums. Reports and recovery bundles stay outside it.
+
 Execution evidence and final manifests are retained separately in `/workspace/sentinel-gate2a/`. Final test counts, source revision, artifact hashes, remaining host-specific checks and verdict will be recorded in its `REPORT.md`. No private review download, source bundle, database, secret configuration or audit report belongs inside the static candidate. Recovery/source bundles remain separate from the publishable files.
 
 Host review still must verify the chosen base path, deep-link fallback, HTTPS/security headers, cache rules, content type/compression, accessibility and route behavior at the actual host. This local candidate is not a deployed service. Authenticated hosting/workers/TLS and live PayPal remain separate, unauthorized workstreams.

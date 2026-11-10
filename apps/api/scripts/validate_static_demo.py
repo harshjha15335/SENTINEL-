@@ -108,19 +108,22 @@ def validate(data):
     )
     for row in dash["recent"]:
         require(row["id"] in tx and row == tx[row["id"]], "Dashboard recent reference mismatch")
-    for group in dash["captured_by_origin"]:
-        rows = [
-            r
-            for r in txs
-            if r["status"] == "CAPTURED"
-            and r["data_origin"] == group["data_origin"]
-            and r["currency"] == group["currency"]
-        ]
-        require(
-            group["captured_count"] == len(rows)
-            and group["captured_amount_minor"] == sum(r["amount_minor"] for r in rows),
-            "Dashboard captured totals mismatch",
-        )
+    require(dash["recent"] == txs[:8], "Dashboard recent ordering/coverage mismatch")
+    captured = [r for r in txs if r["status"] == "CAPTURED"]
+    expected_groups = {}
+    for row in captured:
+        key = (row["data_origin"], row["currency"])
+        count, amount = expected_groups.get(key, (0, 0))
+        expected_groups[key] = (count + 1, amount + row["amount_minor"])
+    exported_groups = {
+        (g["data_origin"], g["currency"]): (g["captured_count"], g["captured_amount_minor"])
+        for g in dash["captured_by_origin"]
+    }
+    require(
+        len(exported_groups) == len(dash["captured_by_origin"])
+        and exported_groups == expected_groups,
+        "Dashboard captured totals mismatch",
+    )
     for groups, rows, key_field in [
         (dash["open_cases_by_origin"], [c for c in cases if c["status"] != "RESOLVED"], "priority"),
         (dash["risk_bands_by_origin"], list(risk.values()), "risk_band"),
@@ -143,6 +146,20 @@ def validate(data):
     require(
         data["paypal-status"]["mode"] == "fixture" and data["paypal-status"]["client_id"] is None,
         "Provider configuration is not public-safe",
+    )
+
+    require(
+        bool(re.fullmatch(r"[0-9a-f]{40}", data["snapshot"].get("commit") or "")),
+        "Snapshot requires a source revision",
+    )
+    provenance = data["snapshot"].get("provenance", {})
+    require(
+        provenance.get("source") == "approved disposable synthetic fixture database"
+        and provenance.get("consistency")
+        == "PostgreSQL exported REPEATABLE READ / READ ONLY snapshot"
+        and provenance.get("gateway") == "fixture"
+        and provenance.get("ai_provider") == "none",
+        "Missing approved consistent fixture provenance",
     )
 
     def privacy(value):

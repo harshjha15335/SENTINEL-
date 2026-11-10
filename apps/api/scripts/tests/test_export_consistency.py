@@ -54,3 +54,29 @@ def test_shared_snapshot_and_read_only_enforcement():
         with engine.begin() as cleanup:
             cleanup.execute(text(f"DROP TABLE IF EXISTS {table}"))
         engine.dispose()
+
+
+@pytest.mark.parametrize(
+    "setting,value",
+    [
+        ("SENTINEL_STATIC_FIXTURE_APPROVED", "false"),
+        ("SENTINEL_DATABASE_URL", "postgresql+psycopg://localhost/production"),
+        ("SENTINEL_DATABASE_URL", "postgresql+psycopg://database.example/fixture_test"),
+        ("SENTINEL_PAYPAL_MODE", "sandbox"),
+        ("SENTINEL_AI_PROVIDER", "google"),
+    ],
+)
+def test_export_refuses_unapproved_sources(monkeypatch, tmp_path, setting, value):
+    import export_static_demo
+
+    for key, default in {
+        "SENTINEL_STATIC_FIXTURE_APPROVED": "true",
+        "SENTINEL_DATABASE_URL": "postgresql+psycopg://localhost/fixture_test",
+        "SENTINEL_PAYPAL_MODE": "fixture",
+        "SENTINEL_AI_PROVIDER": "none",
+    }.items():
+        monkeypatch.setenv(key, default)
+    monkeypatch.setenv(setting, value)
+    with pytest.raises(ValueError, match="approved disposable"):
+        export_static_demo.main(tmp_path / "new-export")
+    assert not (tmp_path / "new-export").exists()

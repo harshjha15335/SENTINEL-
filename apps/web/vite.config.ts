@@ -63,7 +63,7 @@ function staticSnapshot(): Plugin {
           { stdio: "inherit" },
         );
     },
-    closeBundle() {
+    writeBundle() {
       if (!snapshot) return;
       mkdirSync(output, { recursive: true });
       cpSync(snapshot, output, { recursive: true });
