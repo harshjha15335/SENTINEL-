@@ -1,6 +1,7 @@
 import importlib.util
 import io
 import json
+import sys
 from pathlib import Path
 import urllib.error
 
@@ -83,7 +84,8 @@ def test_create_deploy_and_check_url_without_printing_password(
     else:
         assert len(uploads) == 1 and not commands
     assert state["db_password"] not in capsys.readouterr().out
-    assert (tmp_path / "deployment.json").stat().st_mode & 0o777 == 0o600
+    if sys.platform != "win32":
+        assert (tmp_path / "deployment.json").stat().st_mode & 0o777 == 0o600
     deploy.main()  # Resume from the same project; never create a duplicate.
     assert (
         sum(url.endswith("/projects") and method == "POST" for url, method in calls)

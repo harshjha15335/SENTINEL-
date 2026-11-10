@@ -30,7 +30,11 @@ from app.services.investigation.toolbox import CaseToolbox
 sys.path.insert(
     0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..", "scripts"))
 )
-from verify_gemini_entrypoint import SingleRequestLimitingTransport, run_auth_verification
+from verify_gemini_entrypoint import (
+    SingleRequestLimitingTransport,
+    run_auth_verification,
+    run_complete_investigation,
+)
 
 
 @pytest.fixture(autouse=True)
@@ -251,6 +255,27 @@ def test_single_request_limiting_transport_enforces_hard_cap():
     assert transport.request_count == 2
 
 
+def test_single_request_limiting_transport_enforces_cap_after_network_exception():
+    """Verify that a failed 1st request (network error) still consumes the single attempt cap."""
+    class FailingTransport(httpx2.AsyncBaseTransport):
+        async def handle_async_request(self, request: httpx2.Request) -> httpx2.Response:
+            raise httpx2.ConnectError("Network unreachable")
+
+    transport = SingleRequestLimitingTransport(FailingTransport())
+    client = httpx2.AsyncClient(transport=transport)
+
+    # 1st request fails with ConnectError, but counts as 1 attempt
+    with pytest.raises(httpx2.ConnectError):
+        asyncio.run(client.get("https://example.com/test1"))
+    assert transport.request_count == 1
+
+    # 2nd request is hard-blocked at transport boundary, preventing retries
+    with pytest.raises(RuntimeError) as exc_info:
+        asyncio.run(client.get("https://example.com/test2"))
+    assert "STRICT TRANSPORT CAP VIOLATION" in str(exc_info.value)
+    assert transport.request_count == 2
+
+
 def test_single_request_limiting_transport_handles_gzip_decompression():
     """Verify that gzip compressed upstream responses decode without double-decompression."""
     raw_dict = {
@@ -405,3 +430,185 @@ def test_run_auth_verification_offline_403():
         mock_transport=Mock403Transport(),
     )
     assert ret == 1
+
+
+def test_run_complete_investigation_offline():
+    """Verify that run_complete_investigation executes multi-turn flow and passes validation."""
+    import uuid
+    from datetime import UTC, datetime
+
+    from app.db.session import get_sessionmaker
+    from app.models import Case, Merchant, RiskAssessment, Transaction, User
+    from app.models.enums import (
+        CasePriority,
+        CaseStatus,
+        DataOrigin,
+        MerchantEnvironment,
+        Role,
+        TransactionStatus,
+    )
+
+    with get_sessionmaker()() as db:
+        merchant = Merchant(
+            name=f"SynthMerch-{uuid.uuid4().hex[:6]}",
+            environment=MerchantEnvironment.SANDBOX,
+        )
+        db.add(merchant)
+        db.flush()
+        user = User(
+            merchant_id=merchant.id,
+            email=f"analyst-{uuid.uuid4().hex[:6]}@synthetic.example",
+            password_hash="hash",
+            role=Role.ANALYST,
+        )
+        db.add(user)
+        tx = Transaction(
+            merchant_id=merchant.id,
+            data_origin=DataOrigin.SYNTHETIC_DEMO,
+            status=TransactionStatus.CAPTURED,
+            amount_minor=8950,
+            currency="USD",
+            payer_reference="SYN-PAYER-00497",
+            create_idempotency_key=f"idem-{uuid.uuid4()}",
+            paypal_request_id=f"req-{uuid.uuid4()}",
+            created_at=datetime.now(UTC),
+        )
+        db.add(tx)
+        db.flush()
+        from app.models.enums import CaseSource
+        case = Case(
+            merchant_id=merchant.id,
+            transaction_id=tx.id,
+            source=CaseSource.RISK_MODEL,
+            data_origin=DataOrigin.SYNTHETIC_DEMO,
+            status=CaseStatus.OPEN,
+            priority=CasePriority.HIGH,
+            title="Synthetic Review",
+            due_at=datetime.now(UTC),
+        )
+        db.add(case)
+        db.flush()
+        from app.models.enums import PolicyDecision, RiskBand
+        ra = RiskAssessment(
+            merchant_id=merchant.id,
+            transaction_id=tx.id,
+            model_version="v1",
+            feature_version="v1",
+            risk_score=0.75,
+            risk_band=RiskBand.HIGH,
+            policy_decision=PolicyDecision.REVIEW,
+            policy_mode="SHADOW",
+            thresholds={},
+            feature_snapshot={},
+            explanation={},
+            limitations=[],
+            data_origin=DataOrigin.SYNTHETIC_DEMO,
+            trigger="API",
+        )
+        db.add(ra)
+        db.commit()
+        case_id_str = str(case.id)
+        tx_id_str = str(tx.id)
+        ra_id_str = str(ra.id)
+
+    turn_counter = 0
+
+    turn1_response = {
+        "candidates": [
+            {
+                "content": {
+                    "role": "model",
+                    "parts": [
+                        {"functionCall": {"name": "get_case_information", "args": {}}},
+                        {"functionCall": {"name": "get_transaction_details", "args": {}}},
+                        {"functionCall": {"name": "get_latest_risk_assessment", "args": {}}},
+                        {"functionCall": {"name": "get_payer_history", "args": {"limit": 20}}},
+                        {"functionCall": {"name": "get_capture_information", "args": {}}},
+                        {"functionCall": {"name": "get_case_notes", "args": {}}},
+                        {"functionCall": {"name": "list_case_evidence", "args": {}}},
+                    ],
+                },
+                "finishReason": "STOP",
+            }
+        ],
+        "usageMetadata": {
+            "promptTokenCount": 1884,
+            "candidatesTokenCount": 86,
+            "totalTokenCount": 1970,
+        },
+    }
+
+    turn2_findings = {
+        "summary": f"Verified synthetic case review for case {case_id_str}.",
+        "verified_facts": [
+            {
+                "statement": (
+                    f"Payment amount is 89.50 USD for transaction {tx_id_str}."
+                ),
+                "sources": [
+                    {"kind": "transaction", "id": tx_id_str}
+                ],
+            }
+        ],
+        "risk_indicators": [
+            {
+                "description": "Risk assessment flagged high risk.",
+                "sources": [
+                    {"kind": "risk_assessment", "id": ra_id_str}
+                ],
+            }
+        ],
+        "counter_indicators": [],
+        "evidence_references": [],
+        "missing_information": [],
+        "limitations": [],
+        "recommended_action": "CONTINUE_MANUAL_REVIEW",
+        "recommendation_rationale": "High risk indicators observed for SYN-PAYER-00497.",
+        "human_approval_required": True,
+    }
+
+    turn2_response = {
+        "candidates": [
+            {
+                "content": {
+                    "role": "model",
+                    "parts": [
+                        {
+                            "functionCall": {
+                                "name": "final_result",
+                                "args": turn2_findings,
+                            }
+                        }
+                    ],
+                },
+                "finishReason": "STOP",
+            }
+        ],
+        "usageMetadata": {
+            "promptTokenCount": 2400,
+            "candidatesTokenCount": 350,
+            "totalTokenCount": 2750,
+        },
+    }
+
+    class MockMultiTurnTransport(httpx2.AsyncBaseTransport):
+        async def handle_async_request(self, request: httpx2.Request) -> httpx2.Response:
+            nonlocal turn_counter
+            turn_counter += 1
+            body = turn1_response if turn_counter == 1 else turn2_response
+            compressed = gzip.compress(json.dumps(body).encode("utf-8"))
+            return httpx2.Response(
+                200,
+                headers={"content-type": "application/json", "content-encoding": "gzip"},
+                content=compressed,
+                request=request,
+            )
+
+    ret = run_complete_investigation(
+        case_id=case_id_str,
+        raw_key="AIzaSyMockMultiTurnKey12345",
+        max_requests=4,
+        mock_transport=MockMultiTurnTransport(),
+    )
+    assert ret == 0
+    assert turn_counter == 2

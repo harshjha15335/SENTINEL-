@@ -96,23 +96,11 @@ class SentinelGoogleModel(GoogleModel):
         contents, config = await super()._build_content_and_config(
             messages, model_settings, model_request_parameters
         )
-        # Fix: Pydantic-AI 2.55.0 bug where response_modalities is sent as ['TEXT']
-        # even when tools are declared.
+        # Fix: Upstream PydanticAI 2.55.0 bug where response_modalities is sent as ['TEXT']
+        # even when tools are declared. Removing response_modalities prevents API conflict
+        # with function calling.
         if config.get("tools"):
             config["response_modalities"] = None
-
-        # Fix: Mode ANY with 12 tools causes 400 or forces premature completion.
-        # Upgrade to VALIDATED (native schema validation) or AUTO.
-        tool_config = config.get("tool_config")
-        if isinstance(tool_config, dict):
-            fcc = tool_config.get("function_calling_config")
-            if isinstance(fcc, dict):
-                mode = fcc.get("mode")
-                if mode == FunctionCallingConfigMode.ANY:
-                    if self.profile.get("google_supports_strict_tool_definition", False):
-                        fcc["mode"] = FunctionCallingConfigMode.VALIDATED
-                    else:
-                        fcc["mode"] = FunctionCallingConfigMode.AUTO
 
         return contents, config
 

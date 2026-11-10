@@ -154,7 +154,12 @@ def start(
     return run
 
 
-def execute(run_id: uuid.UUID) -> None:
+def execute(
+    run_id: uuid.UUID,
+    *,
+    settings: Settings | None = None,
+    request_limit: int | None = None,
+) -> None:
     """Run a QUEUED investigation with its own database session (background task)."""
     with get_sessionmaker()() as db:
         run = db.get(InvestigationRun, run_id)
@@ -184,7 +189,12 @@ def execute(run_id: uuid.UUID) -> None:
                         InvestigationErrorCategory.PROVIDER_UNAVAILABLE,
                         "The AI provider is no longer configured.",
                     )
-                findings, usage_out, denied = _run_agent(box, spec)
+                if settings is not None or request_limit is not None:
+                    findings, usage_out, denied = _run_agent(
+                        box, spec, request_limit=request_limit, settings=settings
+                    )
+                else:
+                    findings, usage_out, denied = _run_agent(box, spec)
                 usage.update(usage_out)
         except InvestigationFailed as exc:
             failure = exc

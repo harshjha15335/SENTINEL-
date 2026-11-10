@@ -125,10 +125,10 @@ def test_sentinel_google_model_wire_serialization_no_contradiction():
     gen_config = req.get("generationConfig", {})
     # Modality contradiction must be resolved
     assert gen_config.get("responseModalities") is None
-    # Tool config must be upgraded from ANY to VALIDATED
+    # Tool config must enforce ANY mode to guarantee function/final_result invocation without free-text bypass
     tool_config = req.get("toolConfig", {})
     mode = tool_config.get("functionCallingConfig", {}).get("mode")
-    assert mode in ("VALIDATED", "AUTO")
+    assert mode == "ANY"
     # All schemas must have $defs and $ref inlined
     tools = req.get("tools", [])
     final_tool = next(t for t in tools[0]["functionDeclarations"] if t["name"] == "final_result")
