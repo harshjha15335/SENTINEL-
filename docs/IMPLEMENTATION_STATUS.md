@@ -1,5 +1,13 @@
 # Implementation Status
 
+## SENTINEL Gate 2B static host preparation — 10 November 2026
+
+Cloudflare Pages preparation is isolated under [hosting/cloudflare-pages](../hosting/cloudflare-pages/README.md). The approved Gate 2A portable payload remains byte-for-byte unchanged; only reviewed `_headers` and a physical-path recovery `404.html` are added. Snapshot revalidation confirms 9,064 transactions, 1,824 assessments, 179 cases and zero unresolved references. No backend, hosting resources, sharing settings, pushes, merges or deployments changed. DESIGN APPROVAL: APPROVED. DEPLOYMENT APPROVAL: PENDING.
+
+Executed locally: type checking/lint, 10 snapshot regression tests, 18 desktop/mobile Chromium tests with enforced CSP, and 118 encoding/decoded-hash/ETag checks covering 59 served files. The browser checks include actual wallet scroll/reverse, reduced motion, keyboard, search, recorded risk/cases/model, read-only restrictions and intentional inline-script rejection. Cloudflare's current official documentation was reviewed from its pinned GitHub source because the documentation domain is blocked in this executor. Provider acceptance/HTTPS/cache behavior at an actual hostname remains untested.
+
+Lab performance: three cold-browser samples per scenario/device, warm loopback HTTPS server, no network throttling; mobile uses viewport emulation plus simulated 4× CPU slowdown. Median ready times: homepage 1.29s desktop / 2.22s mobile; transactions 2.10s / 3.93s; recorded risk 1.51s / 3.86s. Homepage observed CLS was zero, but transaction-grid maximum observed CLS reached 0.315 desktop / 0.575 mobile; recorded risk reached 0.082 / 0.240. These are documented performance concerns, not passing field Core Web Vitals. Preserve the verified application; accept or address record-view layout/loading concerns deliberately before publication. Actual-host performance and wider browser/device testing remain pending.
+
 ## SENTINEL V2 frontend reconstruction — 10 November 2026
 
 Gate 1 was explicitly approved. The complete operational frontend and public Follow the Money homepage have been reconstructed locally; `/app` is the authenticated entry, with compatible legacy deep links. See [Phase 2 report](sentinel-v2/13-phase2-reconstruction.md). Backend, ML, database and API contracts remain unchanged. Final delivery evidence records test counts and review limits. Deployment/Gate 2 remains PENDING; no push, merge or deployment occurred.

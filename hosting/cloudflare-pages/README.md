@@ -38,7 +38,7 @@ Cloudflare provides Pages deployment hostnames and certificate handling; custom 
 
 ## Documentation reviewed
 
-Official documentation was fetched from Cloudflare's own `cloudflare/cloudflare-docs` production branch because this executor blocks direct access to `developers.cloudflare.com`. The evidence directory preserves retrieved documents, hashes, source revision and retrieval method. Consult current provider documentation again before any eventual deployment:
+Official documentation was fetched from Cloudflare's own `cloudflare/cloudflare-docs` production branch because this executor blocks direct access to `developers.cloudflare.com`. The evidence directory preserves retrieved documents, hashes, source revision and retrieval method. The pinned official source revision is `7f787d8db99e93cbf5946d4221551ff48401d1de` (retrieved 10 November 2026). Consult current provider documentation again before any eventual deployment:
 
 - https://developers.cloudflare.com/pages/configuration/headers/
 - https://developers.cloudflare.com/pages/configuration/serving-pages/
@@ -61,13 +61,26 @@ node hosting/cloudflare-pages/local-preview.mjs /path/to/publish /private/local.
 SENTINEL_STATIC_DEMO=true SENTINEL_STATIC_HASH=true npx playwright test --config playwright.host.config.ts
 ```
 
-The host test configuration accepts only the disposable local certificate. Do not use that TLS exception for actual-host verification. Browser tests check the unchanged wallet, bidirectional scrolling, mobile fallback, reduced motion, keyboard skip, CSP enforcement and recorded read-only views. Standard static tests retain deep links, refresh, back/forward, unavailable features and invalid record checks. Local performance results are laboratory measurements, not field Core Web Vitals or a host performance certification.
+Generate any disposable local certificate outside the publish root; never upload its key. For example, use OpenSSL with subjectAltName DNS:localhost and IP:127.0.0.1. The host test configuration restricts its certificate exception to loopback. Do not use that TLS exception for actual-host verification. Browser tests check the unchanged wallet, bidirectional scrolling, mobile fallback, reduced motion, keyboard skip, CSP enforcement and recorded read-only views. Standard static tests retain deep links, refresh, back/forward, unavailable features and invalid record checks. Local performance results are laboratory measurements, not field Core Web Vitals or a host performance certification.
+
+To repeat the lab and local response probes after browser tests have finished (avoid simultaneous builds/tests affecting measurements):
+
+```sh
+node hosting/cloudflare-pages/probe.mjs /path/to/release /private/headers-compression.json
+node hosting/cloudflare-pages/lab.mjs https://127.0.0.1:9448 /private/performance.json
+```
+
+The lab uses three fresh-browser runs per scenario and viewport for homepage, transaction grid and fully loaded recorded risk. Desktop uses normal CPU; mobile uses a simulated 4× CPU slowdown with a 390×844 viewport. Networking is unthrottled loopback and the preview server is warm. Observed LCP/CLS and readiness times are diagnostic samples, not a real-phone or CDN prediction.
 
 ## Actual-host smoke plan — remains pending
 
 After an explicitly authorized deployment, use a trusted HTTPS client without certificate bypass. Verify HTTP redirects to the correct HTTPS hostname; root and hash-linked views open; all module/font/CSS/data requests use the approved origin and MIME types; `_headers` is not publicly served; unknown physical paths return a genuine recovery 404. Check the CSP and all security headers, with no duplicate/conflicting cache values. Confirm framing and inline-script rejection.
 
-Request representative HTML, hashed JS/CSS/fonts and every JSON file with `Accept-Encoding: br` and `gzip`; check negotiated encoding, decoded hashes against the manifest, ETag/304 behavior, HTML/JSON revalidation and immutable asset policy. Do not infer compression merely from an `Accept-Encoding` request. Repeat the functional browser suite with normal TLS validation, inspect browser CSP/network errors, then test keyboard, reduced motion, forward/reverse scrolling, mobile and network loading at the public hostname. Confirm zero merchant API, provider, external resource or write requests in normal use. Save headers/results, actual deployment ID and manifest hash before handing out a judge URL. Reload long-lived tabs after a release or rollback.
+Request representative HTML, hashed JS/CSS/fonts and every JSON file with `Accept-Encoding: br` and `gzip`; check negotiated encoding, decoded hashes against the manifest, ETag/304 behavior, HTML/JSON revalidation and immutable asset policy. Do not infer compression merely from an `Accept-Encoding` request. Repeat the functional browser suite with normal TLS validation, inspect browser CSP/network errors, then test keyboard, reduced motion, forward/reverse scrolling, mobile and network loading at the public hostname. Confirm zero merchant API, provider, external resource or write requests in normal use. Do not enable optional analytics or other script injection without separate review; inspect the final HTML/network for unreviewed additions. Save headers/results, actual deployment ID and manifest hash before handing out a judge URL. Reload long-lived tabs after a release or rollback.
+
+## Observed local performance — not a field certification
+
+Three samples per scenario produced median readiness of 1.29s desktop / 2.22s simulated mobile for the homepage, 2.10s / 3.93s for transactions, and 1.51s / 3.86s for fully loaded recorded risk. Homepage observed CLS was zero. Record-view layout shifts remain material: maximum sampled transaction CLS was 0.315 desktop / 0.575 mobile; recorded-risk CLS was 0.082 / 0.240. Mobile is 390×844 with simulated 4× CPU slowdown, not a real device; networking is unthrottled loopback with a warm server. No performance budget or field Core Web Vitals pass is claimed. Review/accept or separately address these loading/layout concerns before publication; do not silently alter the approved immutable application during host preparation.
 
 ## Rollback
 
@@ -77,4 +90,4 @@ The first-ever deployment has no previous production deployment to roll back to.
 
 ## Remaining boundary
 
-Readiness here means an artifact and configuration ready for deployment approval. Actual Cloudflare acceptance, HTTPS trust/redirects, security headers at the edge, cache/compression behavior, hostname performance, domain/account settings and rollback remain unverified until a future authorized host test. The authenticated backend and real PayPal tracks are unchanged and separate. Stop before publication.
+Readiness here means an artifact and configuration ready for deployment approval. Actual Cloudflare acceptance, account quotas and optional script-injection settings, HTTPS trust/redirects, security headers at the edge, cache/compression behavior, hostname performance, domain/account settings and rollback remain unverified until a future authorized host test. The authenticated backend and real PayPal tracks are unchanged and separate. Stop before publication.
