@@ -1,3 +1,7 @@
+# Current Gate 2B host preparation
+
+See [16-gate2b-host-preparation.md](16-gate2b-host-preparation.md). Cloudflare Pages configuration is isolated from the approved portable application. Preparation and local validation only; deployment remains PENDING.
+
 # Current Gate 2A static corrections
 
 See [15-gate2a-static-remediation.md](15-gate2a-static-remediation.md) for snapshot consistency, build gates and static capability boundaries. Design remains APPROVED; deployment remains PENDING. The private review Site is unchanged.
