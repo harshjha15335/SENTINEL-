@@ -30,7 +30,7 @@ from app.services.investigation.toolbox import CaseToolbox
 sys.path.insert(
     0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..", "scripts"))
 )
-from verify_gemini_entrypoint import SingleRequestLimitingTransport
+from verify_gemini_entrypoint import SingleRequestLimitingTransport, run_auth_verification
 
 
 @pytest.fixture(autouse=True)
@@ -313,3 +313,95 @@ def test_single_request_limiting_transport_handles_gzip_401():
     assert "UNAUTHENTICATED" in resp.text
     assert limiter.captured_status == 401
     assert limiter.captured_response_json["error"]["code"] == 401
+
+
+def test_run_auth_verification_offline_200():
+    """Verify that run_auth_verification succeeds and decodes model metadata on HTTP 200."""
+    dummy_model = {
+        "name": "models/gemini-3.1-flash-lite",
+        "displayName": "Gemini 3.1 Flash Lite",
+        "supportedGenerationMethods": ["generateContent", "countTokens"],
+    }
+    compressed = gzip.compress(json.dumps(dummy_model).encode("utf-8"))
+
+    class Mock200Transport(httpx2.AsyncBaseTransport):
+        async def handle_async_request(self, request: httpx2.Request) -> httpx2.Response:
+            assert request.method == "GET"
+            assert "gemini-3.1-flash-lite" in str(request.url)
+            assert "x-goog-api-key" in request.headers
+            return httpx2.Response(
+                200,
+                headers={"content-type": "application/json", "content-encoding": "gzip"},
+                content=compressed,
+                request=request,
+            )
+
+    ret = run_auth_verification(
+        raw_key="AIzaSyMockKeyForOfflineTest12345",
+        mock_transport=Mock200Transport(),
+    )
+    assert ret == 0
+
+
+def test_run_auth_verification_offline_401():
+    """Verify that run_auth_verification handles and sanitizes 401 UNAUTHENTICATED error."""
+    err_body = {
+        "error": {
+            "code": 401,
+            "message": "API key not valid. Please pass a valid API key.",
+            "status": "UNAUTHENTICATED",
+        }
+    }
+    compressed = gzip.compress(json.dumps(err_body).encode("utf-8"))
+
+    class Mock401Transport(httpx2.AsyncBaseTransport):
+        async def handle_async_request(self, request: httpx2.Request) -> httpx2.Response:
+            return httpx2.Response(
+                401,
+                headers={"content-type": "application/json", "content-encoding": "gzip"},
+                content=compressed,
+                request=request,
+            )
+
+    ret = run_auth_verification(
+        raw_key="AIzaSyInvalidKeyOfflineTest",
+        mock_transport=Mock401Transport(),
+    )
+    assert ret == 1
+
+
+def test_run_auth_verification_offline_403():
+    """Verify that run_auth_verification handles and sanitizes 403 PERMISSION_DENIED error."""
+    err_body = {
+        "error": {
+            "code": 403,
+            "message": (
+                "Generative Language API has not been used in project 12345 "
+                "before or it is disabled."
+            ),
+            "status": "PERMISSION_DENIED",
+            "details": [
+                {
+                    "@type": "type.googleapis.com/google.rpc.ErrorInfo",
+                    "reason": "SERVICE_DISABLED",
+                    "domain": "googleapis.com",
+                }
+            ],
+        }
+    }
+    compressed = gzip.compress(json.dumps(err_body).encode("utf-8"))
+
+    class Mock403Transport(httpx2.AsyncBaseTransport):
+        async def handle_async_request(self, request: httpx2.Request) -> httpx2.Response:
+            return httpx2.Response(
+                403,
+                headers={"content-type": "application/json", "content-encoding": "gzip"},
+                content=compressed,
+                request=request,
+            )
+
+    ret = run_auth_verification(
+        raw_key="AIzaSyForbiddenKeyOfflineTest",
+        mock_transport=Mock403Transport(),
+    )
+    assert ret == 1

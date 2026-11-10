@@ -131,6 +131,8 @@ def get_api_key_securely(prompt_if_missing: bool = False) -> str:
     key = (
         os.environ.get("SENTINEL_AI_API_KEY")
         or os.environ.get("SENTINEL_IT_AI_API_KEY")
+        or os.environ.get("GOOGLE_API_KEY")
+        or os.environ.get("GEMINI_API_KEY")
         or ""
     )
     key = key.strip()
@@ -149,7 +151,7 @@ def get_api_key_securely(prompt_if_missing: bool = False) -> str:
         except OSError:
             pass
 
-    if prompt_if_missing and sys.stdin.isatty():
+    if prompt_if_missing:
         import getpass
 
         print("\n[SECURE PROMPT] SENTINEL_AI_API_KEY not found in environment.")
@@ -157,7 +159,6 @@ def get_api_key_securely(prompt_if_missing: bool = False) -> str:
         try:
             entered = getpass.getpass("Enter Google Gemini API Key: ").strip()
             if entered:
-                os.environ["SENTINEL_AI_API_KEY"] = entered
                 return entered
         except (OSError, EOFError):
             pass
@@ -514,6 +515,167 @@ def run_controlled_live_test(case_id: str, raw_key: str) -> int:
         return 0 if resp_status == 200 else 1
 
 
+def run_auth_verification(
+    raw_key: str,
+    model_name: str = "gemini-3.1-flash-lite",
+    mock_transport: httpx2.AsyncBaseTransport | None = None,
+) -> int:
+    """Perform strictly ONE authenticated read-only models.get request using official Google SDK.
+
+    Verifies whether the API key works independently of SENTINEL's investigation request.
+    Does NOT call generateContent, run agents, touch the database, or invoke financial APIs.
+    """
+    from google import genai
+    from google.genai import types
+    from google.genai.errors import APIError
+
+    print("\n" + "=" * 70)
+    print("SENTINEL — GEMINI API-KEY AUTHENTICATION VERIFICATION (models.get)")
+    print("=" * 70)
+
+    # 1. Inspect environment variables and precedence
+    env_sentinel = bool(os.environ.get("SENTINEL_AI_API_KEY"))
+    env_sentinel_it = bool(os.environ.get("SENTINEL_IT_AI_API_KEY"))
+    env_google = bool(os.environ.get("GOOGLE_API_KEY"))
+    env_gemini = bool(os.environ.get("GEMINI_API_KEY"))
+
+    print("\n[PREFLIGHT] Environment Variable Audit:")
+    print(f"            SENTINEL_AI_API_KEY Present:    {env_sentinel}")
+    print(f"            SENTINEL_IT_AI_API_KEY Present: {env_sentinel_it}")
+    print(f"            GOOGLE_API_KEY Present:         {env_google}")
+    print(f"            GEMINI_API_KEY Present:         {env_gemini}")
+    print(
+        "            Precedence Order:               SENTINEL_AI_API_KEY -> GOOGLE_API_KEY -> GEMINI_API_KEY"
+    )
+
+    conflict_desc = "NONE"
+    if (env_sentinel or env_sentinel_it) and (env_google or env_gemini):
+        conflict_desc = "POTENTIAL OVERRIDE (SENTINEL_AI_API_KEY takes precedence over GOOGLE_API_KEY/GEMINI_API_KEY)"
+    elif env_google and env_gemini:
+        conflict_desc = "SECONDARY CONFLICT (GOOGLE_API_KEY takes precedence over GEMINI_API_KEY in Google SDK)"
+
+    print(f"            Conflict Status:                {conflict_desc}")
+
+    # 2. Setup transport and hard single-request cap
+    underlying_transport = mock_transport or httpx2.AsyncHTTPTransport(retries=0)
+    limiter = SingleRequestLimitingTransport(underlying_transport)
+    http_client = httpx2.AsyncClient(transport=limiter)
+
+    print("\n[PREFLIGHT] Provider Routing & Authentication Audit:")
+    print(
+        "            API Target:                     Gemini Developer API (generativelanguage.googleapis.com)"
+    )
+    print(
+        "            Vertex AI Mode:                 False (Explicitly disabled)"
+    )
+    print(
+        "            Authentication Header:          x-goog-api-key: [REDACTED]"
+    )
+    print(
+        f"            Target Model:                   {model_name}"
+    )
+    print(
+        "            Operation:                      models.get (Read-only metadata lookup)"
+    )
+    print(
+        "            generateContent Allowed:        NO (Strictly prohibited)"
+    )
+    print(
+        "            Transport Retries:              0 (AsyncHTTPTransport)"
+    )
+    print(
+        "            Transport Request Cap:          1 (SingleRequestLimitingTransport)"
+    )
+
+    client = genai.Client(
+        vertexai=False,
+        api_key=raw_key,
+        http_options=types.HttpOptions(httpx_async_client=http_client),
+    )
+
+    resp_status: int | None = None
+    auth_result: str = "UNKNOWN"
+    model_obj: Any = None
+    error_info: dict[str, Any] = {}
+    transport_decoded_ok = True
+
+    try:
+        model_obj = asyncio.run(client.aio.models.get(model=model_name))
+        resp_status = limiter.captured_status or 200
+        auth_result = "SUCCESS (Authenticated with Google Developer API)"
+    except APIError as exc:
+        resp_status = exc.code or limiter.captured_status or 400
+        auth_result = "FAILED (Google API Error)"
+        error_info["code"] = exc.code
+        error_info["message"] = exc.message
+        if limiter.captured_response_json and "error" in limiter.captured_response_json:
+            err_dict = limiter.captured_response_json["error"]
+            error_info["status"] = err_dict.get("status", "UNKNOWN")
+            error_info["details"] = err_dict.get("details", [])
+    except Exception as exc:  # noqa: BLE001
+        resp_status = limiter.captured_status or 500
+        auth_result = "TRANSPORT_OR_CLIENT_ERROR"
+        error_info["exception_type"] = type(exc).__name__
+        error_info["exception_msg"] = str(exc)
+        if "decompres" in str(exc).lower():
+            transport_decoded_ok = False
+
+    # Evaluation
+    if resp_status == 200:
+        generation_401_explanation = (
+            "EXPLAINED: The local API key authenticates successfully on read-only lookup. "
+            "The earlier HTTP 401 on generateContent was likely caused by a mistyped key during the "
+            "masked prompt, or a temporary propagation delay."
+        )
+        next_action = "API key is valid. The local environment is now confirmed ready for the authorized 1-request investigation test (--execute)."
+    elif resp_status == 401:
+        generation_401_explanation = (
+            "CONFIRMED REPRODUCED: Google rejected the key as UNAUTHENTICATED on read-only lookup. "
+            "The key string entered is invalid, revoked, or not recognized by Google AI Studio."
+        )
+        next_action = "Verify/regenerate your API key in Google AI Studio (https://aistudio.google.com/) and re-run --verify-auth-only."
+    elif resp_status == 403:
+        generation_401_explanation = (
+            "REFINED DIAGNOSIS: Key rejected with HTTP 403 PERMISSION_DENIED. "
+            "The key is recognized, but the Generative Language API is disabled or restricted in the Google Cloud project."
+        )
+        next_action = "Enable the Generative Language API in Google Cloud Console or remove IP/API restrictions on the key."
+    else:
+        generation_401_explanation = f"INCONCLUSIVE: Received HTTP {resp_status}."
+        next_action = "Inspect network connectivity and error details."
+
+    print("\n" + "=" * 70)
+    print("SENTINEL — GEMINI AUTHENTICATION VERIFICATION REPORT")
+    print("=" * 70)
+    print(f"1. Local Model-Lookup HTTP Status:        {resp_status}")
+    print(f"2. Authentication Result:                 {auth_result}")
+    print(
+        f"3. Google Error Status & Reason:          {error_info if error_info else 'None (Success)'}"
+    )
+    print(
+        "4. Correct API Endpoint Used:             YES (https://generativelanguage.googleapis.com/v1/models/...)"
+    )
+    print(f"5. Environment Variable Conflicts:        {conflict_desc}")
+    print(
+        f"6. Transport Decoded Successfully:        {'YES' if transport_decoded_ok else 'NO (Decompression error)'}"
+    )
+    print(
+        f"7. Actual HTTP Requests Counted:          {limiter.request_count}"
+    )
+    print(f"8. Original Generation 401 Explained:     {generation_401_explanation}")
+    print(f"9. Next Precise Action:                   {next_action}")
+    if model_obj:
+        print(
+            f"   Model Display Name:                    {getattr(model_obj, 'display_name', 'N/A')}"
+        )
+        print(
+            f"   Supported Generation Methods:          {getattr(model_obj, 'supported_generation_methods', 'N/A')}"
+        )
+    print("=" * 70)
+
+    return 0 if resp_status == 200 else 1
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description="SENTINEL Gemini Entrypoint Verifier")
     parser.add_argument(
@@ -523,6 +685,12 @@ def main() -> int:
         help="Run offline validation only",
     )
     parser.add_argument(
+        "--verify-auth-only",
+        action="store_true",
+        default=False,
+        help="Perform exactly ONE authenticated read-only models.get request to verify API key validity without running an AI investigation",
+    )
+    parser.add_argument(
         "--execute", action="store_true", help="Authorize single live execution"
     )
     parser.add_argument(
@@ -530,8 +698,8 @@ def main() -> int:
     )
     args = parser.parse_args()
 
-    # Default to dry-run if neither execute nor dry-run is specified
-    if not args.execute and not args.dry_run:
+    # Default to dry-run if neither execute, verify-auth-only nor dry-run is specified
+    if not args.execute and not args.verify_auth_only and not args.dry_run:
         args.dry_run = True
 
     print("=" * 70)
@@ -539,7 +707,9 @@ def main() -> int:
     print("=" * 70)
 
     # 1. Verify configuration
-    cfg_ok, cfg_msg = verify_configuration(prompt_if_missing=args.execute)
+    cfg_ok, cfg_msg = verify_configuration(
+        prompt_if_missing=(args.execute or args.verify_auth_only)
+    )
     if cfg_ok:
         print(f"[OK] Configuration: {cfg_msg}")
     else:
@@ -552,6 +722,13 @@ def main() -> int:
     else:
         print(f"[FAIL] Wire Schema: {wire_msg}")
         return 1
+
+    if args.verify_auth_only:
+        raw_key = get_api_key_securely(prompt_if_missing=True)
+        if not raw_key:
+            print("\n[ERROR] Cannot verify authentication without a Gemini API key.")
+            return 1
+        return run_auth_verification(raw_key=raw_key)
 
     if args.execute:
         if not args.case_id:

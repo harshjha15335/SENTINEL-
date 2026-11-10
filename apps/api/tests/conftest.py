@@ -49,6 +49,34 @@ def require_disposable_database(url: str) -> None:
         raise RuntimeError("Destructive API tests require a loopback database ending in _test")
 
 
+def emergency_terminate_test_backends(url: str) -> int:
+    """Explicitly enabled emergency recovery for isolated test runs only.
+    
+    Strict safety invariants:
+    - Loopback only (127.0.0.1 / localhost)
+    - Database name strictly ending in '_test'
+    - Explicit opt-in via SENTINEL_ALLOW_EMERGENCY_BACKEND_TERMINATION=1
+    - Scoped strictly to current_database() and owned test usename
+    - Never touches unrelated databases, user sessions or hosted instances
+    """
+    if os.environ.get("SENTINEL_ALLOW_EMERGENCY_BACKEND_TERMINATION") != "1":
+        raise RuntimeError("Emergency backend termination is not explicitly enabled.")
+    require_disposable_database(url)
+    
+    with get_engine().connect().execution_options(isolation_level="AUTOCOMMIT") as conn:
+        conn.execute(text("SET lock_timeout = '5s'"))
+        res = conn.execute(
+            text(
+                "SELECT pg_terminate_backend(pid) "
+                "FROM pg_stat_activity "
+                "WHERE datname = current_database() "
+                "AND usename = current_user "
+                "AND pid <> pg_backend_pid()"
+            )
+        ).fetchall()
+        return len(res)
+
+
 @pytest.fixture(scope="session", autouse=True)
 def _migrated_database() -> Iterator[None]:
     require_disposable_database(get_settings().database_url)
@@ -63,11 +91,15 @@ def _migrated_database() -> Iterator[None]:
 @pytest.fixture(autouse=True)
 def _clean_tables() -> Iterator[None]:
     from app.api.v1.auth import _limiter
+    from sqlalchemy.orm import close_all_sessions
 
     _limiter.clear()
     yield
-    get_engine().dispose()
+    # Proper lifecycle cleanup: release all sessions and checked-in connections.
+    close_all_sessions()
+    get_engine().dispose(close=True)
     with get_engine().begin() as conn:
+        conn.execute(text("SET lock_timeout = '5s'"))
         conn.execute(
             text(
                 "TRUNCATE refund_requests, dispute_drafts, disputes, policy_drafts, "
@@ -134,11 +166,13 @@ def other_tenant(db: Session) -> Tenant:
 def app_client() -> Iterator[TestClient]:
     from app.main import app
     from app.services.paypal.factory import get_gateway
+    from sqlalchemy.orm import close_all_sessions
 
     get_gateway.cache_clear()
     with TestClient(app) as c:
         yield c
     app.dependency_overrides.clear()
+    close_all_sessions()
 
 
 def login(client: TestClient, email: str) -> str:
