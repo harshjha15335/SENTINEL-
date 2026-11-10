@@ -2,9 +2,7 @@ import type { Page } from "@playwright/test";
 /** Navigate the approved horizontal menu or its compact equivalent. */
 export async function workspaceNavigate(page: Page, label: string) {
   // Wait for session loading before selecting the responsive navigation variant.
-  await page
-    .getByRole("navigation", { name: "Primary" })
-    .waitFor({ state: "attached" });
+  await page.getByRole("banner").waitFor();
   const primary = page
     .getByRole("navigation", { name: "Primary" })
     .getByRole("link", { name: label, exact: true });
