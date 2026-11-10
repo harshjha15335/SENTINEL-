@@ -1,6 +1,8 @@
+import html
 import re
 
 from fastapi import APIRouter, Depends, Header
+from fastapi.responses import HTMLResponse
 from sqlalchemy.orm import Session
 
 from app.api.deps import paypal_gateway
@@ -88,3 +90,57 @@ def capture_order(
 ) -> TransactionOut:
     txn = checkout.capture_order(db, gateway, principal, paypal_order_id=order_id)
     return to_out(txn)
+
+
+_CARD_CSS = (
+    "body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;"
+    " background: #0f172a; color: #f8fafc; display: flex; align-items: center;"
+    " justify-content: center; height: 100vh; margin: 0; }"
+    " .card { background: #1e293b; padding: 2rem; border-radius: 0.75rem;"
+    " border: 1px solid #334155; max-width: 480px; width: 100%;"
+    " box-shadow: 0 10px 25px rgba(0,0,0,0.5); }"
+    " .badge { display: inline-block; padding: 0.25rem 0.75rem; border-radius: 9999px;"
+    " font-size: 0.875rem; font-weight: 600; margin-bottom: 1rem; }"
+    " h1 { font-size: 1.25rem; margin: 0 0 0.5rem 0; color: #f8fafc; }"
+    " p { color: #94a3b8; font-size: 0.875rem; line-height: 1.5; margin: 0 0 1rem 0; }"
+    " code { background: #0f172a; color: #38bdf8; padding: 0.2rem 0.4rem;"
+    " border-radius: 0.25rem; font-size: 0.8125rem; word-break: break-all; }"
+)
+
+
+@router.get("/return", response_class=HTMLResponse)
+def checkout_return(token: str | None = None, PayerID: str | None = None) -> HTMLResponse:
+    safe_token = html.escape(token or "—")
+    safe_payer = html.escape(PayerID or "—")
+    content = (
+        "<!DOCTYPE html><html lang='en'><head><meta charset='utf-8'>"
+        "<title>SENTINEL — PayPal Sandbox Approval Confirmed</title>"
+        f"<style>{_CARD_CSS} .badge {{ background: #166534; color: #4ade80; }}</style>"
+        "</head><body><div class='card'>"
+        "<div class='badge'>SANDBOX APPROVAL RECORDED</div>"
+        "<h1>Buyer Approval Confirmed</h1>"
+        "<p>PayPal Sandbox buyer approval succeeded for this order session.</p>"
+        f"<p>Order Token: <code>{safe_token}</code></p>"
+        f"<p>Payer ID: <code>{safe_payer}</code></p>"
+        "<p><strong>Next step:</strong> Return to your SENTINEL terminal to verify approval.</p>"
+        "</div></body></html>"
+    )
+    return HTMLResponse(content=content)
+
+
+@router.get("/cancel", response_class=HTMLResponse)
+def checkout_cancel(token: str | None = None) -> HTMLResponse:
+    safe_token = html.escape(token or "—")
+    content = (
+        "<!DOCTYPE html><html lang='en'><head><meta charset='utf-8'>"
+        "<title>SENTINEL — PayPal Sandbox Approval Cancelled</title>"
+        f"<style>{_CARD_CSS} .badge {{ background: #991b1b; color: #f87171; }}</style>"
+        "</head><body><div class='card'>"
+        "<div class='badge'>SANDBOX APPROVAL CANCELLED</div>"
+        "<h1>Buyer Approval Cancelled</h1>"
+        "<p>The buyer cancelled the PayPal Sandbox checkout session.</p>"
+        f"<p>Order Token: <code>{safe_token}</code></p>"
+        "<p>You may return to your terminal to inspect the cancelled transaction.</p>"
+        "</div></body></html>"
+    )
+    return HTMLResponse(content=content)

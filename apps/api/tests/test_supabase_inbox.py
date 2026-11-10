@@ -378,3 +378,88 @@ def test_fixture_event_reaches_investigation_packet_and_independent_approval(
     assert case.data_origin == DataOrigin.SIMULATED
     assert forward(inbox, fixture_api) == 0
     assert db.scalar(select(func.count()).select_from(Case)) == 1
+
+
+def test_make_supabase_headers_diagnostics():
+    """Verify make_supabase_headers fails gracefully on empty/whitespace keys."""
+    from scripts.verify_paypal_sandbox_checkout import make_supabase_headers
+
+    assert make_supabase_headers(None) == {}
+    assert make_supabase_headers("") == {}
+    assert make_supabase_headers("   ") == {}
+    headers = make_supabase_headers("valid-secret-token")
+    assert headers == {
+        "apikey": "valid-secret-token",
+        "Authorization": "Bearer valid-secret-token",
+    }
+
+
+def test_concurrent_bridge_claims_yield_distinct_rows(inbox, db, tenant):
+    """Multiple concurrent workers claiming inbox rows acquire distinct disjoint leases."""
+    txn1 = high_candidate(db, tenant)
+    txn2 = high_candidate(db, tenant)
+    body1 = event(txn1)
+    body2 = event(txn2)
+    assert enqueue(inbox, body1) is True
+    assert enqueue(inbox, body2) is True
+
+    claim1 = inbox.execute(
+        "select * from public.sentinel_claim_webhooks(1, 'SIMULATED')"
+    ).fetchall()
+    claim2 = inbox.execute(
+        "select * from public.sentinel_claim_webhooks(1, 'SIMULATED')"
+    ).fetchall()
+
+    assert len(claim1) == 1
+    assert len(claim2) == 1
+    assert claim1[0]["id"] != claim2[0]["id"]
+    assert claim1[0]["lease_token"] != claim2[0]["lease_token"]
+    assert claim1[0]["status"] == "RUNNING"
+    assert claim2[0]["status"] == "RUNNING"
+
+
+def test_merchant_isolation_for_webhooks(db, tenant, other_tenant, inbox, fixture_api):
+    """Webhooks for Tenant A reconcile against Tenant A, never mutating Tenant B."""
+    txn_a = high_candidate(db, tenant)
+    txn_b = high_candidate(db, other_tenant)
+
+    body_a = event(txn_a)
+    assert enqueue(inbox, body_a) is True
+    assert forward(inbox, fixture_api) == 1
+
+    db.expire_all()
+    assert db.get(Transaction, txn_a.id).status is TransactionStatus.CAPTURED
+    assert db.get(Transaction, txn_b.id).status is TransactionStatus.ORDER_CREATED
+    assert (
+        db.scalar(
+            select(func.count())
+            .select_from(PaymentEvent)
+            .where(PaymentEvent.merchant_id == other_tenant.merchant.id)
+        )
+        == 0
+    )
+
+
+def test_supabase_rpc_failure_backs_off_without_acknowledgment(db, tenant, inbox):
+    """When Supabase RPC fails during claim, the worker backs off without false acknowledgment."""
+    txn = high_candidate(db, tenant)
+    assert enqueue(inbox, event(txn)) is True
+
+    def broken_rpc(request):
+        raise httpx.HTTPStatusError("RPC 503", request=request, response=httpx.Response(503))
+
+    with (
+        httpx.Client(
+            base_url="https://example.supabase.co/rest/v1/rpc/",
+            transport=httpx.MockTransport(broken_rpc),
+        ) as client,
+        httpx.Client(base_url="http://localhost") as api,
+        pytest.raises(httpx.HTTPStatusError),
+    ):
+        poll_once(client, api, fixtures=True, fixture_key=FIXTURE_KEY)
+
+    row = inbox.execute("select * from public.sentinel_webhook_inbox").fetchone()
+    assert row["status"] == "PENDING"
+    assert row["processed_at"] is None
+
+

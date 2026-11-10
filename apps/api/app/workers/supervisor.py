@@ -6,6 +6,7 @@ import subprocess
 import sys
 import time
 from ipaddress import IPv4Network, IPv6Network, collapse_addresses, ip_network
+from pathlib import Path
 
 from app.core.config import get_settings
 
@@ -61,8 +62,14 @@ def main() -> None:
     signal.signal(signal.SIGTERM, stop)
     signal.signal(signal.SIGINT, stop)
     failures = [0 for _ in commands]
+    api_dir = str(Path(__file__).resolve().parents[2])
+    env = os.environ.copy()
+    if "PYTHONPATH" in env:
+        env["PYTHONPATH"] = f"{api_dir}{os.pathsep}{env['PYTHONPATH']}"
+    else:
+        env["PYTHONPATH"] = api_dir
     try:
-        children = [subprocess.Popen(command) for command in commands]  # noqa: S603
+        children = [subprocess.Popen(command, cwd=api_dir, env=env) for command in commands]  # noqa: S603
         while not stopping:
             for i, child in enumerate(children):
                 if child.poll() is not None:
@@ -71,7 +78,7 @@ def main() -> None:
                         raise SystemExit("Worker restart budget exhausted")
                     time.sleep(min(5, failures[i]))
                     if not stopping:
-                        children[i] = subprocess.Popen(commands[i])  # noqa: S603
+                        children[i] = subprocess.Popen(commands[i], cwd=api_dir, env=env)  # noqa: S603
             time.sleep(1)
     finally:
         for child in children:

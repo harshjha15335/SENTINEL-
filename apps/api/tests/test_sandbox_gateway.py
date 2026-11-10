@@ -45,8 +45,60 @@ def test_create_order_sends_server_amount_and_idempotency_header() -> None:
     assert body["intent"] == "CAPTURE"
     assert body["purchase_units"][0]["amount"]["value"] == "59.97"
     assert body["purchase_units"][0]["items"][0]["quantity"] == "3"
+    exp = body["payment_source"]["paypal"]["experience_context"]
+    assert exp["return_url"] == "http://127.0.0.1:8040/api/v1/paypal/return"
+    assert exp["cancel_url"] == "http://127.0.0.1:8040/api/v1/paypal/cancel"
     assert result.status == "PAYER_ACTION_REQUIRED"
     assert result.approve_url and "checkoutnow" in result.approve_url
+
+
+def test_create_order_respects_custom_return_and_cancel_urls() -> None:
+    fake = FakePayPal()
+    custom = CreateOrderInput(
+        reference_id="ref-cust",
+        request_id="req-cust",
+        items=[LineItem("Widget", "SKU-1", 1, Money(1000, "USD"))],
+        return_url="https://sentinel.internal/app/return",
+        cancel_url="https://sentinel.internal/app/cancel",
+    )
+    _gateway(fake).create_order(custom)
+    req = fake.calls[-1]
+    body = json.loads(req.content)
+    exp = body["payment_source"]["paypal"]["experience_context"]
+    assert exp["return_url"] == "https://sentinel.internal/app/return"
+    assert exp["cancel_url"] == "https://sentinel.internal/app/cancel"
+
+
+def test_checkout_redirect_url_validation() -> None:
+    import pytest
+
+    from app.core.config import validate_checkout_url
+
+    # Safe URLs pass
+    assert (
+        validate_checkout_url("https://example.org/return")
+        == "https://example.org/return"
+    )
+    assert (
+        validate_checkout_url("http://127.0.0.1:8040/callback")
+        == "http://127.0.0.1:8040/callback"
+    )
+    assert (
+        validate_checkout_url("http://localhost:3000/done")
+        == "http://localhost:3000/done"
+    )
+
+    # Insecure external HTTP is rejected
+    with pytest.raises(ValueError, match="insecure http is only permitted on loopback"):
+        validate_checkout_url("http://insecure-external.com/return")
+
+    # Embedded credentials rejected
+    with pytest.raises(ValueError, match="must not contain user credentials"):
+        validate_checkout_url("https://user:pass@example.com/return")
+
+    # CRLF injection rejected
+    with pytest.raises(ValueError, match="whitespace or control characters"):
+        validate_checkout_url("https://example.com/return\r\ninjected")
 
 
 def test_token_is_cached_and_refreshed_on_401() -> None:

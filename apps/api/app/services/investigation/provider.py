@@ -11,7 +11,6 @@ from dataclasses import dataclass, replace
 from typing import Any
 
 import pydantic_ai
-from google.genai.types import FunctionCallingConfigMode
 from pydantic_ai.models import Model, ModelRequestParameters
 from pydantic_ai.models.google import GoogleModel
 from pydantic_ai.profiles.google import GoogleJsonSchemaTransformer

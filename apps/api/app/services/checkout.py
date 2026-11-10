@@ -42,6 +42,8 @@ def create_order(
     product_id: uuid.UUID,
     quantity: int,
     idempotency_key: str,
+    return_url: str | None = None,
+    cancel_url: str | None = None,
 ) -> Transaction:
     if not 1 <= quantity <= MAX_QUANTITY:
         raise DomainError(f"Quantity must be between 1 and {MAX_QUANTITY}")
@@ -95,6 +97,8 @@ def create_order(
                 request_id=txn.paypal_request_id,
                 description=f"SENTINEL demo: {product.name}"[:127],
                 items=[LineItem(product.name[:127], product.sku, quantity, unit)],
+                return_url=return_url,
+                cancel_url=cancel_url,
             )
         )
     except PayPalError as exc:
@@ -103,7 +107,7 @@ def create_order(
 
     txn.paypal_order_id = result.order_id
     txn.provider_status = result.status
-    txn.provider_summary = {"create": result.summary}
+    txn.provider_summary = {"create": {**result.summary, "approve_url": result.approve_url}}
     audit.record(
         db,
         action="paypal.order.created",

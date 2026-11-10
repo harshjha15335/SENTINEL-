@@ -86,6 +86,8 @@ class CreateOrderInput:
     items: list[LineItem]
     request_id: str
     description: str | None = None
+    return_url: str | None = None
+    cancel_url: str | None = None
 
     @property
     def total(self) -> Money:

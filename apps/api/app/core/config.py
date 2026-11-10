@@ -1,11 +1,72 @@
 """Typed application configuration loaded from environment variables."""
 
+import os
+import subprocess
+import sys
 from enum import StrEnum
 from functools import lru_cache
+from urllib.parse import urlsplit
 from uuid import UUID
 
 from pydantic import Field, SecretStr, field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+
+def validate_checkout_url(url: str, *, name: str = "checkout URL") -> str:
+    """Validate scheme, structure, and security of checkout redirect URLs.
+
+    Invariants:
+    - Must be valid HTTP (loopback/localhost only) or HTTPS
+    - Must not contain user credentials (user:pass@host)
+    - Must not contain whitespace, CRLF, or control characters
+    - Must not exceed PayPal's 2048 character limit
+    """
+    if not url or not isinstance(url, str):
+        raise ValueError(f"{name} must be a non-empty string")
+    cleaned = url.strip()
+    if any(c in cleaned for c in ("\r", "\n", "\t", " ")):
+        raise ValueError(f"{name} must not contain whitespace or control characters")
+    if len(cleaned) > 2048:
+        raise ValueError(f"{name} exceeds PayPal 2048-character limit")
+    parsed = urlsplit(cleaned)
+    if parsed.scheme not in ("http", "https"):
+        raise ValueError(f"{name} must use http or https scheme (got {parsed.scheme!r})")
+    if parsed.scheme == "http":
+        host = (parsed.hostname or "").lower()
+        if host not in ("127.0.0.1", "localhost", "::1"):
+            raise ValueError(
+                f"{name} insecure http is only permitted on loopback (got {parsed.hostname!r})"
+            )
+    if parsed.username or parsed.password:
+        raise ValueError(f"{name} must not contain user credentials")
+    return cleaned
+
+
+def _populate_windows_user_env() -> None:
+    if sys.platform != "win32" or "pytest" in sys.modules:
+        return
+    for var in (
+        "SENTINEL_PAYPAL_CLIENT_ID",
+        "SENTINEL_PAYPAL_CLIENT_SECRET",
+        "SENTINEL_PAYPAL_WEBHOOK_ID",
+    ):
+        if not os.environ.get(var):
+            try:
+                cmd = [
+                    "powershell",
+                    "-NoProfile",
+                    "-Command",
+                    f'[Environment]::GetEnvironmentVariable("{var}", "User")',
+                ]
+                res = subprocess.run(cmd, capture_output=True, text=True, timeout=2.0)  # noqa: S603
+                val = res.stdout.strip()
+                if val:
+                    os.environ[var] = val
+            except (subprocess.SubprocessError, OSError):
+                pass
+
+
+_populate_windows_user_env()
 
 
 class PayPalMode(StrEnum):
@@ -54,6 +115,8 @@ class Settings(BaseSettings):
     paypal_webhook_id: str | None = None
     paypal_timeout_seconds: float = 20.0
     refund_execution_enabled: bool = False
+    paypal_return_url: str | None = None
+    paypal_cancel_url: str | None = None
 
     # Investigation agent. Without a provider and key, only deterministic summaries are produced.
     ai_provider: AIProvider = AIProvider.NONE
@@ -124,6 +187,13 @@ class Settings(BaseSettings):
         if any(char.isspace() for char in normalized):
             raise ValueError("PayPal secret must be nonempty without embedded whitespace")
         return SecretStr(normalized)
+
+    @field_validator("paypal_return_url", "paypal_cancel_url")
+    @classmethod
+    def _validate_paypal_redirect_url(cls, value: str | None) -> str | None:
+        if not value:
+            return None
+        return validate_checkout_url(value)
 
     @model_validator(mode="after")
     def _no_partial_paypal_credentials(self) -> "Settings":

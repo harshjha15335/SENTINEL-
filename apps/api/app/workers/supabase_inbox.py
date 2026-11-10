@@ -69,15 +69,28 @@ def main() -> None:
     name = "supabase_fixture_bridge" if args.fixtures else "supabase_bridge"
     failures = 0
     next_metrics = 0.0
+    transport = httpx.HTTPTransport(
+        retries=1,
+        limits=httpx.Limits(max_keepalive_connections=5, max_connections=20, keepalive_expiry=10.0),
+        verify=True,
+    )
+    api_transport = httpx.HTTPTransport(
+        retries=2,
+        limits=httpx.Limits(max_keepalive_connections=5, max_connections=20, keepalive_expiry=5.0),
+    )
     with (
         httpx.Client(
             base_url=url.rstrip("/") + "/rest/v1/rpc/",
             headers={"apikey": key, "Authorization": f"Bearer {key}"},
             timeout=20,
             follow_redirects=False,
+            transport=transport,
         ) as client,
         httpx.Client(
-            base_url=api_url.rstrip("/"), timeout=30, follow_redirects=False
+            base_url=api_url.rstrip("/"),
+            timeout=30,
+            follow_redirects=False,
+            transport=api_transport,
         ) as api_client,
     ):
         while True:

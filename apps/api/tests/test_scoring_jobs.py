@@ -72,3 +72,34 @@ def test_failed_scoring_backoff_and_terminal_state_have_no_partial_assessment(
             job.available_at = datetime.now(UTC) - timedelta(seconds=1)
             db.commit()
     assert run_once() == 0
+
+
+def test_scoring_job_reuses_existing_capture_assessment(db, tenant):
+    """When scored upon capture, the webhook job links it without duplicate scoring."""
+    from app.services.risk.scoring import score_after_capture
+
+    txn = high_candidate(db, tenant)
+    txn.occurred_at = datetime(2026, 9, 1, 12, tzinfo=UTC)
+    score_after_capture(db, txn.id)
+    initial_assessment = db.scalar(
+        select(RiskAssessment).where(RiskAssessment.transaction_id == txn.id)
+    )
+    assert initial_assessment is not None
+    assert initial_assessment.trigger == "capture"
+
+    enqueue(db, txn.id)
+    job = db.scalar(select(RiskScoringJob).where(RiskScoringJob.transaction_id == txn.id))
+    job.available_at = datetime.now(UTC) - timedelta(seconds=1)
+    db.commit()
+
+    assert run_once() == 1
+    db.expire_all()
+    updated_job = db.scalar(select(RiskScoringJob).where(RiskScoringJob.transaction_id == txn.id))
+    assert updated_job.status == "COMPLETED"
+    assert updated_job.assessment_id == initial_assessment.id
+
+    assessments = db.scalars(
+        select(RiskAssessment).where(RiskAssessment.transaction_id == txn.id)
+    ).all()
+    assert len(assessments) == 1
+

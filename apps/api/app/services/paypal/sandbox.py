@@ -15,6 +15,7 @@ from typing import Any
 
 import httpx
 
+from app.core.config import get_settings, validate_checkout_url
 from app.models.enums import DataOrigin
 from app.services.paypal.parsing import parse_capture, parse_order
 from app.services.paypal.types import (
@@ -177,6 +178,20 @@ class SandboxPayPalGateway:
 
     def create_order(self, order: CreateOrderInput) -> OrderResult:
         total = order.total
+        settings = get_settings()
+        raw_return = (
+            order.return_url
+            or settings.paypal_return_url
+            or "http://127.0.0.1:8040/api/v1/paypal/return"
+        )
+        raw_cancel = (
+            order.cancel_url
+            or settings.paypal_cancel_url
+            or "http://127.0.0.1:8040/api/v1/paypal/cancel"
+        )
+        return_url = validate_checkout_url(raw_return, name="return_url")
+        cancel_url = validate_checkout_url(raw_cancel, name="cancel_url")
+
         body = {
             "intent": "CAPTURE",
             "purchase_units": [
@@ -214,6 +229,8 @@ class SandboxPayPalGateway:
                     "experience_context": {
                         "shipping_preference": "NO_SHIPPING",
                         "user_action": "PAY_NOW",
+                        "return_url": return_url,
+                        "cancel_url": cancel_url,
                     }
                 }
             },
