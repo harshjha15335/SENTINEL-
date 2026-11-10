@@ -32,6 +32,9 @@ export function AppNavigation() {
     previousPath.current = location.pathname;
     let latest = target;
     let active = true;
+    // Apply before paint so effect replays cannot mistake the outgoing scene's
+    // position for a same-path scroll position and preserve it on the new page.
+    window.scrollTo({ top: target, behavior: "instant" });
     const save = () => {
       try {
         sessionStorage.setItem(key, String(latest));

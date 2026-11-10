@@ -1,3 +1,7 @@
+# Current private preview correction
+
+See [14-private-preview-overlap.md](14-private-preview-overlap.md). The owner-private read-only Site is authorized for review; operational deployment remains PENDING. The dossier-entry overlap correction moves its CTA below the pinned reveal. Historical publication restrictions below refer to the earlier delivery and the operational app.
+
 # Current reconstruction — Phase 2
 
 See [13-phase2-reconstruction.md](13-phase2-reconstruction.md) for production routes, functionality preservation, verification and legacy removal. Gate 1 is APPROVED. Deployment/Gate 2 is PENDING. Older sections below are historical.

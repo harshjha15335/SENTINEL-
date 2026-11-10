@@ -188,9 +188,7 @@ function DesktopStory() {
           enter.style.visibility = show ? "visible" : "hidden";
           enter.inert = !show;
           if (show && footer?.contains(document.activeElement))
-            enter
-              .querySelector<HTMLAnchorElement>("a")
-              ?.focus({ preventScroll: true });
+            enter.querySelector<HTMLAnchorElement>("a")?.focus();
         }
         buttons.forEach((n, i) =>
           n.setAttribute("aria-current", i === s.stage ? "step" : "false"),
@@ -414,12 +412,6 @@ function DesktopStory() {
               <DemoDossier embedded />
             </div>
             <ReceiptMorph />
-            <div className="v2-scene-enter" inert>
-              <span>FROM PAYMENT TO PERSPECTIVE.</span>
-              <Link className="v2-button" to="/demo-payment">
-                Explore simulated demo <ArrowUpRight size={18} />
-              </Link>
-            </div>
             <footer className="v2-scene-footer">
               <span>
                 <ArrowDown size={15} /> SCROLL TO FOLLOW THE MONEY
@@ -443,6 +435,12 @@ function DesktopStory() {
               <i data-progress />
             </div>
           </section>
+        </div>
+        <div className="v2-scene-enter" inert>
+          <span>FROM PAYMENT TO PERSPECTIVE.</span>
+          <Link className="v2-button" to="/demo-payment">
+            Explore simulated demo <ArrowUpRight size={18} />
+          </Link>
         </div>
         <StoryAfter />
       </main>

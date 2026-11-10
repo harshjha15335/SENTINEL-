@@ -207,18 +207,16 @@
   min-height: 100vh;
 }
 .v2-scene-enter {
-  position: absolute;
-  right: 4.2vw;
-  bottom: 27px;
+  position: relative;
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
+  justify-content: flex-end;
   gap: 20px;
-  z-index: 5;
   visibility: hidden;
-  padding: 12px 14px 12px 22px;
-  border: 1px solid var(--border);
-  border-radius: 100px;
-  background: #f7f4ee;
+  padding: 24px 4.2vw;
+  border-top: 1px solid var(--border);
+  background: var(--background);
 }
 .v2-scene-enter > span {
   font:
@@ -511,9 +509,6 @@
 }
 .v2-scene-footer > span:last-child {
   display: none;
-}
-.v2-scene-enter {
-  z-index: 7;
 }
 .v2-scene-enter > span {
   font-size: 11px;

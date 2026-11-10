@@ -188,3 +188,44 @@ test("receipt becomes native dossier header without any workspace text scaling",
   expect(Math.abs((carried?.y ?? 0) - (target?.y ?? 0))).toBeLessThan(1);
   await expect(page.locator("[data-note]")).toHaveCount(6);
 });
+
+for (const viewport of [
+  { width: 1890, height: 652 },
+  { width: 1440, height: 900 },
+  { width: 1280, height: 720 },
+  { width: 1024, height: 768 },
+  { width: 945, height: 326 },
+]) {
+  test(`dossier entry action does not cover the reveal at ${viewport.width}x${viewport.height}`, async ({
+    page,
+  }) => {
+    await page.setViewportSize(viewport);
+    await page.goto("/");
+    await page.locator(".v2-money-art").waitFor();
+    await page.evaluate(() => document.fonts.ready);
+    await page.evaluate(() => scrollTo(0, innerHeight * 4 * 0.999));
+    await expect(page.locator(".v2-story")).toHaveAttribute("data-stage", "6");
+    const frame = await page.locator("[data-dossier-frame]").boundingBox();
+    const action = page.locator(".v2-scene-enter");
+    await expect(action).toBeVisible();
+    const actionBounds = await action.boundingBox();
+    expect(frame).not.toBeNull();
+    expect(actionBounds).not.toBeNull();
+    if (!frame || !actionBounds)
+      throw new Error("Missing reveal or entry action bounds");
+    expect(actionBounds.y).toBeGreaterThanOrEqual(frame.y + frame.height - 1);
+    await action
+      .getByRole("link", { name: "Explore simulated demo", exact: true })
+      .click();
+    await expect(page).toHaveURL(/\/demo-payment$/);
+    await expect(
+      page.getByRole("heading", { name: "Payment dossier.", exact: true }),
+    ).toBeInViewport();
+    await expect.poll(() => page.evaluate(() => scrollY)).toBe(0);
+    expect(
+      await page.evaluate(
+        () => document.documentElement.scrollWidth - innerWidth,
+      ),
+    ).toBeLessThanOrEqual(1);
+  });
+}
