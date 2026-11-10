@@ -1,5 +1,9 @@
 # Implementation Status
 
+## SENTINEL Gate 2C loading stability — 10 November 2026
+
+Targeted frontend correction complete. All 18 controlled primary-page samples have CLS 0; 18 throttled samples have maximum CLS 0.001552. Gate 2B transaction maximum was 0.575 mobile. Preserved all 9,064 transactions, 1,824 assessments and 179 cases; no backend/model/contracts or approved homepage changes. Verified 49 frontend unit tests, 24 static/CSP/loading browser tests, 26 operational browser tests, 10 snapshot tests, typing, lint, all three builds and production isolation. See [Gate 2C report](sentinel-v2/17-gate2c-loading-stability.md) and the delivery evidence for detailed measurements. Secondary mobile case-detail CLS remains 0.119 in one exploratory sample; throttled full-data readiness reaches about 8.5s. No field-performance or actual-host claim. DESIGN APPROVAL: APPROVED. DEPLOYMENT APPROVAL: PENDING. No push, merge, resources or deployment.
+
 ## SENTINEL Gate 2B static host preparation — 10 November 2026
 
 Cloudflare Pages preparation is isolated under [hosting/cloudflare-pages](../hosting/cloudflare-pages/README.md). The approved Gate 2A portable payload remains byte-for-byte unchanged; only reviewed `_headers` and a physical-path recovery `404.html` are added. Snapshot revalidation confirms 9,064 transactions, 1,824 assessments, 179 cases and zero unresolved references. No backend, hosting resources, sharing settings, pushes, merges or deployments changed. DESIGN APPROVAL: APPROVED. DEPLOYMENT APPROVAL: PENDING.

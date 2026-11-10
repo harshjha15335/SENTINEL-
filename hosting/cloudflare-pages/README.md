@@ -4,19 +4,19 @@ DESIGN APPROVAL: APPROVED
 
 DEPLOYMENT APPROVAL: PENDING
 
-This is an isolated static-host configuration for the immutable Gate 2A portable/hash application at `5261ebf24c9e2c58949fc883e8c377acea101d37`. No application/backend/model source changes are needed. No Cloudflare project, account setting, DNS record, sharing permission or deployment has been created or changed. Existing private review hosting is untouched.
+This is the reviewed static-host configuration reused for the Gate 2C loading-stability application at `06139049a88a32e609229cd8a700037ce6c37b10`. The accepted `_headers` and `404.html` are unchanged. The frontend correction reserves loading geometry and activates the existing fonts early; backend/models/contracts and the approved homepage are unchanged. No Cloudflare project, account setting, DNS record, sharing permission or deployment has been created or changed. Existing private review hosting is untouched.
 
 ## Reproduce without hosting actions
 
 Commit configuration first. From repository root:
 
 ```sh
-python hosting/cloudflare-pages/prepare.py /path/to/SENTINEL-Gate2A-static-candidates.zip /path/to/NEW-release-directory
+python hosting/cloudflare-pages/prepare.py /path/to/SENTINEL-Gate2C-static-candidates.zip /path/to/NEW-release-directory
 ```
 
 The exact future publish root is `NEW-release-directory/publish`. Its contents are also archived in `NEW-release-directory/cloudflare-publish.zip`, with `_headers` and a plain accessible `404.html` at the ZIP root. Do not upload the containing release directory, reports, manifests, credentials or recovery bundles. `HOST-MANIFEST.json` and `SHA256SUMS` stay outside `publish`.
 
-Preparation verifies the exact Gate 2A input archive hash, every original checksum and manifest, application revision, snapshot closure/privacy/counts, Cloudflare header/file limits and a clean source revision. The 58 portable application/data files are copied unchanged; only `_headers` and `404.html` are added. The existing Gate 2A package and source recovery are preserved.
+Preparation pins the newly verified static archive hash and frontend revision, verifies every checksum/manifest and the exact original snapshot, and checks header/file limits and a clean source revision. Its 54 portable application/data files are copied unchanged into the host package; only the same reviewed `_headers` and `404.html` are added (56 files). Historical Gate 2A and Gate 2B packages and recovery are preserved. The reduced JS file count reflects eager/shared chunk consolidation, not fewer records or table features.
 
 ## Proposed Pages settings — only after explicit authorization
 
@@ -72,15 +72,17 @@ node hosting/cloudflare-pages/lab.mjs https://127.0.0.1:9448 /private/performanc
 
 The lab uses three fresh-browser runs per scenario and viewport for homepage, transaction grid and fully loaded recorded risk. Desktop uses normal CPU; mobile uses a simulated 4× CPU slowdown with a 390×844 viewport. Networking is unthrottled loopback and the preview server is warm. Observed LCP/CLS and readiness times are diagnostic samples, not a real-phone or CDN prediction.
 
+For the Gate 2C detailed lab, run `stability-lab.mjs ORIGIN OUTPUT controlled` and then `stability-lab.mjs ORIGIN OUTPUT stress` sequentially, without competing builds/browser suites. Both retain raw layout entries; stress adds simulated CPU/network constraints. The local probes accept an optional origin as their third argument, so isolated test ports can preserve historical candidates.
+
 ## Actual-host smoke plan — remains pending
 
 After an explicitly authorized deployment, use a trusted HTTPS client without certificate bypass. Verify HTTP redirects to the correct HTTPS hostname; root and hash-linked views open; all module/font/CSS/data requests use the approved origin and MIME types; `_headers` is not publicly served; unknown physical paths return a genuine recovery 404. Check the CSP and all security headers, with no duplicate/conflicting cache values. Confirm framing and inline-script rejection.
 
 Request representative HTML, hashed JS/CSS/fonts and every JSON file with `Accept-Encoding: br` and `gzip`; check negotiated encoding, decoded hashes against the manifest, ETag/304 behavior, HTML/JSON revalidation and immutable asset policy. Do not infer compression merely from an `Accept-Encoding` request. Repeat the functional browser suite with normal TLS validation, inspect browser CSP/network errors, then test keyboard, reduced motion, forward/reverse scrolling, mobile and network loading at the public hostname. Confirm zero merchant API, provider, external resource or write requests in normal use. Do not enable optional analytics or other script injection without separate review; inspect the final HTML/network for unreviewed additions. Save headers/results, actual deployment ID and manifest hash before handing out a judge URL. Reload long-lived tabs after a release or rollback.
 
-## Observed local performance — not a field certification
+## Historical Gate 2B performance — superseded by Gate 2C measurements
 
-Three samples per scenario produced median readiness of 1.29s desktop / 2.22s simulated mobile for the homepage, 2.10s / 3.93s for transactions, and 1.51s / 3.86s for fully loaded recorded risk. Homepage observed CLS was zero. Record-view layout shifts remain material: maximum sampled transaction CLS was 0.315 desktop / 0.575 mobile; recorded-risk CLS was 0.082 / 0.240. Mobile is 390×844 with simulated 4× CPU slowdown, not a real device; networking is unthrottled loopback with a warm server. No performance budget or field Core Web Vitals pass is claimed. Review/accept or separately address these loading/layout concerns before publication; do not silently alter the approved immutable application during host preparation.
+Three samples per scenario produced median readiness of 1.29s desktop / 2.22s simulated mobile for the homepage, 2.10s / 3.93s for transactions, and 1.51s / 3.86s for fully loaded recorded risk. Homepage observed CLS was zero. Record-view layout shifts remain material: maximum sampled transaction CLS was 0.315 desktop / 0.575 mobile; recorded-risk CLS was 0.082 / 0.240. Mobile is 390×844 with simulated 4× CPU slowdown, not a real device; networking is unthrottled loopback with a warm server. No performance budget or field Core Web Vitals pass is claimed. Gate 2C explicitly authorizes the targeted loading-stability correction. See `docs/sentinel-v2/17-gate2c-loading-stability.md` and the Gate 2C delivery report for before/after results and all samples. No field Core Web Vitals claim is made.
 
 ## Rollback
 

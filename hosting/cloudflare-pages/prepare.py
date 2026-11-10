@@ -1,6 +1,6 @@
-"""Verify the immutable Gate 2A package and add only reviewed static-host configuration.
+"""Verify the immutable reviewed static package and add only reviewed static-host configuration.
 
-Usage: python hosting/cloudflare-pages/prepare.py GATE2A_ZIP NEW_RELEASE_DIRECTORY
+Usage: python hosting/cloudflare-pages/prepare.py STATIC_CANDIDATES_ZIP NEW_RELEASE_DIRECTORY
 Only NEW_RELEASE_DIRECTORY/publish is a future publish root. This script never deploys.
 """
 
@@ -16,8 +16,8 @@ from zipfile import ZIP_DEFLATED, ZipFile, ZipInfo
 
 ROOT = Path(__file__).resolve().parents[2]
 CONFIG = Path(__file__).resolve().parent
-INPUT_SHA = "40d7818056312e178f7d8911f8cf9dd2c299f262e0c2c280162d0cc90e984f1c"
-INPUT_SOURCE = "5261ebf24c9e2c58949fc883e8c377acea101d37"
+INPUT_SHA = "7fb7d4f9458b00d597b309b3cc2f12e597dc22d06cbad53c0c177ac373d7c0c9"
+INPUT_SOURCE = "06139049a88a32e609229cd8a700037ce6c37b10"
 spec = importlib.util.spec_from_file_location(
     "validator", ROOT / "apps/api/scripts/validate_static_demo.py"
 )
@@ -29,7 +29,7 @@ def prepare(archive, release):
     if release.exists():
         raise ValueError("Refusing to overwrite an existing release")
     if hashlib.sha256(archive.read_bytes()).hexdigest() != INPUT_SHA:
-        raise ValueError("Unexpected Gate 2A package hash")
+        raise ValueError("Unexpected reviewed static package hash")
     payload = {}
     with ZipFile(archive) as source:
         if source.testzip() is not None:
