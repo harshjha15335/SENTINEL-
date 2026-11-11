@@ -1,5 +1,21 @@
 # Implementation Status
 
+## SENTINEL Gate 2C loading stability — 10 November 2026
+
+Targeted frontend correction complete. All 18 controlled primary-page samples have CLS 0; 18 throttled samples have maximum CLS 0.001552. Gate 2B transaction maximum was 0.575 mobile. Preserved all 9,064 transactions, 1,824 assessments and 179 cases; no backend/model/contracts or approved homepage changes. Verified 49 frontend unit tests, 24 static/CSP/loading browser tests, 26 operational browser tests, 10 snapshot tests, typing, lint, all three builds and production isolation. See [Gate 2C report](sentinel-v2/17-gate2c-loading-stability.md) and the delivery evidence for detailed measurements. Secondary mobile case-detail CLS remains 0.119 in one exploratory sample; throttled full-data readiness reaches about 8.5s. No field-performance or actual-host claim. DESIGN APPROVAL: APPROVED. DEPLOYMENT APPROVAL: PENDING. No push, merge, resources or deployment.
+
+## SENTINEL Gate 2B static host preparation — 10 November 2026
+
+Cloudflare Pages preparation is isolated under [hosting/cloudflare-pages](../hosting/cloudflare-pages/README.md). The approved Gate 2A portable payload remains byte-for-byte unchanged; only reviewed `_headers` and a physical-path recovery `404.html` are added. Snapshot revalidation confirms 9,064 transactions, 1,824 assessments, 179 cases and zero unresolved references. No backend, hosting resources, sharing settings, pushes, merges or deployments changed. DESIGN APPROVAL: APPROVED. DEPLOYMENT APPROVAL: PENDING.
+
+Executed locally: type checking/lint, 10 snapshot regression tests, 18 desktop/mobile Chromium tests with enforced CSP, and 118 encoding/decoded-hash/ETag checks covering 59 served files. The browser checks include actual wallet scroll/reverse, reduced motion, keyboard, search, recorded risk/cases/model, read-only restrictions and intentional inline-script rejection. Cloudflare's current official documentation was reviewed from its pinned GitHub source because the documentation domain is blocked in this executor. Provider acceptance/HTTPS/cache behavior at an actual hostname remains untested.
+
+Lab performance: three cold-browser samples per scenario/device, warm loopback HTTPS server, no network throttling; mobile uses viewport emulation plus simulated 4× CPU slowdown. Median ready times: homepage 1.29s desktop / 2.22s mobile; transactions 2.10s / 3.93s; recorded risk 1.51s / 3.86s. Homepage observed CLS was zero, but transaction-grid maximum observed CLS reached 0.315 desktop / 0.575 mobile; recorded risk reached 0.082 / 0.240. These are documented performance concerns, not passing field Core Web Vitals. Preserve the verified application; accept or address record-view layout/loading concerns deliberately before publication. Actual-host performance and wider browser/device testing remain pending.
+
+## SENTINEL V2 frontend reconstruction — 10 November 2026
+
+Gate 1 was explicitly approved. The complete operational frontend and public Follow the Money homepage have been reconstructed locally; `/app` is the authenticated entry, with compatible legacy deep links. See [Phase 2 report](sentinel-v2/13-phase2-reconstruction.md). Backend, ML, database and API contracts remain unchanged. Final delivery evidence records test counts and review limits. Deployment/Gate 2 remains PENDING; no push, merge or deployment occurred.
+
 ## Latest next-phase implementation — 6 November 2026
 
 The new [technical report](NEXT_PHASE_REPORT.md) supersedes older feature-status and environment observations below. Guarded refunds, dispute preparation, validation-only Policy Lab, scoped monitoring/network views and a refreshed judge scenario are now implemented locally. Actual hosting, genuine PayPal/AI and remote bridge access remain separately blocked/unverified. See [setup](NEXT_PHASE_SETUP.md), [runbook](NEXT_PHASE_RUNBOOK.md), [architecture](NEXT_PHASE_ARCHITECTURE.md) and [demo](NEXT_PHASE_DEMO.md). Earlier dated inventories remain historical.
@@ -156,3 +172,13 @@ Historical implementation baseline: 2026-10-11 (session 3). Current Session 8 re
   - graph analytics and explorer
   - policy lab
 - **Phase 6:** deployment, CSP, security review, demo video.
+
+### Local V2 creative reset — Follow the Money (2026-11-09)
+
+The isolated development preview is replaced with an original wallet/money narrative and warm ivory/electric-purple identity, per explicit rejection of the reel design. New horizontal navigation, chronological payment casefile, read-only transaction explorer and clearly labeled simulated Command Center composition are scoped to the preview. Existing operational screens, backend, auth and production routes remain intact. See `docs/sentinel-v2/09-money-trail-reset.md` and the delivered test report for verification; prior reel captures are historical. Design and deployment approval remain PENDING. No broad Phase 2 migration, push, merge or deployment.
+
+Follow the Money validation: 43 frontend tests; 262 backend passed and one skipped; 19 Chromium tests plus three targeted transition rechecks; typing/lint/builds/production isolation and additional desktop/mobile accessibility audits passed. See `docs/sentinel-v2/10-money-trail-qa.md` for execution details and limits.
+
+### Final Gate 1 visual polish — 10 November 2026 (Asia/Calcutta)
+
+Retained the preferred Follow the Money direction and isolated scope. Wallet folds/pockets/bill layers, six staggered curled notes, native receipt-to-header transformation (no scaled workspace text), larger small labels, SVG navigation icons and explicit simulated/authenticated entry are implemented. Command Center remains a labeled simulated composition prototype; Phase 2 has not begun. Verification: 43 frontend passed; 262 backend passed, one provider skip; 20 Chromium passed plus the affected morph recheck; typing/lint, normal/static builds and production isolation passed. See `docs/sentinel-v2/11-gate1-polish.md` and the new approval ZIP for exact SHA, captures and limitations. Both approvals remain PENDING. No backend, auth, contract, infrastructure or legacy-screen source changes; no push, merge or deployment.

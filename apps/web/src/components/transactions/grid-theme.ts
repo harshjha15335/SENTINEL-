@@ -4,7 +4,6 @@ import {
   ModuleRegistry,
   TooltipModule,
   ValidationModule,
-  colorSchemeDark,
   themeQuartz,
 } from "ag-grid-community";
 
@@ -19,20 +18,20 @@ ModuleRegistry.registerModules([
   ...(import.meta.env.DEV ? [ValidationModule] : []),
 ]);
 
-export const sentinelGridTheme = themeQuartz.withPart(colorSchemeDark).withParams({
-  backgroundColor: "#0f161e",
-  foregroundColor: "#e6ebf1",
-  chromeBackgroundColor: "#0f161e",
-  headerTextColor: "#a7b2bf",
+export const sentinelGridTheme = themeQuartz.withParams({
+  backgroundColor: "#F7F4EE",
+  foregroundColor: "#201A2B",
+  chromeBackgroundColor: "#F7F4EE",
+  headerTextColor: "#686273",
   headerFontWeight: 500,
   headerFontSize: 12,
-  borderColor: "#1f2a37",
-  rowHoverColor: "#141d27",
-  accentColor: "#5b9bf0",
-  fontFamily: "'IBM Plex Sans', ui-sans-serif, system-ui, sans-serif",
+  borderColor: "#DED7E5",
+  rowHoverColor: "#EFEBF5",
+  accentColor: "#7547EB",
+  fontFamily: "'DM Sans', ui-sans-serif, system-ui, sans-serif",
   fontSize: 13,
-  browserColorScheme: "dark",
+  browserColorScheme: "light",
   columnBorder: false,
-  wrapperBorderRadius: 10,
-  spacing: 6,
+  wrapperBorderRadius: 0,
+  spacing: 9,
 });

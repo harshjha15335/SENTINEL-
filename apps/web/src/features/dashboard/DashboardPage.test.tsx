@@ -15,12 +15,24 @@ describe("DashboardPage", () => {
           transactions_total: 3,
           by_status: { CAPTURED: 2, CAPTURE_FAILED: 1 },
           captured_by_origin: [
-            { data_origin: "LIVE_SANDBOX", currency: "USD", captured_count: 1, captured_amount_minor: 24900 },
-            { data_origin: "SIMULATED", currency: "USD", captured_count: 1, captured_amount_minor: 1900 },
+            {
+              data_origin: "LIVE_SANDBOX",
+              currency: "USD",
+              captured_count: 1,
+              captured_amount_minor: 24900,
+            },
+            {
+              data_origin: "SIMULATED",
+              currency: "USD",
+              captured_count: 1,
+              captured_amount_minor: 1900,
+            },
           ],
           webhook_events: { PROCESSED: 2 },
           recent: [txn()],
-          open_cases_by_origin: [{ data_origin: "SYNTHETIC_DEMO", key: "HIGH", count: 3 }],
+          open_cases_by_origin: [
+            { data_origin: "SYNTHETIC_DEMO", key: "HIGH", count: 3 },
+          ],
           risk_bands_by_origin: [
             { data_origin: "SYNTHETIC_DEMO", key: "HIGH", count: 3 },
             { data_origin: "SYNTHETIC_DEMO", key: "LOW", count: 17 },
@@ -31,27 +43,124 @@ describe("DashboardPage", () => {
     renderWithProviders(<DashboardPage />);
     expect(await screen.findByText("$249.00")).toBeInTheDocument();
     expect(screen.getByText("$19.00")).toBeInTheDocument();
-    expect(screen.getByLabelText(/Data origin: Live sandbox/)).toBeInTheDocument();
+    expect(
+      screen.getByLabelText(/Data origin: Live sandbox/),
+    ).toBeInTheDocument();
     expect(screen.getByText(/2 processed/)).toBeInTheDocument();
-    expect(screen.getByText("20 scored: 3 high · 0 medium · 17 low")).toBeInTheDocument();
+    expect(
+      screen.getByText("20 scored: 3 high · 0 medium · 17 low"),
+    ).toBeInTheDocument();
   });
 
   it("shows an empty state with a next step", async () => {
     mockApi([
-      { path: "/api/v1/dashboard/summary", body: { transactions_total: 0, by_status: {}, captured_by_origin: [], webhook_events: {}, recent: [], open_cases_by_origin: [], risk_bands_by_origin: [] } },
+      {
+        path: "/api/v1/dashboard/summary",
+        body: {
+          transactions_total: 0,
+          by_status: {},
+          captured_by_origin: [],
+          webhook_events: {},
+          recent: [],
+          open_cases_by_origin: [],
+          risk_bands_by_origin: [],
+        },
+      },
     ]);
     renderWithProviders(<DashboardPage />);
-    expect(await screen.findByText("No captured payments yet")).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "Run a sandbox checkout" })).toBeInTheDocument();
+    expect(
+      await screen.findByText("No captured payments yet"),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("link", { name: "Run a sandbox checkout" }),
+    ).toBeInTheDocument();
   });
 
   it("shows errors with the correlation reference", async () => {
     vi.stubGlobal(
       "fetch",
-      vi.fn(async () => new Response(JSON.stringify({ error: { code: "x", message: "Database unavailable" } }), { status: 503, headers: { "x-correlation-id": "abc123def456" } })),
+      vi.fn(
+        async () =>
+          new Response(
+            JSON.stringify({
+              error: { code: "x", message: "Database unavailable" },
+            }),
+            { status: 503, headers: { "x-correlation-id": "abc123def456" } },
+          ),
+      ),
     );
     renderWithProviders(<DashboardPage />);
-    expect(await screen.findByRole("alert")).toHaveTextContent("Database unavailable");
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "Database unavailable",
+    );
     expect(screen.getByText("Reference abc123def456")).toBeInTheDocument();
+  });
+  it("uses the existing case service for the decision desk and retains origin labels", async () => {
+    mockApi([
+      {
+        path: "/api/v1/dashboard/summary",
+        body: {
+          transactions_total: 1,
+          by_status: { CAPTURED: 1 },
+          captured_by_origin: [],
+          webhook_events: {},
+          recent: [],
+          open_cases_by_origin: [],
+          risk_bands_by_origin: [],
+        },
+      },
+      {
+        path: /\/cases\?limit=3&offset=0&status=OPEN&priority=HIGH$/,
+        body: {
+          total: 7,
+          items: [
+            {
+              id: "real-case",
+              title: "Recorded review case",
+              data_origin: "SYNTHETIC_DEMO",
+              due_at: "2026-11-10T12:00:00Z",
+              transaction: txn({ amount_minor: 9900 }),
+            },
+          ],
+        },
+      },
+    ]);
+    renderWithProviders(<DashboardPage />);
+    expect(await screen.findByText("Recorded review case")).toBeInTheDocument();
+    expect(screen.getByText("7 OPEN HIGH-PRIORITY CASES")).toBeInTheDocument();
+    expect(screen.getByText("$99.00")).toBeInTheDocument();
+    expect(
+      screen.getByRole("link", { name: "Review the case" }),
+    ).toHaveAttribute("href", "/app/cases/real-case");
+  });
+  it("keeps a queue API failure as an error rather than showing illustrative cases", async () => {
+    mockApi([
+      {
+        path: "/api/v1/dashboard/summary",
+        body: {
+          transactions_total: 0,
+          by_status: {},
+          captured_by_origin: [],
+          webhook_events: {},
+          recent: [],
+          open_cases_by_origin: [],
+          risk_bands_by_origin: [],
+        },
+      },
+      {
+        path: /\/cases\?/,
+        status: 503,
+        body: {
+          error: { code: "unavailable", message: "Review queue unavailable" },
+        },
+      },
+    ]);
+    renderWithProviders(<DashboardPage />);
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "Review queue unavailable",
+    );
+    expect(
+      screen.queryByRole("link", { name: "Review the case" }),
+    ).not.toBeInTheDocument();
   });
 });
