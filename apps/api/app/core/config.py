@@ -158,6 +158,10 @@ class Settings(BaseSettings):
     # Local-only deterministic webhook ingress. Never enabled in production.
     allow_webhook_fixtures: bool = False
     require_workers_ready: bool = False
+    # A configured bridge is mandatory even in fixture mode; absence is intentional
+    # only for fixture-only installations. Secrets never appear in health output.
+    supabase_url: str | None = None
+    supabase_service_role_key: SecretStr | None = None
     # Global inbox aggregates are visible only to this installation operator's merchant.
     # Tenant administrators otherwise see their own application queues only.
     operations_inbox_merchant_id: UUID | None = None
@@ -256,6 +260,50 @@ class Settings(BaseSettings):
                 "SENTINEL_PAYPAL_CLIENT_ID and SENTINEL_PAYPAL_CLIENT_SECRET must be set together"
             )
         return self
+
+    @model_validator(mode="after")
+    def _complete_supabase_configuration(self) -> "Settings":
+        has_url = bool(self.supabase_url)
+        has_key = self.supabase_service_role_key is not None and bool(
+            self.supabase_service_role_key.get_secret_value().strip()
+        )
+        if has_url != has_key:
+            raise ValueError("Supabase URL and service-role key must be configured together")
+        if self.supabase_url:
+            try:
+                parsed = urlsplit(self.supabase_url)
+                valid = (
+                    parsed.scheme == "https"
+                    and parsed.hostname is not None
+                    and parsed.hostname.endswith(".supabase.co")
+                    and parsed.username is None
+                    and parsed.password is None
+                    and parsed.port is None
+                    and parsed.path in ("", "/")
+                    and not parsed.query
+                    and not parsed.fragment
+                    and not any(
+                        c.isspace() or unicodedata.category(c).startswith("C")
+                        for c in self.supabase_url
+                    )
+                )
+            except ValueError:
+                valid = False
+            if not valid:
+                raise ValueError("Supabase requires a valid project HTTPS origin")
+        return self
+
+    @property
+    def supabase_configured(self) -> bool:
+        return bool(self.supabase_url and self.supabase_service_role_key)
+
+    @property
+    def bridge_required(self) -> bool:
+        return self.paypal_mode is PayPalMode.SANDBOX or self.supabase_configured
+
+    @property
+    def worker_configuration_ready(self) -> bool:
+        return not self.bridge_required or self.supabase_configured
 
     @property
     def ai_configured(self) -> bool:

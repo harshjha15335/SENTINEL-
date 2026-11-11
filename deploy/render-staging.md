@@ -1,196 +1,269 @@
-# SENTINEL V2 — Render staging Blueprint handoff
+# SENTINEL V2 — Render staging compatibility handoff
 
-Status: LOCAL REVIEW CANDIDATE; APPLICATION COMPATIBILITY BLOCKED; NOT APPROVED TO APPLY.
-Date: 2026-11-11. Render is the only authorized hosting destination.
+Review date: 12 November 2026 (Asia/Calcutta). LOCAL ONLY. No push, PR action,
+merge, Blueprint creation/application, Render resource modification, genuine
+PayPal/webhook operation, paid AI call or Render credit consumption.
 
-## Target and evidence
+## Source and checkpoint
 
-- Existing project: Sentinel, `prj-dbq48lon74is739m7nl0`.
-- Workspace: My Workspace, `tea-d8gorhflk1mc73f4pmr0`.
-- Environment: Staging (capitalization intentional).
-- Owner reports Staging has 0 services, 0 environment groups and no deployed resources.
-  This is owner-verified evidence, not an independent project inspection, and does not
-  establish absence of a Blueprint or external deployment integration.
-- Latest scoped workspace service inventory returned only an unrelated meeting-intelligence
-  service. No existing hosting resources were modified.
-- `deploy/render-staging.yaml` is the intended staging path. Root `render.yaml` remains a
-  legacy demo manifest, now manual-only; do not use it as this staging deployment.
-- The name-based projects/environments mapping expresses the intended placement. It does
-  not encode an immutable project ID. Before approval, the actual Render plan must identify
-  the existing project/environment, not create a similarly named project. Stop on mismatch.
+Starting commit: `8993816840192e259cedc2e02809d455328a85ff` on
+`fix/sentinel-v2-acceptance-blockers`. Preserved local checkpoint:
+`backup/render-staging-8993816`. The exact final SHA is in the external final
+report; this document is included in that commit, not a self-referencing SHA.
+Existing GitHub integration/main refs were read again without modification.
 
-## Configuration and functionality
+## Root causes and readiness correction
 
-One paid Docker web service builds the existing multi-stage Dockerfile: React production
-assets are served by FastAPI on the same origin. Existing supervisor starts the API and
-pipeline worker; one service instance preserves the singleton contract. No UI, backend,
-models, migrations, dependency pins or Dockerfile were changed by this preparation.
+Before editing, readiness required both pipeline and Supabase bridge for every
+worker-gated deployment, while the supervisor only started a bridge when its raw
+URL environment variable was present. The CLI readiness gate also hard-coded both
+workers. That mismatch made intentionally unconfigured fixture staging impossible.
+The old dependency graph and pre-edit behavior are retained in the review evidence.
 
-PostgreSQL 16 matches compose and current CI. Database evidence storage persists across
-container replacement; no separate disk, Redis, frontend host or paid AI service is added.
-The service and database are proposed in Singapore, subject to owner/availability approval.
-The application security profile must be `production` even though the Render environment
-is Staging: current Settings rejects hosted deployments with another profile. This does
-not enable live payments. PayPal is fixture, paid AI is `none`, refund execution and webhook
-fixture ingress are false; no PayPal/AI/Supabase credentials are requested or supplied.
-Provider-dependent functionality is intentionally unavailable in this initial mode; existing
-implementation is preserved, not validated against live providers.
+Settings now validates complete Supabase URL/key pairs and trusted project-origin
+shape. Partial/invalid configuration fails closed. A sandbox deployment, or ANY
+configured Supabase integration, still requires a genuine healthy bridge. Fixture
+mode with no Supabase requires PostgreSQL, exact schema and fresh HEALTHY pipeline;
+it reports `not_required_fixture_mode` for the deliberately absent bridge. It does
+not create a fake bridge heartbeat. Required sandbox configuration/credentials
+cannot be replaced by an old healthy row. Provider verification remains explicitly
+unverified by readiness; 200 is not proof of successful PayPal or paid AI access.
 
-Auto deployment uses `autoDeployTrigger: 'off'`. Blueprint previews are explicitly off;
-independent service preview generation is omitted (disabled per current specification).
-Blueprint Auto Sync is NOT a YAML setting. Any future Blueprint creation must explicitly
-use `autoSync: false`; verify it stays false before every manual sync. Disabling service
-auto-deploy does not stop a manual Blueprint application from provisioning/building/deploying.
+The supervisor refuses missing mandatory bridge configuration before child startup,
+marks a configured bridge STARTING and marks a failed worker DEGRADED before restart.
+An owning pipeline marks STOPPED before releasing its advisory lock on graceful
+exit; standby never fabricates owner health. Abrupt failure is detected by the
+supervisor; independent heartbeat freshness still has the existing 45-second bound.
+The CLI only permits a bridge exemption with explicit --fixture-only, fixture mode,
+absent configuration and the matching truthful API state; its default remains strict.
 
-Migrations are operator-controlled through the pre-deploy command, pinned to reviewed head
-`d105a4143283`; runtime auto-migration and automatic demo loading are disabled. No migrations
-were run in this preparation. Seed users once after authorized deployment through private
-operator input, never persistent generated seed-password variables. Existing passwords must
-remain unchanged on restart; never use `--rotate-passwords` as a bootstrap retry.
+| Deployment | Required worker contract |
+| --- | --- |
+| Hosted fixture, no Supabase | Pipeline + DB + exact schema; no bridge |
+| Fixture with complete Supabase configuration | Pipeline + healthy configured bridge + DB/schema |
+| Sandbox with worker gate | Pipeline + genuine bridge/configuration, paired PayPal credentials + DB/schema |
+| Partial/invalid Supabase settings | Configuration rejection; no ready claim |
+| Worker missing/degraded/stopped/stale | Not ready; recovery requires fresh genuine HEALTHY heartbeat |
 
-## Published monthly estimate, retrieved 2026-11-11
+Fixture-only staging preserves UI, risk scoring, evidence, review and deterministic
+investigation behavior. It does not verify genuine webhook delivery, actual PayPal
+checkout/refund execution or paid AI. Refund execution and fixture webhook ingress
+remain disabled. There is no live PayPal mode.
 
-| Resource | Proposed plan | Monthly USD |
-| --- | --- | ---: |
-| Web, 1 CPU / 2 GB RAM, one instance | 1c-2g | 25.00 |
-| PostgreSQL, 0.5 CPU / 1 GB RAM | 0.5c-1g | 19.00 |
-| Database storage, explicitly 1 GB | 0.30/GB-month | 0.30 |
-| Base total | | 44.30 |
+## PostgreSQL TLS decision — APPROVAL PENDING
 
-The measured historical application profiles peaked near 600 MiB, so a 512 MB web plan is
-not an adequate basis for this unchanged application. The 1 GB database is a conservative
-staging candidate, not a hosted load-test result. A 256 MB database would reduce the base
-estimate to $31.30/month but is not selected without capacity evidence.
+Active hosted SQLAlchemy, Alembic and workers continue using verify-full. URL modes
+cannot downgrade it. No generic disable-verification variable was added to active
+runtime code. The unchanged default connection policy is exercised by real local
+TLS/no-TLS/CA/hostname tests, migrations and genuine supervised worker connections.
 
-Assumes a $0 Hobby workspace fee and included build/bandwidth allowances. The actual workspace
-plan/quote/credit eligibility are not independently verified. A $25 Pro workspace fee would
-bring this base to $69.30/month and exceed $50 for one month. Taxes, excess builds, bandwidth,
-optional backups/retention, existing account usage and later storage growth may add charges.
-Confirm the exact dashboard quote before approval. Do not enable automatic storage growth,
-extra replicas, previews or workspace upgrades as part of this proposal.
+Render documents self-signed internal database TLS that does not support verify-full.
+The active internal Blueprint reference therefore remains intentionally non-deployable
+under current security policy. Do not apply it merely because schema validation passes.
 
-$50 is a finite credit balance, not a monthly allowance: $44.30 leaves $5.70 after one nominal
-month; approximately 34 days at a 30-day-month equivalent before extras. This is not a budget
-cap or billing guarantee. Configure account alerts and an owner-approved stop/decommission
-schedule before provisioning. Stopping the web service alone does not eliminate database or
-storage charges. Do not delete a database without backup and explicit authorization.
+Option A (recommended for limited fixture staging, OWNER APPROVAL REQUIRED): private
+same-region Render PostgreSQL with mandatory encrypted-only require, an exact
+owner-reviewed short internal host, database/user, hosted staging/fixture/no-AI scope,
+no genuine Supabase integration, no refund execution, no connection-query redirects
+or explicit CA override. The material trade-off is lack of server certificate/hostname
+authentication. Owner authentication of the Render account/resource binding does not
+turn require into cryptographic server authentication.
 
-## Verification performed
+An inert patch is provided at `deploy/approval-pending/render-internal-tls.patch`.
+It proposes runtime and Blueprint changes but IS NOT APPLIED OR ACTIVATED. Syntax,
+patch applicability and isolated offline scope probes pass (one allowed, 12 rejected).
+That is not its full regression acceptance. Approving this exact security trade-off,
+then applying/testing it in a new commit, remains necessary. Production defaults stay
+strict; no actual internal host has yet been provisioned or approved.
 
-- Read current Render Blueprint spec, JSON Schema, compute plans, pricing, environment
-  variable documentation, PostgreSQL connection reference and infrastructure-as-code guide.
-- Corrected root manifest and staging manifest pass downloaded public JSON Schema.
-- YAML/topology checks pass: disabled deploy/previews, one instance, colocated resources,
-  Docker paths, database reference, PostgreSQL 16, private DB allowlist and no provider keys.
-- Two existing offline Render contract tests pass under pytest.
-- Loaded literal staging variables through actual application Settings: fixture mode,
-  secure hosted profile, database storage and disabled paid AI accepted.
-- Verified migration head against Alembic graph without connecting to a database.
-- Offline probe with an explicitly simulated healthy DB/pipeline correctly remained NOT READY
-  because Supabase bridge is absent. This is not a live database or hosted health result.
-- Runtime database connection arguments remain verify-full with an existing CA bundle.
-- Render CLI is not installed: no platform-side Blueprint validation was performed.
-- Full 508-test application suite was NOT rerun for configuration-only changes. Earlier
-  508 passes/1 skipped remain historical evidence at the preceding remediation checkpoint.
+Option B: retain verify-full with the actual external Render endpoint, trusted CA
+chain and hostname, and bounded Render egress allowlisting. More setup/latency and
+possible outbound usage; no dedicated IP purchase. Live endpoint/CA/network compatibility
+cannot be established before resources exist. Never use unrestricted external DB
+allowlists. This needs revised concrete configuration and reviewed plans, not an
+unverified URL substitution.
 
-## Application compatibility blockers — do not apply
+## Blueprint configuration
 
-1. Hosted readiness unconditionally requires `supabase_bridge`, including PayPal fixture mode.
-   Supervisor starts that bridge only when a Supabase URL is supplied. This proposal deliberately
-   supplies none, so /api/v1/ready cannot succeed. Do not fake heartbeats, disable hosted mode,
-   disable worker readiness or switch the health check to liveness to conceal this.
-   A separately scoped compatibility correction should make bridge requirements reflect actual
-   configured integrations in fixture-only staging while retaining pipeline freshness and all
-   genuine-provider safeguards. It needs review and regression tests before deployment.
-2. fromDatabase.connectionString uses the internal Render endpoint. Existing hosted DB code
-   forces sslmode=verify-full. Current Render documentation says internal self-signed TLS
-   endpoints do not support verify-ca/verify-full. The present mapping therefore fails the
-   hosted TLS contract. Resolve before applying: prefer a verified external endpoint with
-   bounded Render egress allowlisting and an explicitly approved two-phase Blueprint procedure
-   (database first, then securely bind its external URL), or another reviewed supported trust
-   design. Do not silently downgrade verification or allow unrestricted external DB access.
-   The current manifest stays private-only and fail-closed until that decision/configuration
-   correction is made; it is not a deployable workaround.
-3. Actual ingress proxy IP/CIDR scope must be verified and securely supplied through
-   SENTINEL_FORWARDED_ALLOW_IPS. Wildcard/unbounded trust is forbidden. Do not guess a CIDR.
-4. Exact existing-project mapping, plans/region/quote/credit coverage and host acceptance
-   remain unverified. Schema acceptance alone cannot establish them.
+Target existing Sentinel project `prj-dbq48lon74is739m7nl0`, My Workspace
+`tea-d8gorhflk1mc73f4pmr0`, environment Staging. Owner verified 0 services,
+0 environment groups and no deployed resources there. This does not prove absence
+of Blueprints or external deployment bindings. Names in YAML express placement
+intent, not an immutable project-ID guarantee: inspect the actual plan and stop
+if it would create a duplicate project or touch unrelated resources.
 
-No backend/security code was changed to work around these blockers; this authorization covers
-local Blueprint preparation. Resolve compatibility locally, obtain a new final commit and
-rerun affected regressions before calling this ready for deployment.
+Root `render.yaml` now mirrors `deploy/render-staging.yaml`; choose ONE Blueprint,
+not two stacks. `deploy/render-staging-database.yaml` is a database-first phase of
+that same future manual Blueprint, not authorization or a second database.
 
-## Exact gated deployment procedure (future only)
+- One existing Docker application: built React served by FastAPI on one origin,
+  supervised durable pipeline, one instance, plan 1c-2g, Singapore.
+- PostgreSQL 16 (matching CI), plan 0.5c-1g, same region, explicit 1 GB disk,
+  private-only `ipAllowList: []`.
+- autoDeployTrigger off, no automatic previews; service preview generation omitted.
+- Blueprint Auto Sync cannot be disabled in YAML: future creation MUST explicitly
+  set autoSync=false and every manual plan must verify it remains false.
+- Fixture PayPal, AI none, refunds false, webhook fixture ingress false; no provider
+  credentials or persistent bootstrap passwords in configuration.
+- Production security profile inside Render Staging: secure cookies, DB evidence
+  storage, empty CORS list (same origin), worker readiness required.
+- Exact reviewed migration d105a4143283 in pre-deploy command; runtime auto-migration
+  and automatic demo loading off. Proxy trust is a mandatory owner-supplied bounded
+  IP/CIDR input; never guess or use wildcard trust.
 
-1. Close H02: verify Render Blueprint inventory, GitHub webhooks/Apps/Pages/environment
-   triggers, and absence of Vercel/Cloudflare SENTINEL bindings. Do not use a test push/PR.
-2. Resolve the compatibility blockers above; revise the Blueprint/procedure as necessary.
-   Revalidate schema, application settings/TLS/readiness, proxy trust and migration/bootstrap
-   behavior; run affected regressions. Stop if any gate fails.
-3. Obtain explicit authorization for pushing only the corrected remediation branch and
-   opening a draft PR into integration. Verify new CI against its actual head, review browser
-   checks outside CI, then obtain separate integration/main merge approvals. No deploy dispatch.
-4. Select the final full release SHA after review (a merge can change it). With separate
-   publication approval, create a dedicated frozen Git release branch at exactly that SHA;
-   never let this ref follow main. Verify remote ref, source files and local commit agree.
-   Its intended name is release/sentinel-v2-staging-approved; it has NOT been created.
-   A branch declaration is not an immutable SHA pin: freeze it and recheck before each operation.
-5. Approve the concrete staging cost, credit coverage, duration/alerts, backup and rollback
-   plan. Obtain explicit authorization to CREATE a Blueprint and plan only. On creation use
-   the canonical GitHub repo, confirmed workspace, frozen approved ref, the final staging
-   Blueprint path and autoSync=false. Nothing in this document authorizes that API call.
-6. Inspect the planned sync before APPLY approval: existing project ID must be
-   prj-dbq48lon74is739m7nl0, environment Staging, exact approved source SHA, Auto Sync off,
-   no previews, one intended web service and one intended database, no unrelated resources,
-   no extra projects, replacements/deletions or unexpected costs. If the creation surface
-   cannot target the existing project, stop and use a supported verified placement flow.
-   Do not automatically adopt or modify unrelated resources to make the plan pass.
-7. Resolve secret inputs privately. Never paste DB URLs/passwords in chat. Verify only
-   fixture/none provider settings and bounded proxy trust; no AI/PayPal keys, no inherited
-   env group enabling integrations. Stop if the final plan or remote ref changed.
-8. Obtain explicit approval of this exact sync, SHA and cost BEFORE approving/applying it.
-   If TLS resolution uses two phases, each phase needs a concrete reviewed plan/approval;
-   preserve autoSync=false throughout. Provisioning/application may begin billing and deploy.
-9. Verify actual build/deploy SHA, database TLS identity, migration revision, schema and
-   genuine configured worker freshness. Require /api/v1/ready success; never substitute a
-   static screenshot or liveness result. Bootstrap users once in a private operator session
-   using getpass/secure one-off inputs, then run app.cli demo-load --if-empty if approved.
-   Do not leave bootstrap passwords in service/group configuration or logs.
-10. Exercise HTTPS, secure cookies, CSRF, roles/merchant boundaries, login/logout retry,
-    approved desktop/mobile UI, checkout fixture labels, deterministic AI fallback, evidence
-    upload/download persistence, review/refund-intent controls, investigations and pipeline
-    handoff/restart. No real provider operations. Refresh/deep-link/back navigation too.
-11. On failure, stop and report. Do not repeat paid builds, resize, weaken checks or rerun
-    migrations blindly. App rollback must use an approved immutable compatible SHA; database
-    downgrade/deletion/restore needs separate backup and approval. Staging success does not
-    authorize production deployment or provider activation.
+## Measured database sizing and cost
 
-## Outstanding H02 owner checklist
+Both local limits were verified in cgroup memory.max/cpu.max. Same 9,051 synthetic
+seed records, 24 new simulated scoring jobs, four concurrent authenticated readers
+and 96 requests. No genuine providers. The API/worker ran outside the DATABASE limit;
+this is database sizing, not a new whole-application memory profile. Shared disposable
+PostgreSQL test infrastructure differs from a fresh managed Render instance; results
+are local acceptance evidence, not a hosted latency guarantee.
 
-- Render: workspace-wide Blueprint inventory (including paused/pending first-sync entries)
-  must show no active SENTINEL binding capable of applying pushes. Empty Staging does not
-  settle this. Confirm no service/preview binding elsewhere in the intended workspace.
-- GitHub repository: active webhooks/events, installed Apps/repository access, Pages source,
-  environment deployment rules and push/PR/main-trigger behavior.
-- Vercel and Cloudflare owner accounts: no SENTINEL project Git bindings or deployment hooks
-  capable of automatic deployment. Only inspect; report any binding before changing it.
-- Record account/project/repo/branch, behavior for branch push/draft PR/PR update/main merge,
-  and redacted settings/date. Blocked APIs were not repeatedly retried.
-- After safety evidence is complete, explicit publication approval is still required.
+| Metric | 256 MiB / 0.1 CPU | 1 GiB / 0.5 CPU |
+| --- | ---: | ---: |
+| Migration | 6.86 s | 4.36 s |
+| Synthetic data load | 37.09 s | 14.09 s |
+| p95 read response | 5796.91 ms | 742.51 ms |
+| Maximum read response | 8699.42 ms | 843.45 ms |
+| Peak sampled DB connections | 10 | 8 |
+| Transactions after probe | 9075 | 9075 |
+| Completed queued scoring jobs | 24 | 24 |
+| Database bytes | 19577879 | 19512343 |
+| New OOM events | 0 | 0 |
+| Pre-set p95 target <= 2 seconds | FAIL | PASS |
 
-## Sources
+The 256 MB plan remained functional and memory fit; its tested workload latency
+failed the pre-set target. Do not claim it cannot run PostgreSQL or that memory
+alone demands 1 GB. Retain 1 GB / 0.5 CPU for the four-reader staging scenario.
+The 256 MB aggregate summary/logs survive; a harness filename collision overwrote
+its raw per-sample array, disclosed in the evidence summary. No samples were invented.
 
-- https://render.com/docs/blueprint-spec.md
-- https://render.com/schema/render.yaml.json
-- https://render.com/docs/compute-plans.md
-- https://render.com/pricing.md
-- https://render.com/docs/configure-environment-variables.md
-- https://render.com/docs/postgresql-creating-connecting.md
-- https://render.com/docs/infrastructure-as-code.md
+Current published base monthly estimate (Hobby workspace fee assumed $0):
+web $25 + PostgreSQL $19 + 1 GB database storage $0.30 = **$44.30/month**.
+The rejected cheaper combination would be $31.30/month. $50 leaves $5.70 after
+one nominal month before extras (about 34 days at a 30-day equivalent). A bounded
+seven-day staging trial is approximately $10.34 base, not a quote or spending cap.
+A $25 Pro workspace fee would make the total $69.30/month. Actual account plan,
+credit coverage/expiry/eligibility, taxes, builds, bandwidth and other workspace usage
+remain unverified; obtain the exact dashboard quote before approval. Do not upgrade
+workspace, enable autoscaling/storage growth/replicas/previews or spend credits now.
 
-CODE REMEDIATION: PRESERVED
-BLUEPRINT SCHEMA: PASS
-APPLICATION HOSTING COMPATIBILITY: BLOCKED
-PUBLICATION: BLOCKED PENDING H02 AND APPROVAL
-DEPLOYMENT APPROVAL: PENDING
-No push, merge, Blueprint creation/application, hosting change, paid AI or credit consumption.
+The cgroup comparison used only a disposable LOCAL database container. Docker's
+zero-valued update failed to clear limits, so the same local service was recreated
+with its existing volume retained. Original unlimited resource settings, original
+TLS settings and every database name were verified restored. No Render resource changed.
+
+## Complete local acceptance
+
+| Suite | Passed |
+| --- | ---: |
+| Backend | 382 |
+| Frontend | 53 |
+| ML | 7 |
+| Auxiliary | 34 |
+| Operational desktop/mobile browser | 34 |
+| Static desktop/mobile browser | 24 |
+| TOTAL | 534 |
+
+One credential-gated live-AI test skipped; no live providers used. 26 new unique
+regression cases over 508. Targeted reruns are not added again to this total.
+Backend lint/format/typing, frontend lint/typing, ML lint/format, production/portable/
+static builds, executable OpenAPI and generated TypeScript parity, offline Postman
+validation, disposable migration/schema checks and production isolation pass.
+51 visual checks report no layout, accessibility or page errors; keyboard and security
+browser probes pass. Original test-function ASTs in extended files are unchanged.
+
+A local actual entrypoint/supervisor run used the hosted security profile, current
+source/build, strict verify-full and temporary locally trusted certificate/SANs.
+Migration 2.92 seconds; ready after 10.46 seconds; genuine DB sessions TLS 1.3.
+No Supabase heartbeat was fabricated. Killing the pipeline caused 503, then genuine
+recovery; graceful shutdown persisted STOPPED; restart became ready. This is NOT a
+Render certificate or public HTTPS/proxy verification result.
+
+Fresh source integrity checks preserve approved frontend, financial controls,
+auth/logout, callback validation, upload security, models, existing migrations,
+Dockerfile, entrypoint, dependencies and contracts outside the targeted changes.
+A real pending-job handoff probe again completed the job after owner death, with
+one assessment/one attempt after duplicate enqueue and graceful lock release.
+
+## Docker verification — BLOCKED BY LOCAL STORAGE
+
+The full unchanged Dockerfile was actually attempted. The VFS-backed local Docker
+filesystem exhausted space at COPY of package metadata, before a successful image
+build. Retained-runtime source probes also failed: an unusable bind-mounted Alembic configuration (mapping not verified),
+a test-harness HOME issue (corrected), then disk exhaustion during migration even
+with copied current source. They are NOT successful fresh-image startup evidence.
+The local supervised startup above establishes application behavior separately.
+
+Do not mark Docker build/startup or Render staging as passed. Repeat a fresh full
+build and disposable fixture startup in an adequately sized local workspace or,
+after H02 and publication approval, the reviewed GitHub CI. Preserve logs and never
+weaken tests/checks to work around capacity. Initial overlapping test/schema access
+and disk-induced PostgreSQL failures were retained; final full suites ran after
+recovery against separate disposable databases. Test assertions/timeouts were not weakened.
+Unused local Docker images/build cache were removed during capacity recovery; Git checkpoints and existing data volumes were preserved. Task-created disposable databases were removed after evidence capture.
+Generated dependencies were temporarily RAM-backed for capacity; source and delivery
+artifacts remain in workspace. Recreate generated dependencies from pinned manifests
+if the runtime restarts; this is not a source dependency change or transitive lock.
+
+## Remaining H02 and authorization gates
+
+Read-only owner evidence required; do not repeat blocked APIs or create test pushes:
+
+1. Render workspace Blueprint inventory, including paused/pending first sync, and any
+   SENTINEL service/preview binding elsewhere. Empty Staging alone is insufficient.
+2. GitHub active webhooks/events, installed Apps/repo access, Pages source, environments
+   and behavior on branch push/draft PR/PR update/main merge.
+3. Owner Vercel/Cloudflare inventories: no SENTINEL Git binding or deploy hook capable
+   of automatically publishing it. Policy permits only Render; no other deployment
+   configurations were prepared. Report discovered bindings before changing them.
+4. Record account/project/repo/ref/settings/date with secrets redacted. Actual plans,
+   project mapping, proxy trust, credit coverage and public-host acceptance remain open.
+
+Publishing is not authorized. Local origin is the recovery repo, so any later approved
+push must explicitly target https://github.com/harshjha15335/SENTINEL-.git, only the
+new fix branch and approved SHA; no all-branch/tag/force/main/integration push.
+New draft PR base: integration/sentinel-v2-antigravity-20261111. Existing PR #2 remains
+unchanged. Draft PR status does not disable external previews or CI.
+
+## Exact staged procedure and rollback
+
+1. Review readiness changes and the precise TLS trade-off. If internal require is
+   approved, apply the inert patch LOCALLY, add required policy regressions, run full
+   acceptance and record a new SHA. Otherwise prepare/verify strict external strategy.
+2. Close H02. Obtain explicit fix-branch push/draft-PR approval, publish only approved
+   source, verify fresh checks at that head (including Docker). Review coverage outside CI.
+3. Separately approve remediation merge into integration, reverify PR #2, then separately
+   approve main merge. Never treat old 8250671 checks as checks of this new candidate.
+4. Select the final full approved release SHA AFTER merging; with explicit ref-publication
+   approval, freeze a dedicated release branch at that SHA. It must not follow main.
+5. Approve actual plans/credit/budget/duration/backup/rollback. With separate CREATE/PLAN
+   approval, create one Blueprint with autoSync=false, correct repo/frozen ref, database-first
+   path and confirmed workspace. Inspect placement in EXISTING prj-dbq48lon74is739m7nl0 / Staging.
+   Stop on duplicate project, unrelated resources, changed source, unexpected charges or failed plan.
+6. Obtain explicit approval of the database-only sync before applying it. This starts billing.
+   Authenticate the created host/region/account binding. Review internal exact-host input, or
+   external trusted endpoint and bounded egress ranges. Do not open unrestricted access.
+7. Manually update the SAME Blueprint to the final reviewed app path/ref, keeping Auto Sync off.
+   Review plan: existing intended DB retained, only one intended web service added, same approved
+   SHA, no deletions/replacements/unrelated adoption. Supply inputs securely. Obtain explicit
+   approval BEFORE approving/applying this second sync. No prototype placeholder is deployable.
+8. Verify actual built/deployed SHA, schema, TLS policy, genuine required worker freshness,
+   HTTPS/proxy/client-address behavior, secure cookies, CSRF, tenant/roles, evidence persistence,
+   fixture checkout labels, scoring, investigations, review/refund-intent boundaries, mobile,
+   logout/reload and worker handoff. Bootstrap users once with private one-off password input,
+   never persistent seed secrets; demo-load --if-empty only as approved. No paid/real providers.
+9. On failure stop and preserve evidence/database. No blind rebuild, resize, DB downgrade,
+   secret logging or repeated charged operation. First deployment has no hosted known-good
+   rollback target yet. Later app rollback uses an approved tested immutable SHA compatible
+   with schema/TLS policy. Backup/restore/deletion needs separate approval; never revert an
+   established database automatically. Source checkpoint 8993816 is recoverable locally,
+   but its original fixture readiness blocker makes it an unvalidated hosted rollback target.
+10. Successful Staging does not authorize production, paid AI or genuine PayPal activation.
+
+READINESS BLOCKER: FIXED LOCALLY
+RENDER INTERNAL TLS: APPROVAL-PENDING (inert patch; active strict default retained)
+LOCAL REGRESSIONS: 534 PASSED / 1 LIVE-AI SKIPPED
+FULL DOCKER BUILD/STARTUP: BLOCKED — LOCAL VFS DISK CAPACITY
+PUBLICATION / MAIN MERGE / RENDER DEPLOYMENT: BLOCKED; NOT AUTHORIZED

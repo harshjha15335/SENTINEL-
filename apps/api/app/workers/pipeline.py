@@ -74,6 +74,9 @@ def main() -> None:
             finally:
                 # No in-flight job is abandoned voluntarily; normal transaction
                 # and idempotency boundaries remain in events_once/score_once.
+                # Invalidate the departing owner's heartbeat before a standby can
+                # acquire ownership and publish its own fresh HEALTHY record.
+                heartbeat("pipeline", "STOPPED")
                 lock.execute(text("select pg_advisory_unlock(:id)"), {"id": LOCK_ID})
                 lock.commit()
     finally:

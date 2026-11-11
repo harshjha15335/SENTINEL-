@@ -1,4 +1,4 @@
-# REVIEW ONLY: do not apply until deploy/render-staging.md's blockers are closed.
+# REVIEW ONLY: do not apply until deploy/render-staging.md's approval gates close.
 # Target existing Sentinel project prj-dbq48lon74is739m7nl0, My Workspace, Staging.
 # Names express intent, not an immutable project-ID binding: verify the actual plan.
 # Blueprint Auto Sync is account metadata, not YAML: create with autoSync=false.
@@ -29,6 +29,8 @@ projects:
                 value: production
               - key: SENTINEL_HOSTED_DEPLOYMENT
                 value: 'true'
+              # TLS exception remains UNAPPLIED at deploy/approval-pending/.
+              # Internal mapping cannot start under active verify-full policy.
               - key: SENTINEL_DATABASE_URL
                 fromDatabase:
                   name: sentinel-v2-staging-db

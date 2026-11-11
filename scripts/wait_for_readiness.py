@@ -62,6 +62,7 @@ def wait_until_ready(
     interval_seconds: float = 0.5,
     expected_revision: str | None = None,
     require_workers: bool = False,
+    fixture_only: bool = False,
 ) -> bool:
     start_time = time.monotonic()
     deadline = start_time + timeout_seconds
@@ -70,7 +71,9 @@ def wait_until_ready(
     health_url = f"{base_url}/api/v1/health"
     ready_url = f"{base_url}/api/v1/ready"
 
-    log.info(f"Initiating fail-closed readiness probe for {base_url} (timeout={timeout_seconds}s)")
+    log.info(
+        f"Initiating fail-closed readiness probe for {base_url} (timeout={timeout_seconds}s)"
+    )
 
     # Phase 1: Wait for TCP port connection
     port_open = False
@@ -96,7 +99,9 @@ def wait_until_ready(
         time.sleep(interval_seconds)
 
     if not health_ok:
-        log.error(f"FAIL-CLOSED: /api/v1/health did not return 200 OK within {timeout_seconds}s.")
+        log.error(
+            f"FAIL-CLOSED: /api/v1/health did not return 200 OK within {timeout_seconds}s."
+        )
         return False
 
     # Phase 3: Wait for /api/v1/ready returning 200 {"status": "ready"}
@@ -105,7 +110,11 @@ def wait_until_ready(
         if status == 200 and isinstance(data, dict):
             status_field = data.get("status")
             checks = data.get("checks", {})
-            if status_field == "ready" and checks.get("database") == "ok" and checks.get("schema") == "ok":
+            if (
+                status_field == "ready"
+                and checks.get("database") == "ok"
+                and checks.get("schema") == "ok"
+            ):
                 # Check expected schema revision if specified
                 if expected_revision and checks.get("migration") != expected_revision:
                     log.error(
@@ -116,12 +125,27 @@ def wait_until_ready(
 
                 # Check workers if required
                 if require_workers:
-                    for w in ("pipeline", "supabase_bridge"):
+                    fixture_without_bridge = (
+                        fixture_only
+                        and checks.get("paypal_mode") == "fixture"
+                        and checks.get("supabase_configuration") == "absent"
+                        and checks.get("supabase_bridge") == "not_required_fixture_mode"
+                    )
+                    workers = (
+                        ("pipeline",)
+                        if fixture_without_bridge
+                        else ("pipeline", "supabase_bridge")
+                    )
+                    for w in workers:
                         if checks.get(w) != "ok":
-                            log.warning(f"Worker {w} not ready yet ({checks.get(w)}); retrying...")
+                            log.warning(
+                                f"Worker {w} not ready yet ({checks.get(w)}); retrying..."
+                            )
                             break
                     else:
-                        log.info(f"Readiness check /api/v1/ready passed with all required workers.")
+                        log.info(
+                            f"Readiness check /api/v1/ready passed with all required workers."
+                        )
                         return True
                 else:
                     log.info(f"Readiness check /api/v1/ready passed (HTTP 200).")
@@ -135,13 +159,37 @@ def wait_until_ready(
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Wait for SENTINEL API readiness (fail-closed)")
-    parser.add_argument("--host", default="127.0.0.1", help="API host (default: 127.0.0.1)")
-    parser.add_argument("--port", type=int, default=8000, help="API port (default: 8000)")
-    parser.add_argument("--timeout", type=float, default=30.0, help="Timeout in seconds (default: 30)")
-    parser.add_argument("--interval", type=float, default=0.5, help="Poll interval in seconds (default: 0.5)")
-    parser.add_argument("--expected-revision", default=None, help="Expected Alembic migration head")
-    parser.add_argument("--require-workers", action="store_true", help="Require pipeline and bridge workers")
+    parser = argparse.ArgumentParser(
+        description="Wait for SENTINEL API readiness (fail-closed)"
+    )
+    parser.add_argument(
+        "--host", default="127.0.0.1", help="API host (default: 127.0.0.1)"
+    )
+    parser.add_argument(
+        "--port", type=int, default=8000, help="API port (default: 8000)"
+    )
+    parser.add_argument(
+        "--timeout", type=float, default=30.0, help="Timeout in seconds (default: 30)"
+    )
+    parser.add_argument(
+        "--interval",
+        type=float,
+        default=0.5,
+        help="Poll interval in seconds (default: 0.5)",
+    )
+    parser.add_argument(
+        "--expected-revision", default=None, help="Expected Alembic migration head"
+    )
+    parser.add_argument(
+        "--require-workers",
+        action="store_true",
+        help="Require pipeline and bridge workers",
+    )
+    parser.add_argument(
+        "--fixture-only",
+        action="store_true",
+        help="Allow explicitly absent fixture-only bridge; pipeline remains required",
+    )
 
     args = parser.parse_args()
     success = wait_until_ready(
@@ -151,6 +199,7 @@ def main() -> int:
         interval_seconds=args.interval,
         expected_revision=args.expected_revision,
         require_workers=args.require_workers,
+        fixture_only=args.fixture_only,
     )
     return 0 if success else 1
 
