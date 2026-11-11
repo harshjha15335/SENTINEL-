@@ -1,8 +1,13 @@
-# Render Blueprint: one-click hosted demo built from this GitHub repository.
-# Deploy: https://render.com/deploy?repo=https://github.com/harshjha15335/SENTINEL-
+# Render-only, review-only demo Blueprint. Do not apply without deployment approval.
+# Official project: prj-dbq48lon74is739m7nl0 (Sentinel / My Workspace).
+# Stage first; manually deploy and verify the exact approved commit SHA.
+# Service auto-deploy is disabled; Blueprint auto-sync must also remain disabled
+# in Render. This local file does not prove or change existing account settings.
 # Runs in fixture mode (SIMULATED PayPal records) with the SYNTHETIC_DEMO scenario loaded.
 # To use PayPal sandbox instead, set SENTINEL_PAYPAL_MODE=sandbox and the two credential
 # variables in the Render dashboard. There is deliberately no live (production) PayPal mode.
+previews:
+  generation: 'off'
 services:
   - type: web
     name: sentinel
@@ -11,7 +16,7 @@ services:
     dockerfilePath: ./Dockerfile
     dockerContext: .
     healthCheckPath: /api/v1/ready
-    autoDeploy: true
+    autoDeployTrigger: 'off'
     envVars:
       - key: SENTINEL_DATABASE_URL
         fromDatabase:

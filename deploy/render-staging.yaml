@@ -1,0 +1,68 @@
+# REVIEW ONLY: do not apply until deploy/render-staging.md's blockers are closed.
+# Target existing Sentinel project prj-dbq48lon74is739m7nl0, My Workspace, Staging.
+# Names express intent, not an immutable project-ID binding: verify the actual plan.
+# Blueprint Auto Sync is account metadata, not YAML: create with autoSync=false.
+# Use a frozen approved Git ref; verify its full SHA before planning and approval.
+previews:
+  generation: 'off'
+projects:
+  - name: Sentinel
+    environments:
+      - name: Staging
+        services:
+          - type: web
+            name: sentinel-v2-staging
+            runtime: docker
+            plan: 1c-2g
+            region: singapore
+            dockerfilePath: ./Dockerfile
+            dockerContext: .
+            autoDeployTrigger: 'off'
+            numInstances: 1
+            maxShutdownDelaySeconds: 60
+            healthCheckPath: /api/v1/ready
+            preDeployCommand: alembic upgrade d105a4143283 && python -m app.cli check-schema
+            envVars:
+              # Existing code requires this production SECURITY profile even in
+              # Render's Staging environment. This does not enable live PayPal.
+              - key: SENTINEL_ENVIRONMENT
+                value: production
+              - key: SENTINEL_HOSTED_DEPLOYMENT
+                value: 'true'
+              - key: SENTINEL_DATABASE_URL
+                fromDatabase:
+                  name: sentinel-v2-staging-db
+                  property: connectionString
+              - key: SENTINEL_STORAGE_BACKEND
+                value: database
+              - key: SENTINEL_COOKIE_SECURE
+                value: 'true'
+              - key: SENTINEL_CORS_ORIGINS
+                value: '[]'
+              - key: SENTINEL_FORWARDED_ALLOW_IPS
+                sync: false
+              - key: SENTINEL_REQUIRE_WORKERS_READY
+                value: 'true'
+              - key: SENTINEL_AUTO_MIGRATE
+                value: 'false'
+              - key: SENTINEL_MIGRATION_TARGET
+                value: d105a4143283
+              - key: SENTINEL_DEMO_AUTOLOAD
+                value: 'false'
+              - key: SENTINEL_PAYPAL_MODE
+                value: fixture
+              - key: SENTINEL_ALLOW_WEBHOOK_FIXTURES
+                value: 'false'
+              - key: SENTINEL_REFUND_EXECUTION_ENABLED
+                value: 'false'
+              - key: SENTINEL_AI_PROVIDER
+                value: none
+        databases:
+          - name: sentinel-v2-staging-db
+            databaseName: sentinel_staging
+            user: sentinel_staging
+            postgresMajorVersion: '16'
+            plan: 0.5c-1g
+            region: singapore
+            diskSizeGB: 1
+            ipAllowList: []
