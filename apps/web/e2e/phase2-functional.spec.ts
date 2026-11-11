@@ -12,8 +12,25 @@ async function login(page: Page) {
 }
 test("legacy deep link retains its query/hash through sign-in and canonical refresh", async ({
   page,
+  request,
 }) => {
-  const id = "8891b311-1c44-4b99-95a5-45c3f3ba8be5";
+  // The request fixture has its own cookies: the browser remains unauthenticated.
+  // Resolve a real seeded record instead of relying on a previous machine's UUID.
+  const signedIn = await request.post("/api/v1/auth/login", {
+    data: { email: "analyst@northwind.example", password },
+  });
+  expect(signedIn.ok()).toBeTruthy();
+  const records = await request.get("/api/v1/transactions?limit=100&offset=0");
+  expect(records.ok()).toBeTruthy();
+  const data = (await records.json()) as {
+    items: { id: string; amount_minor: number; currency: string }[];
+  };
+  const record = data.items[0];
+  expect(record, "a seeded transaction is required").toBeDefined();
+  const id = record.id;
+  const amount = new Intl.NumberFormat("en-US", {
+    style: "currency", currency: record.currency,
+  }).format(record.amount_minor / 100);
   await page.goto(`/transactions/${id}?context=review#record`);
   await expect(
     page.getByRole("heading", { name: "Sign in to your workspace" }),
@@ -25,11 +42,11 @@ test("legacy deep link retains its query/hash through sign-in and canonical refr
     new RegExp(`/app/transactions/${id}\\?context=review#record$`),
   );
   await expect(
-    page.getByRole("heading", { name: "$1,200.00", exact: true }),
+    page.getByRole("heading", { name: amount, exact: true }),
   ).toBeVisible();
   await page.reload();
   await expect(
-    page.getByRole("heading", { name: "$1,200.00", exact: true }),
+    page.getByRole("heading", { name: amount, exact: true }),
   ).toBeVisible();
 });
 test("transaction filters, pagination, page sorting and keyboard entry use the preserved services", async ({

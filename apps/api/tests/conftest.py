@@ -51,7 +51,7 @@ def require_disposable_database(url: str) -> None:
 
 def emergency_terminate_test_backends(url: str) -> int:
     """Explicitly enabled emergency recovery for isolated test runs only.
-    
+
     Strict safety invariants:
     - Loopback only (127.0.0.1 / localhost)
     - Database name strictly ending in '_test'
@@ -62,7 +62,7 @@ def emergency_terminate_test_backends(url: str) -> int:
     if os.environ.get("SENTINEL_ALLOW_EMERGENCY_BACKEND_TERMINATION") != "1":
         raise RuntimeError("Emergency backend termination is not explicitly enabled.")
     require_disposable_database(url)
-    
+
     with get_engine().connect().execution_options(isolation_level="AUTOCOMMIT") as conn:
         conn.execute(text("SET lock_timeout = '5s'"))
         res = conn.execute(
@@ -90,8 +90,9 @@ def _migrated_database() -> Iterator[None]:
 
 @pytest.fixture(autouse=True)
 def _clean_tables() -> Iterator[None]:
-    from app.api.v1.auth import _limiter
     from sqlalchemy.orm import close_all_sessions
+
+    from app.api.v1.auth import _limiter
 
     _limiter.clear()
     yield
@@ -164,9 +165,10 @@ def other_tenant(db: Session) -> Tenant:
 
 @pytest.fixture
 def app_client() -> Iterator[TestClient]:
+    from sqlalchemy.orm import close_all_sessions
+
     from app.main import app
     from app.services.paypal.factory import get_gateway
-    from sqlalchemy.orm import close_all_sessions
 
     get_gateway.cache_clear()
     with TestClient(app) as c:

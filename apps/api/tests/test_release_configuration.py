@@ -70,8 +70,8 @@ def test_destructive_suite_rejects_non_disposable_database(url):
 
 
 def test_emergency_terminate_test_backends_requires_explicit_opt_in():
-    from tests.conftest import emergency_terminate_test_backends
     from app.core.config import get_settings
+    from tests.conftest import emergency_terminate_test_backends
 
     # Without SENTINEL_ALLOW_EMERGENCY_BACKEND_TERMINATION=1, must refuse
     with pytest.raises(RuntimeError, match="not explicitly enabled"):
@@ -83,5 +83,6 @@ def test_emergency_terminate_test_backends_rejects_unsafe_db(monkeypatch):
 
     monkeypatch.setenv("SENTINEL_ALLOW_EMERGENCY_BACKEND_TERMINATION", "1")
     with pytest.raises(RuntimeError, match="loopback database ending in _test"):
-        emergency_terminate_test_backends("postgresql+psycopg://sentinel:sentinel@127.0.0.1:5432/prod_db")
-
+        emergency_terminate_test_backends(
+            "postgresql+psycopg://sentinel:sentinel@127.0.0.1:5432/prod_db"
+        )

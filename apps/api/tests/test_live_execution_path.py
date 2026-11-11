@@ -257,6 +257,7 @@ def test_single_request_limiting_transport_enforces_hard_cap():
 
 def test_single_request_limiting_transport_enforces_cap_after_network_exception():
     """Verify that a failed 1st request (network error) still consumes the single attempt cap."""
+
     class FailingTransport(httpx2.AsyncBaseTransport):
         async def handle_async_request(self, request: httpx2.Request) -> httpx2.Response:
             raise httpx2.ConnectError("Network unreachable")
@@ -476,6 +477,7 @@ def test_run_complete_investigation_offline():
         db.add(tx)
         db.flush()
         from app.models.enums import CaseSource
+
         case = Case(
             merchant_id=merchant.id,
             transaction_id=tx.id,
@@ -489,6 +491,7 @@ def test_run_complete_investigation_offline():
         db.add(case)
         db.flush()
         from app.models.enums import PolicyDecision, RiskBand
+
         ra = RiskAssessment(
             merchant_id=merchant.id,
             transaction_id=tx.id,
@@ -542,20 +545,14 @@ def test_run_complete_investigation_offline():
         "summary": f"Verified synthetic case review for case {case_id_str}.",
         "verified_facts": [
             {
-                "statement": (
-                    f"Payment amount is 89.50 USD for transaction {tx_id_str}."
-                ),
-                "sources": [
-                    {"kind": "transaction", "id": tx_id_str}
-                ],
+                "statement": (f"Payment amount is 89.50 USD for transaction {tx_id_str}."),
+                "sources": [{"kind": "transaction", "id": tx_id_str}],
             }
         ],
         "risk_indicators": [
             {
                 "description": "Risk assessment flagged high risk.",
-                "sources": [
-                    {"kind": "risk_assessment", "id": ra_id_str}
-                ],
+                "sources": [{"kind": "risk_assessment", "id": ra_id_str}],
             }
         ],
         "counter_indicators": [],

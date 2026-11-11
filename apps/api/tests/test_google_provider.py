@@ -125,7 +125,8 @@ def test_sentinel_google_model_wire_serialization_no_contradiction():
     gen_config = req.get("generationConfig", {})
     # Modality contradiction must be resolved
     assert gen_config.get("responseModalities") is None
-    # Tool config must enforce ANY mode to guarantee function/final_result invocation without free-text bypass
+    # Tool config must enforce ANY mode to guarantee function/final_result invocation
+    # without free-text bypass.
     tool_config = req.get("toolConfig", {})
     mode = tool_config.get("functionCallingConfig", {}).get("mode")
     assert mode == "ANY"

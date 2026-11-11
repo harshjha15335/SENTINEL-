@@ -75,18 +75,11 @@ def test_checkout_redirect_url_validation() -> None:
     from app.core.config import validate_checkout_url
 
     # Safe URLs pass
+    assert validate_checkout_url("https://example.org/return") == "https://example.org/return"
     assert (
-        validate_checkout_url("https://example.org/return")
-        == "https://example.org/return"
+        validate_checkout_url("http://127.0.0.1:8040/callback") == "http://127.0.0.1:8040/callback"
     )
-    assert (
-        validate_checkout_url("http://127.0.0.1:8040/callback")
-        == "http://127.0.0.1:8040/callback"
-    )
-    assert (
-        validate_checkout_url("http://localhost:3000/done")
-        == "http://localhost:3000/done"
-    )
+    assert validate_checkout_url("http://localhost:3000/done") == "http://localhost:3000/done"
 
     # Insecure external HTTP is rejected
     with pytest.raises(ValueError, match="insecure http is only permitted on loopback"):

@@ -461,5 +461,3 @@ def test_supabase_rpc_failure_backs_off_without_acknowledgment(db, tenant, inbox
     row = inbox.execute("select * from public.sentinel_webhook_inbox").fetchone()
     assert row["status"] == "PENDING"
     assert row["processed_at"] is None
-
-

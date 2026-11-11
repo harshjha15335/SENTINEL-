@@ -192,5 +192,3 @@ def test_checkout_return_and_cancel_endpoints(app_client: TestClient) -> None:
     assert xss_resp.status_code == 200
     assert "<script>alert(1)</script>" not in xss_resp.text
     assert "&lt;script&gt;alert(1)&lt;/script&gt;" in xss_resp.text
-
-
