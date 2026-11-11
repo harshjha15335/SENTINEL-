@@ -1,0 +1,137 @@
+status,path,reason
+M,.github/workflows/pages.yml,approved static consistency and host review tooling
+M,.github/workflows/supabase.yml,test-only CI/setup reconciliation
+A,AGENTS.md,approved static consistency and host review tooling
+M,apps/api/pyproject.toml,test-only CI/setup reconciliation
+M,apps/api/scripts/export_static_demo.py,approved static consistency and host review tooling
+A,apps/api/scripts/tests/test_export_consistency.py,approved static consistency and host review tooling
+A,apps/api/scripts/tests/test_static_snapshot.py,approved static consistency and host review tooling
+A,apps/api/scripts/validate_static_demo.py,approved static consistency and host review tooling
+M,apps/api/tests/conftest.py,test-only CI/setup reconciliation
+M,apps/api/tests/test_checkout.py,test-only CI/setup reconciliation
+M,apps/api/tests/test_google_provider.py,test-only CI/setup reconciliation
+M,apps/api/tests/test_live_execution_path.py,test-only CI/setup reconciliation
+M,apps/api/tests/test_paypal_oauth_audit.py,test-only CI/setup reconciliation
+M,apps/api/tests/test_release_configuration.py,test-only CI/setup reconciliation
+M,apps/api/tests/test_sandbox_gateway.py,test-only CI/setup reconciliation
+M,apps/api/tests/test_scoring_jobs.py,test-only CI/setup reconciliation
+M,apps/api/tests/test_supabase_inbox.py,test-only CI/setup reconciliation
+M,apps/web/e2e/fixture-flow.spec.ts,approved UI design and full workflow parity
+A,apps/web/e2e/host-preparation.spec.ts,approved UI design and full workflow parity
+A,apps/web/e2e/loading-stability.spec.ts,approved UI design and full workflow parity
+M,apps/web/e2e/operations.spec.ts,approved UI design and full workflow parity
+A,apps/web/e2e/phase2-functional.spec.ts,approved UI design and full workflow parity
+M,apps/web/e2e/static-demo.spec.ts,approved UI design and full workflow parity
+A,apps/web/e2e/v2-integration.spec.ts,approved UI design and full workflow parity
+A,apps/web/e2e/v2-preview.spec.ts,approved UI design and full workflow parity
+A,apps/web/e2e/v2-spatial.spec.ts,approved UI design and full workflow parity
+M,apps/web/e2e/workbench.spec.ts,approved UI design and full workflow parity
+A,apps/web/e2e/workspace-navigation.ts,approved UI design and full workflow parity
+M,apps/web/package-lock.json,approved UI design and full workflow parity
+M,apps/web/package.json,approved UI design and full workflow parity
+A,apps/web/playwright.host.config.ts,approved UI design and full workflow parity
+A,apps/web/playwright.phase2.config.ts,approved UI design and full workflow parity
+A,apps/web/playwright.v2.config.ts,approved UI design and full workflow parity
+A,apps/web/scripts/check-v2-production.mjs,approved UI design and full workflow parity
+A,apps/web/scripts/measure-v2.mjs,approved UI design and full workflow parity
+M,apps/web/src/app/App.tsx,approved UI design and full workflow parity
+A,apps/web/src/components/layout/AppNavigation.tsx,approved UI design and full workflow parity
+M,apps/web/src/components/layout/AppShell.tsx,approved UI design and full workflow parity
+A,apps/web/src/components/layout/CapabilityBoundary.test.tsx,approved UI design and full workflow parity
+A,apps/web/src/components/layout/CapabilityBoundary.tsx,approved UI design and full workflow parity
+M,apps/web/src/components/layout/PageHeader.tsx,approved UI design and full workflow parity
+A,apps/web/src/components/layout/RecordLoading.tsx,approved UI design and full workflow parity
+A,apps/web/src/components/layout/WorkspaceFonts.tsx,approved UI design and full workflow parity
+A,apps/web/src/components/layout/WorkspaceTabs.tsx,approved UI design and full workflow parity
+M,apps/web/src/components/transactions/grid-theme.ts,approved UI design and full workflow parity
+M,apps/web/src/components/ui/Badge.tsx,approved UI design and full workflow parity
+M,apps/web/src/components/ui/Button.tsx,approved UI design and full workflow parity
+M,apps/web/src/components/ui/Panel.tsx,approved UI design and full workflow parity
+M,apps/web/src/components/ui/States.tsx,approved UI design and full workflow parity
+M,apps/web/src/features/auth/LoginPage.tsx,approved UI design and full workflow parity
+A,apps/web/src/features/auth/session.test.tsx,approved UI design and full workflow parity
+M,apps/web/src/features/auth/session.ts,approved UI design and full workflow parity
+M,apps/web/src/features/cases/CaseDetailPage.test.tsx,approved UI design and full workflow parity
+M,apps/web/src/features/cases/CaseDetailPage.tsx,approved UI design and full workflow parity
+M,apps/web/src/features/cases/CasesPage.tsx,approved UI design and full workflow parity
+M,apps/web/src/features/cases/TransactionCases.tsx,approved UI design and full workflow parity
+M,apps/web/src/features/checkout/CheckoutPage.test.tsx,approved UI design and full workflow parity
+M,apps/web/src/features/checkout/CheckoutPage.tsx,approved UI design and full workflow parity
+M,apps/web/src/features/dashboard/DashboardPage.test.tsx,approved UI design and full workflow parity
+M,apps/web/src/features/dashboard/DashboardPage.tsx,approved UI design and full workflow parity
+M,apps/web/src/features/demo/StaticDemoBanner.tsx,approved UI design and full workflow parity
+M,apps/web/src/features/disputes/DisputesPage.test.tsx,approved UI design and full workflow parity
+M,apps/web/src/features/disputes/DisputesPage.tsx,approved UI design and full workflow parity
+A,apps/web/src/features/experience/Dossier.tsx,approved UI design and full workflow parity
+A,apps/web/src/features/experience/Experience.tsx,approved UI design and full workflow parity
+A,apps/web/src/features/experience/ReceiptMorph.tsx,approved UI design and full workflow parity
+A,apps/web/src/features/experience/Story.tsx,approved UI design and full workflow parity
+A,apps/web/src/features/experience/Wallet.tsx,approved UI design and full workflow parity
+A,apps/web/src/features/experience/experience.css,approved UI design and full workflow parity
+A,apps/web/src/features/experience/fixtures.ts,approved UI design and full workflow parity
+A,apps/web/src/features/experience/money-scene.test.ts,approved UI design and full workflow parity
+A,apps/web/src/features/experience/money-scene.ts,approved UI design and full workflow parity
+A,apps/web/src/features/experience/story.css,approved UI design and full workflow parity
+M,apps/web/src/features/monitoring/MonitoringPage.tsx,approved UI design and full workflow parity
+M,apps/web/src/features/network/NetworkPage.tsx,approved UI design and full workflow parity
+M,apps/web/src/features/operations/DemoGuidePage.tsx,approved UI design and full workflow parity
+M,apps/web/src/features/operations/OperationsPage.tsx,approved UI design and full workflow parity
+M,apps/web/src/features/policy/PolicyLabPage.tsx,approved UI design and full workflow parity
+M,apps/web/src/features/refunds/RefundsPage.tsx,approved UI design and full workflow parity
+M,apps/web/src/features/risk/CapacityWarning.tsx,approved UI design and full workflow parity
+M,apps/web/src/features/risk/Contributions.tsx,approved UI design and full workflow parity
+M,apps/web/src/features/risk/ModelPage.tsx,approved UI design and full workflow parity
+M,apps/web/src/features/risk/RiskPanel.tsx,approved UI design and full workflow parity
+M,apps/web/src/features/settings/SettingsPage.tsx,approved UI design and full workflow parity
+M,apps/web/src/features/transactions/TransactionDetailPage.tsx,approved UI design and full workflow parity
+M,apps/web/src/features/transactions/TransactionsPage.tsx,approved UI design and full workflow parity
+A,apps/web/src/lib/capabilities.ts,approved UI design and full workflow parity
+M,apps/web/src/lib/staticApi.ts,approved UI design and full workflow parity
+M,apps/web/src/main.tsx,approved UI design and full workflow parity
+M,apps/web/src/pages/NotFoundPage.tsx,approved UI design and full workflow parity
+M,apps/web/src/styles/tokens.css,approved UI design and full workflow parity
+A,apps/web/src/styles/workspace.css,approved UI design and full workflow parity
+M,apps/web/vite.config.ts,approved UI design and full workflow parity
+M,docs/IMPLEMENTATION_STATUS.md,"audit, handoff and executed evidence"
+A,docs/integration/2026-11-11/README.md,"audit, handoff and executed evidence"
+A,docs/integration/2026-11-11/change-inventory.csv,"audit, handoff and executed evidence"
+A,docs/integration/2026-11-11/file-conflict-matrix.csv,"audit, handoff and executed evidence"
+A,docs/integration/2026-11-11/plan.md,"audit, handoff and executed evidence"
+A,docs/integration/2026-11-11/pr-file-inventory.csv,"audit, handoff and executed evidence"
+A,docs/integration/2026-11-11/source-heads.json,"audit, handoff and executed evidence"
+A,docs/sentinel-v2/00-handoff.md,"audit, handoff and executed evidence"
+A,docs/sentinel-v2/01-repository-audit.md,"audit, handoff and executed evidence"
+A,docs/sentinel-v2/02-feature-and-workflow-matrix.md,"audit, handoff and executed evidence"
+A,docs/sentinel-v2/02-operational-states.md,"audit, handoff and executed evidence"
+A,docs/sentinel-v2/02-server-contract-index.md,"audit, handoff and executed evidence"
+A,docs/sentinel-v2/03-route-migration-plan.md,"audit, handoff and executed evidence"
+A,docs/sentinel-v2/04-design-system.md,"audit, handoff and executed evidence"
+A,docs/sentinel-v2/05-animation-contract.md,"audit, handoff and executed evidence"
+A,docs/sentinel-v2/06-migration-progress.md,"audit, handoff and executed evidence"
+A,docs/sentinel-v2/07-final-qa.md,"audit, handoff and executed evidence"
+A,docs/sentinel-v2/08-visual-corrections-review.md,"audit, handoff and executed evidence"
+A,docs/sentinel-v2/09-money-trail-reset.md,"audit, handoff and executed evidence"
+A,docs/sentinel-v2/10-money-trail-qa.md,"audit, handoff and executed evidence"
+A,docs/sentinel-v2/11-gate1-polish.md,"audit, handoff and executed evidence"
+A,docs/sentinel-v2/12-phase2-authorization.md,"audit, handoff and executed evidence"
+A,docs/sentinel-v2/13-phase2-reconstruction.md,"audit, handoff and executed evidence"
+A,docs/sentinel-v2/14-private-preview-overlap.md,"audit, handoff and executed evidence"
+A,docs/sentinel-v2/15-gate2a-static-remediation.md,"audit, handoff and executed evidence"
+A,docs/sentinel-v2/16-gate2b-host-preparation.md,"audit, handoff and executed evidence"
+A,docs/sentinel-v2/17-gate2c-loading-stability.md,"audit, handoff and executed evidence"
+A,docs/sentinel-v2/font-licenses/DM-Sans.txt,"audit, handoff and executed evidence"
+A,docs/sentinel-v2/font-licenses/IBM-Plex-Mono.txt,"audit, handoff and executed evidence"
+A,docs/sentinel-v2/font-licenses/Manrope.txt,"audit, handoff and executed evidence"
+A,hosting/cloudflare-pages/404.html,approved static consistency and host review tooling
+A,hosting/cloudflare-pages/README.md,approved static consistency and host review tooling
+A,hosting/cloudflare-pages/_headers,approved static consistency and host review tooling
+A,hosting/cloudflare-pages/lab.mjs,approved static consistency and host review tooling
+A,hosting/cloudflare-pages/local-preview.mjs,approved static consistency and host review tooling
+A,hosting/cloudflare-pages/prepare.py,approved static consistency and host review tooling
+A,hosting/cloudflare-pages/probe.mjs,approved static consistency and host review tooling
+A,hosting/cloudflare-pages/stability-lab.mjs,approved static consistency and host review tooling
+M,ml/tests/test_pipeline.py,test-only CI/setup reconciliation
+M,packages/contracts/openapi.json,generated additive callback contracts
+M,packages/contracts/openapi.ts,generated additive callback contracts
+A,scripts/package-static-candidate.py,approved static consistency and host review tooling
+A,scripts/prepare_integration_browser.py,test-only CI/setup reconciliation
