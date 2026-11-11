@@ -7,7 +7,7 @@
 +from typing import Literal
  from urllib.parse import urlsplit
  from uuid import UUID
- 
+
 @@ -125,6 +126,10 @@
      hosted_deployment: bool = False
      database_url: str = "postgresql+psycopg://sentinel:sentinel@127.0.0.1:5432/sentinel"
@@ -27,11 +27,11 @@
  from collections.abc import Iterator
  from functools import lru_cache
  from pathlib import Path
- 
+
  from sqlalchemy import Engine, create_engine
 +from sqlalchemy.engine import make_url
  from sqlalchemy.orm import Session, sessionmaker
- 
+
  from app.core.config import Settings, get_settings
 @@ -15,6 +17,34 @@
      Explicit connect arguments override any weaker sslmode in a provider-issued URL.
