@@ -32,7 +32,7 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - run: pip install 'pytest==9.1.1' 'psycopg[binary]==3.3.6'
+      - run: pip install 'pytest==9.1.1' 'psycopg[binary]==3.3.6' 'sqlalchemy==2.1.4'
       - run: pytest -q supabase/tests
         env:
           SENTINEL_SUPABASE_TEST_DATABASE_URL: postgresql://sentinel:sentinel@127.0.0.1:5432/sentinel_supabase_check
