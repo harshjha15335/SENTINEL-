@@ -1,0 +1,259 @@
+[
+  {
+    "route": "/app",
+    "name": "overview",
+    "title": "Fraud Risk Manager",
+    "headingCount": 17,
+    "headings": [
+      {
+        "tag": "H1",
+        "text": "Dashboard"
+      },
+      {
+        "tag": "H2",
+        "text": "Chargeback model"
+      },
+      {
+        "tag": "H3",
+        "text": "ROC-AUC"
+      },
+      {
+        "tag": "H3",
+        "text": "Threshold"
+      },
+      {
+        "tag": "H3",
+        "text": "Precision / Recall"
+      },
+      {
+        "tag": "H3",
+        "text": "At current threshold"
+      },
+      {
+        "tag": "H3",
+        "text": "What does this threshold actually save you?"
+      },
+      {
+        "tag": "H3",
+        "text": "Expected cost by threshold"
+      },
+      {
+        "tag": "H3",
+        "text": "Drift check"
+      },
+      {
+        "tag": "H3",
+        "text": "ROC curve"
+      },
+      {
+        "tag": "H3",
+        "text": "Confusion matrix"
+      },
+      {
+        "tag": "H2",
+        "text": "Return-risk model — separate model, trained on `returned`"
+      },
+      {
+        "tag": "H3",
+        "text": "ROC-AUC"
+      },
+      {
+        "tag": "H3",
+        "text": "AP"
+      },
+      {
+        "tag": "H3",
+        "text": "Medium / High"
+      },
+      {
+        "tag": "H3",
+        "text": "Base return rate"
+      },
+      {
+        "tag": "H2",
+        "text": "Model choice — is XGBoost actually earning its complexity?"
+      }
+    ],
+    "textLength": 2981,
+    "textExcerpt": "Fraud Risk Manager AI RISK CONSOLE Dashboard Score order Batch scoring Review queue Abuse rings Fraud spikes Evidence Backend connected FRAUD RISK MANAGER Dashboard Chargeback model RANKING QUALITY ROC-AUC 0.767 COST-OPTIMAL CUTOFF Threshold 0.25 AT COST-OPTIMAL THRESHOLD Precision / Recall 16.9% / 84.5% EXPECTED MONTHLY LOSS At current threshold ₹9,74,400 POLICY SIMULATOR What does this threshold",
+    "screenshot": "frm_route_overview.png",
+    "networkCallsCount": 14,
+    "backendCalls": [
+      {
+        "url": "https://fraud-risk-manager.onrender.com/",
+        "method": "GET"
+      },
+      {
+        "url": "https://fraud-risk-manager.onrender.com/metrics",
+        "method": "GET"
+      }
+    ]
+  },
+  {
+    "route": "/app/score",
+    "name": "score",
+    "title": "Fraud Risk Manager",
+    "headingCount": 3,
+    "headings": [
+      {
+        "tag": "H1",
+        "text": "Score an order"
+      },
+      {
+        "tag": "H3",
+        "text": "Order details"
+      },
+      {
+        "tag": "H3",
+        "text": "Decision threshold"
+      }
+    ],
+    "textLength": 718,
+    "textExcerpt": "Fraud Risk Manager AI RISK CONSOLE Dashboard Score order Batch scoring Review queue Abuse rings Fraud spikes Evidence Backend connected FRAUD RISK MANAGER Score an order Order details Order value (₹) Account age (days) Category electronics fashion beauty home grocery sports Payment method upi credit card debit card netbanking cod Discount applied (%) Previous orders by customer Previous chargeback",
+    "screenshot": "frm_route_score.png",
+    "networkCallsCount": 13,
+    "backendCalls": [
+      {
+        "url": "https://fraud-risk-manager.onrender.com/",
+        "method": "GET"
+      }
+    ]
+  },
+  {
+    "route": "/app/batch",
+    "name": "batch",
+    "title": "Fraud Risk Manager",
+    "headingCount": 2,
+    "headings": [
+      {
+        "tag": "H1",
+        "text": "Batch scoring"
+      },
+      {
+        "tag": "H3",
+        "text": "Upload an order export"
+      }
+    ],
+    "textLength": 424,
+    "textExcerpt": "Fraud Risk Manager AI RISK CONSOLE Dashboard Score order Batch scoring Review queue Abuse rings Fraud spikes Evidence Backend connected FRAUD RISK MANAGER Batch scoring Upload an order export Score an entire day's orders at once through both models. Every row needs the same fields as the single-order form — download a template to see the expected columns. Drop a CSV here, or click to browse Up ",
+    "screenshot": "frm_route_batch.png",
+    "networkCallsCount": 13,
+    "backendCalls": [
+      {
+        "url": "https://fraud-risk-manager.onrender.com/",
+        "method": "GET"
+      }
+    ]
+  },
+  {
+    "route": "/app/review",
+    "name": "review",
+    "error": "page.goto: Timeout 25000ms exceeded.\nCall log:\n\u001b[2m  - navigating to \"https://fraud-risk-manager.vercel.app/app/review\", waiting until \"networkidle\"\u001b[22m\n"
+  },
+  {
+    "route": "/app/graph",
+    "name": "graph",
+    "title": "Fraud Risk Manager",
+    "headingCount": 3,
+    "headings": [
+      {
+        "tag": "H1",
+        "text": "Abuse-ring sentinel"
+      },
+      {
+        "tag": "H3",
+        "text": "Shared-identity network"
+      },
+      {
+        "tag": "H3",
+        "text": "Node detail"
+      }
+    ],
+    "textLength": 321,
+    "textExcerpt": "Fraud Risk Manager AI RISK CONSOLE Dashboard Score order Batch scoring Review queue Abuse rings Fraud spikes Evidence Backend connected FRAUD RISK MANAGER Abuse-ring sentinel 278 rings detected CUSTOMERS LINKED BY DEVICE OR ADDRESS Shared-identity network Customer Device Address Node detail Click a node to see details.",
+    "screenshot": "frm_route_graph.png",
+    "networkCallsCount": 14,
+    "backendCalls": [
+      {
+        "url": "https://fraud-risk-manager.onrender.com/",
+        "method": "GET"
+      },
+      {
+        "url": "https://fraud-risk-manager.onrender.com/graph",
+        "method": "GET"
+      }
+    ]
+  },
+  {
+    "route": "/app/spikes",
+    "name": "spikes",
+    "title": "Fraud Risk Manager",
+    "headingCount": 6,
+    "headings": [
+      {
+        "tag": "H1",
+        "text": "Fraud-spike detector"
+      },
+      {
+        "tag": "H3",
+        "text": "Chargeback rate"
+      },
+      {
+        "tag": "H3",
+        "text": "Latest z-score"
+      },
+      {
+        "tag": "H3",
+        "text": "Flag if z-score exceeds"
+      },
+      {
+        "tag": "H3",
+        "text": "Chargeback rate over time"
+      },
+      {
+        "tag": "H3",
+        "text": "Spike detail"
+      }
+    ],
+    "textLength": 1021,
+    "textExcerpt": "Fraud Risk Manager AI RISK CONSOLE Dashboard Score order Batch scoring Review queue Abuse rings Fraud spikes Evidence Backend connected FRAUD RISK MANAGER Fraud-spike detector 3 spikes detected Webhook alerting is live — no active spike to report right now. MOST RECENT WEEK Chargeback rate 7.5% DEVIATION FROM BASELINE Latest z-score -2.03 ANOMALY THRESHOLD Flag if z-score exceeds 2.0 WEEKLY, TRAIL",
+    "screenshot": "frm_route_spikes.png",
+    "networkCallsCount": 15,
+    "backendCalls": [
+      {
+        "url": "https://fraud-risk-manager.onrender.com/",
+        "method": "GET"
+      },
+      {
+        "url": "https://fraud-risk-manager.onrender.com/fraud-spikes",
+        "method": "GET"
+      }
+    ]
+  },
+  {
+    "route": "/app/evidence",
+    "name": "evidence",
+    "title": "Fraud Risk Manager",
+    "headingCount": 2,
+    "headings": [
+      {
+        "tag": "H1",
+        "text": "Chargeback evidence"
+      },
+      {
+        "tag": "H3",
+        "text": "Compile an evidence packet"
+      }
+    ],
+    "textLength": 359,
+    "textExcerpt": "Fraud Risk Manager AI RISK CONSOLE Dashboard Score order Batch scoring Review queue Abuse rings Fraud spikes Evidence Backend connected FRAUD RISK MANAGER Chargeback evidence Compile an evidence packet Enter an order ID to auto-assemble delivery proof, device/IP match, order history, and policy references into a submission-ready dispute response. Generate",
+    "screenshot": "frm_route_evidence.png",
+    "networkCallsCount": 14,
+    "backendCalls": [
+      {
+        "url": "https://fraud-risk-manager.onrender.com/",
+        "method": "GET"
+      }
+    ]
+  }
+]

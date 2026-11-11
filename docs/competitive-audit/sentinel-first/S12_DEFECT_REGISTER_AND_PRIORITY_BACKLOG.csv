@@ -1,0 +1,7 @@
+finding_id,priority,severity,confidence,path_lines,reproducibility,impact,remedy,verification
+DEF-001,P1,High,High,apps/api/app/services/inbox_bridge.py:31,Historical,Historical capture webhook marked PROCESSED prematurely; causal actor unproven from surviving logs,Document as operational risk; enforce strict receipt verification in bridge,Bridge receipt invariant verified in test_supabase_inbox.py
+DEF-002,P1,High,High,apps/api/app/workers/supabase_inbox.py:20,Operational,Automated webhook delivery across public internet unverified on live host,Execute fresh PayPal Sandbox transaction on hosted staging container,Stage 8 live verification on hosted URL
+DEF-003,P2,Medium,High,render.yaml:14,Deterministic,Pushing to main automatically triggers Render Docker build,Set autoDeploy: false in render.yaml if operator approval is required,Inspect render.yaml
+DEF-004,P1,Medium,High,apps/api/app/workers/pipeline.py:45,Deterministic,Overlapping rolling container deployments fail on worker advisory lock 7682346,Ensure single replica numInstances: 1 and stop-before-start rollout,deploy/tests/test_render_contract.py
+DEF-005,P3,Low,High,apps/api/tests/test_hosted_database_tls.py:20,Deterministic,Hosted database TLS test skipped in local environment,Supply test SSL database URL in CI/CD pipeline,pytest apps/api/tests/test_hosted_database_tls.py
+

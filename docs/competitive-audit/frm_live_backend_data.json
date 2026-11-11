@@ -1,0 +1,1140 @@
+{
+  "metrics": {
+    "holdout_rows": 4000,
+    "holdout_positive_rate": 0.113,
+    "roc_auc": 0.7668,
+    "average_precision": 0.4526,
+    "cost_assumptions_inr": {
+      "false_positive_cost": 350,
+      "false_negative_cost": 4500
+    },
+    "best_cost_weighted_threshold": {
+      "threshold": 0.25,
+      "precision": 0.1686,
+      "recall": 0.8451,
+      "f1": 0.2811,
+      "tp": 382,
+      "fp": 1884,
+      "fn": 70,
+      "tn": 1664,
+      "expected_cost_inr": 974400
+    },
+    "threshold_sweep": [
+      {
+        "threshold": 0.05,
+        "precision": 0.1155,
+        "recall": 0.9845,
+        "f1": 0.2067,
+        "tp": 445,
+        "fp": 3408,
+        "fn": 7,
+        "tn": 140,
+        "expected_cost_inr": 1224300
+      },
+      {
+        "threshold": 0.1,
+        "precision": 0.1279,
+        "recall": 0.9403,
+        "f1": 0.2252,
+        "tp": 425,
+        "fp": 2897,
+        "fn": 27,
+        "tn": 651,
+        "expected_cost_inr": 1135450
+      },
+      {
+        "threshold": 0.15,
+        "precision": 0.1445,
+        "recall": 0.9115,
+        "f1": 0.2494,
+        "tp": 412,
+        "fp": 2440,
+        "fn": 40,
+        "tn": 1108,
+        "expected_cost_inr": 1034000
+      },
+      {
+        "threshold": 0.2,
+        "precision": 0.1566,
+        "recall": 0.8761,
+        "f1": 0.2658,
+        "tp": 396,
+        "fp": 2132,
+        "fn": 56,
+        "tn": 1416,
+        "expected_cost_inr": 998200
+      },
+      {
+        "threshold": 0.25,
+        "precision": 0.1686,
+        "recall": 0.8451,
+        "f1": 0.2811,
+        "tp": 382,
+        "fp": 1884,
+        "fn": 70,
+        "tn": 1664,
+        "expected_cost_inr": 974400
+      },
+      {
+        "threshold": 0.3,
+        "precision": 0.1821,
+        "recall": 0.7965,
+        "f1": 0.2964,
+        "tp": 360,
+        "fp": 1617,
+        "fn": 92,
+        "tn": 1931,
+        "expected_cost_inr": 979950
+      },
+      {
+        "threshold": 0.35,
+        "precision": 0.2009,
+        "recall": 0.6991,
+        "f1": 0.3121,
+        "tp": 316,
+        "fp": 1257,
+        "fn": 136,
+        "tn": 2291,
+        "expected_cost_inr": 1051950
+      },
+      {
+        "threshold": 0.4,
+        "precision": 0.2523,
+        "recall": 0.6062,
+        "f1": 0.3563,
+        "tp": 274,
+        "fp": 812,
+        "fn": 178,
+        "tn": 2736,
+        "expected_cost_inr": 1085200
+      },
+      {
+        "threshold": 0.45,
+        "precision": 0.3469,
+        "recall": 0.5288,
+        "f1": 0.4189,
+        "tp": 239,
+        "fp": 450,
+        "fn": 213,
+        "tn": 3098,
+        "expected_cost_inr": 1116000
+      },
+      {
+        "threshold": 0.5,
+        "precision": 0.4586,
+        "recall": 0.4779,
+        "f1": 0.468,
+        "tp": 216,
+        "fp": 255,
+        "fn": 236,
+        "tn": 3293,
+        "expected_cost_inr": 1151250
+      },
+      {
+        "threshold": 0.55,
+        "precision": 0.5241,
+        "recall": 0.458,
+        "f1": 0.4888,
+        "tp": 207,
+        "fp": 188,
+        "fn": 245,
+        "tn": 3360,
+        "expected_cost_inr": 1168300
+      },
+      {
+        "threshold": 0.6,
+        "precision": 0.5515,
+        "recall": 0.4381,
+        "f1": 0.4883,
+        "tp": 198,
+        "fp": 161,
+        "fn": 254,
+        "tn": 3387,
+        "expected_cost_inr": 1199350
+      },
+      {
+        "threshold": 0.65,
+        "precision": 0.5689,
+        "recall": 0.4204,
+        "f1": 0.4835,
+        "tp": 190,
+        "fp": 144,
+        "fn": 262,
+        "tn": 3404,
+        "expected_cost_inr": 1229400
+      },
+      {
+        "threshold": 0.7,
+        "precision": 0.5922,
+        "recall": 0.4049,
+        "f1": 0.4809,
+        "tp": 183,
+        "fp": 126,
+        "fn": 269,
+        "tn": 3422,
+        "expected_cost_inr": 1254600
+      },
+      {
+        "threshold": 0.75,
+        "precision": 0.6084,
+        "recall": 0.385,
+        "f1": 0.4715,
+        "tp": 174,
+        "fp": 112,
+        "fn": 278,
+        "tn": 3436,
+        "expected_cost_inr": 1290200
+      },
+      {
+        "threshold": 0.8,
+        "precision": 0.625,
+        "recall": 0.365,
+        "f1": 0.4609,
+        "tp": 165,
+        "fp": 99,
+        "fn": 287,
+        "tn": 3449,
+        "expected_cost_inr": 1326150
+      },
+      {
+        "threshold": 0.85,
+        "precision": 0.6667,
+        "recall": 0.3142,
+        "f1": 0.4271,
+        "tp": 142,
+        "fp": 71,
+        "fn": 310,
+        "tn": 3477,
+        "expected_cost_inr": 1419850
+      },
+      {
+        "threshold": 0.9,
+        "precision": 0.7091,
+        "recall": 0.1726,
+        "f1": 0.2776,
+        "tp": 78,
+        "fp": 32,
+        "fn": 374,
+        "tn": 3516,
+        "expected_cost_inr": 1694200
+      },
+      {
+        "threshold": 0.95,
+        "precision": 0.8788,
+        "recall": 0.0642,
+        "f1": 0.1196,
+        "tp": 29,
+        "fp": 4,
+        "fn": 423,
+        "tn": 3544,
+        "expected_cost_inr": 1904900
+      }
+    ],
+    "drift_analysis_at_best_threshold": [
+      {
+        "slice": "slice_1_of_3",
+        "date_range": [
+          "2026-03-11 15:40:00",
+          "2026-04-16 20:03:00"
+        ],
+        "n_orders": 1333,
+        "precision": 0.1718,
+        "recall": 0.875,
+        "positive_rate": 0.114
+      },
+      {
+        "slice": "slice_2_of_3",
+        "date_range": [
+          "2026-04-16 20:15:00",
+          "2026-05-24 02:29:00"
+        ],
+        "n_orders": 1333,
+        "precision": 0.1789,
+        "recall": 0.8395,
+        "positive_rate": 0.1215
+      },
+      {
+        "slice": "slice_3_of_3",
+        "date_range": [
+          "2026-05-24 02:39:00",
+          "2026-06-29 22:40:00"
+        ],
+        "n_orders": 1334,
+        "precision": 0.1544,
+        "recall": 0.8188,
+        "positive_rate": 0.1034
+      }
+    ],
+    "return_model": {
+      "holdout_rows": 4000,
+      "holdout_positive_rate": 0.25425,
+      "roc_auc": 0.6413994279613318,
+      "average_precision": 0.399155963180841,
+      "band_thresholds": {
+        "medium": 0.4589,
+        "high": 0.6779
+      }
+    },
+    "baseline_comparison": {
+      "comparison_threshold": 0.25,
+      "holdout_rows": 4000,
+      "models": {
+        "xgboost": {
+          "description": "Gradient-boosted trees (300 estimators, depth 5) — the model used in production.",
+          "roc_auc": 0.7668,
+          "average_precision": 0.4526,
+          "precision_at_threshold": 0.1686,
+          "recall_at_threshold": 0.8451,
+          "f1_at_threshold": 0.2811
+        },
+        "logistic_regression": {
+          "description": "Plain logistic regression, balanced class weights, scaled features — a standard, interpretable baseline.",
+          "roc_auc": 0.7804908162145444,
+          "average_precision": 0.474014108615191,
+          "precision_at_threshold": 0.15120525931336742,
+          "recall_at_threshold": 0.915929203539823,
+          "f1_at_threshold": 0.25956112852664576
+        }
+      },
+      "roc_auc_improvement": -0.0137,
+      "average_precision_improvement": -0.0214
+    }
+  },
+  "reviewSample": [
+    {
+      "order_id": "ORD-0010424",
+      "customer_id": "cust_71ad16ad2c",
+      "order_value": 1972.29,
+      "risk_score": 0.9178,
+      "risk_band": "high",
+      "top_reason_label": "Order IP location doesn't match account country",
+      "flagged_at": "2026-11-08T15:12:08.348602",
+      "status": "pending",
+      "resolved_at": null,
+      "alert_sent": true
+    },
+    {
+      "order_id": "ORD-0001309",
+      "customer_id": "cust_e3670ce0c3",
+      "order_value": 1808.05,
+      "risk_score": 0.9063,
+      "risk_band": "high",
+      "top_reason_label": "Shipping address differs from billing address",
+      "flagged_at": "2026-11-09T01:12:08.348602",
+      "status": "pending",
+      "resolved_at": null,
+      "alert_sent": true
+    },
+    {
+      "order_id": "ORD-0002811",
+      "customer_id": "cust_90415f9b8d",
+      "order_value": 748.29,
+      "risk_score": 0.8633,
+      "risk_band": "high",
+      "top_reason_label": "Shipping address differs from billing address",
+      "flagged_at": "2026-11-10T23:12:08.348602",
+      "status": "pending",
+      "resolved_at": null,
+      "alert_sent": true
+    }
+  ],
+  "spikes": {
+    "granularity": "weekly",
+    "points": [
+      {
+        "period_start": "2024-12-30",
+        "order_count": 180,
+        "chargeback_count": 25,
+        "chargeback_rate": 0.1389,
+        "rolling_mean": null,
+        "rolling_std": null,
+        "z_score": null,
+        "is_spike": false
+      },
+      {
+        "period_start": "2025-01-06",
+        "order_count": 240,
+        "chargeback_count": 24,
+        "chargeback_rate": 0.1,
+        "rolling_mean": null,
+        "rolling_std": null,
+        "z_score": null,
+        "is_spike": false
+      },
+      {
+        "period_start": "2025-01-13",
+        "order_count": 263,
+        "chargeback_count": 54,
+        "chargeback_rate": 0.2053,
+        "rolling_mean": null,
+        "rolling_std": null,
+        "z_score": null,
+        "is_spike": false
+      },
+      {
+        "period_start": "2025-01-20",
+        "order_count": 256,
+        "chargeback_count": 29,
+        "chargeback_rate": 0.1133,
+        "rolling_mean": null,
+        "rolling_std": null,
+        "z_score": null,
+        "is_spike": false
+      },
+      {
+        "period_start": "2025-01-27",
+        "order_count": 273,
+        "chargeback_count": 37,
+        "chargeback_rate": 0.1355,
+        "rolling_mean": null,
+        "rolling_std": null,
+        "z_score": null,
+        "is_spike": false
+      },
+      {
+        "period_start": "2025-02-03",
+        "order_count": 264,
+        "chargeback_count": 43,
+        "chargeback_rate": 0.1629,
+        "rolling_mean": null,
+        "rolling_std": null,
+        "z_score": null,
+        "is_spike": false
+      },
+      {
+        "period_start": "2025-02-10",
+        "order_count": 234,
+        "chargeback_count": 29,
+        "chargeback_rate": 0.1239,
+        "rolling_mean": null,
+        "rolling_std": null,
+        "z_score": null,
+        "is_spike": false
+      },
+      {
+        "period_start": "2025-02-17",
+        "order_count": 277,
+        "chargeback_count": 37,
+        "chargeback_rate": 0.1336,
+        "rolling_mean": null,
+        "rolling_std": null,
+        "z_score": null,
+        "is_spike": false
+      },
+      {
+        "period_start": "2025-02-24",
+        "order_count": 250,
+        "chargeback_count": 35,
+        "chargeback_rate": 0.14,
+        "rolling_mean": 0.1392,
+        "rolling_std": 0.0326,
+        "z_score": 0.03,
+        "is_spike": false
+      },
+      {
+        "period_start": "2025-03-03",
+        "order_count": 286,
+        "chargeback_count": 52,
+        "chargeback_rate": 0.1818,
+        "rolling_mean": 0.1393,
+        "rolling_std": 0.0326,
+        "z_score": 1.31,
+        "is_spike": false
+      },
+      {
+        "period_start": "2025-03-10",
+        "order_count": 236,
+        "chargeback_count": 29,
+        "chargeback_rate": 0.1229,
+        "rolling_mean": 0.1495,
+        "rolling_std": 0.0313,
+        "z_score": -0.85,
+        "is_spike": false
+      },
+      {
+        "period_start": "2025-03-17",
+        "order_count": 282,
+        "chargeback_count": 39,
+        "chargeback_rate": 0.1383,
+        "rolling_mean": 0.1392,
+        "rolling_std": 0.0227,
+        "z_score": -0.04,
+        "is_spike": false
+      },
+      {
+        "period_start": "2025-03-24",
+        "order_count": 300,
+        "chargeback_count": 36,
+        "chargeback_rate": 0.12,
+        "rolling_mean": 0.1424,
+        "rolling_std": 0.0202,
+        "z_score": -1.11,
+        "is_spike": false
+      },
+      {
+        "period_start": "2025-03-31",
+        "order_count": 252,
+        "chargeback_count": 34,
+        "chargeback_rate": 0.1349,
+        "rolling_mean": 0.1404,
+        "rolling_std": 0.0216,
+        "z_score": -0.25,
+        "is_spike": false
+      },
+      {
+        "period_start": "2025-04-07",
+        "order_count": 280,
+        "chargeback_count": 41,
+        "chargeback_rate": 0.1464,
+        "rolling_mean": 0.1369,
+        "rolling_std": 0.0196,
+        "z_score": 0.48,
+        "is_spike": false
+      },
+      {
+        "period_start": "2025-04-14",
+        "order_count": 267,
+        "chargeback_count": 44,
+        "chargeback_rate": 0.1648,
+        "rolling_mean": 0.1397,
+        "rolling_std": 0.0191,
+        "z_score": 1.31,
+        "is_spike": false
+      },
+      {
+        "period_start": "2025-04-21",
+        "order_count": 249,
+        "chargeback_count": 28,
+        "chargeback_rate": 0.1124,
+        "rolling_mean": 0.1436,
+        "rolling_std": 0.0208,
+        "z_score": -1.5,
+        "is_spike": false
+      },
+      {
+        "period_start": "2025-04-28",
+        "order_count": 279,
+        "chargeback_count": 31,
+        "chargeback_rate": 0.1111,
+        "rolling_mean": 0.1402,
+        "rolling_std": 0.0236,
+        "z_score": -1.23,
+        "is_spike": false
+      },
+      {
+        "period_start": "2025-05-05",
+        "order_count": 251,
+        "chargeback_count": 29,
+        "chargeback_rate": 0.1155,
+        "rolling_mean": 0.1314,
+        "rolling_std": 0.0184,
+        "z_score": -0.86,
+        "is_spike": false
+      },
+      {
+        "period_start": "2025-05-12",
+        "order_count": 288,
+        "chargeback_count": 39,
+        "chargeback_rate": 0.1354,
+        "rolling_mean": 0.1304,
+        "rolling_std": 0.0191,
+        "z_score": 0.26,
+        "is_spike": false
+      },
+      {
+        "period_start": "2025-05-19",
+        "order_count": 272,
+        "chargeback_count": 29,
+        "chargeback_rate": 0.1066,
+        "rolling_mean": 0.1301,
+        "rolling_std": 0.0189,
+        "z_score": -1.24,
+        "is_spike": false
+      },
+      {
+        "period_start": "2025-05-26",
+        "order_count": 237,
+        "chargeback_count": 36,
+        "chargeback_rate": 0.1519,
+        "rolling_mean": 0.1284,
+        "rolling_std": 0.0205,
+        "z_score": 1.15,
+        "is_spike": false
+      },
+      {
+        "period_start": "2025-06-02",
+        "order_count": 268,
+        "chargeback_count": 32,
+        "chargeback_rate": 0.1194,
+        "rolling_mean": 0.1305,
+        "rolling_std": 0.0221,
+        "z_score": -0.5,
+        "is_spike": false
+      },
+      {
+        "period_start": "2025-06-09",
+        "order_count": 252,
+        "chargeback_count": 34,
+        "chargeback_rate": 0.1349,
+        "rolling_mean": 0.1272,
+        "rolling_std": 0.0213,
+        "z_score": 0.36,
+        "is_spike": false
+      },
+      {
+        "period_start": "2025-06-16",
+        "order_count": 269,
+        "chargeback_count": 32,
+        "chargeback_rate": 0.119,
+        "rolling_mean": 0.1234,
+        "rolling_std": 0.0157,
+        "z_score": -0.28,
+        "is_spike": false
+      },
+      {
+        "period_start": "2025-06-23",
+        "order_count": 249,
+        "chargeback_count": 34,
+        "chargeback_rate": 0.1365,
+        "rolling_mean": 0.1242,
+        "rolling_std": 0.0152,
+        "z_score": 0.81,
+        "is_spike": false
+      },
+      {
+        "period_start": "2025-06-30",
+        "order_count": 261,
+        "chargeback_count": 45,
+        "chargeback_rate": 0.1724,
+        "rolling_mean": 0.1274,
+        "rolling_std": 0.0147,
+        "z_score": 3.06,
+        "is_spike": true
+      },
+      {
+        "period_start": "2025-07-07",
+        "order_count": 261,
+        "chargeback_count": 33,
+        "chargeback_rate": 0.1264,
+        "rolling_mean": 0.1345,
+        "rolling_std": 0.0207,
+        "z_score": -0.39,
+        "is_spike": false
+      },
+      {
+        "period_start": "2025-07-14",
+        "order_count": 234,
+        "chargeback_count": 34,
+        "chargeback_rate": 0.1453,
+        "rolling_mean": 0.1334,
+        "rolling_std": 0.0209,
+        "z_score": 0.57,
+        "is_spike": false
+      },
+      {
+        "period_start": "2025-07-21",
+        "order_count": 266,
+        "chargeback_count": 27,
+        "chargeback_rate": 0.1015,
+        "rolling_mean": 0.1382,
+        "rolling_std": 0.0181,
+        "z_score": -2.03,
+        "is_spike": false
+      },
+      {
+        "period_start": "2025-07-28",
+        "order_count": 240,
+        "chargeback_count": 32,
+        "chargeback_rate": 0.1333,
+        "rolling_mean": 0.1319,
+        "rolling_std": 0.0211,
+        "z_score": 0.07,
+        "is_spike": false
+      },
+      {
+        "period_start": "2025-08-04",
+        "order_count": 267,
+        "chargeback_count": 34,
+        "chargeback_rate": 0.1273,
+        "rolling_mean": 0.1337,
+        "rolling_std": 0.0205,
+        "z_score": -0.31,
+        "is_spike": false
+      },
+      {
+        "period_start": "2025-08-11",
+        "order_count": 266,
+        "chargeback_count": 44,
+        "chargeback_rate": 0.1654,
+        "rolling_mean": 0.1327,
+        "rolling_std": 0.0206,
+        "z_score": 1.58,
+        "is_spike": false
+      },
+      {
+        "period_start": "2025-08-18",
+        "order_count": 269,
+        "chargeback_count": 43,
+        "chargeback_rate": 0.1599,
+        "rolling_mean": 0.1385,
+        "rolling_std": 0.0226,
+        "z_score": 0.94,
+        "is_spike": false
+      },
+      {
+        "period_start": "2025-08-25",
+        "order_count": 245,
+        "chargeback_count": 27,
+        "chargeback_rate": 0.1102,
+        "rolling_mean": 0.1414,
+        "rolling_std": 0.0238,
+        "z_score": -1.31,
+        "is_spike": false
+      },
+      {
+        "period_start": "2025-09-01",
+        "order_count": 235,
+        "chargeback_count": 31,
+        "chargeback_rate": 0.1319,
+        "rolling_mean": 0.1337,
+        "rolling_std": 0.0224,
+        "z_score": -0.08,
+        "is_spike": false
+      },
+      {
+        "period_start": "2025-09-08",
+        "order_count": 250,
+        "chargeback_count": 30,
+        "chargeback_rate": 0.12,
+        "rolling_mean": 0.1344,
+        "rolling_std": 0.0222,
+        "z_score": -0.65,
+        "is_spike": false
+      },
+      {
+        "period_start": "2025-09-15",
+        "order_count": 277,
+        "chargeback_count": 28,
+        "chargeback_rate": 0.1011,
+        "rolling_mean": 0.1312,
+        "rolling_std": 0.0222,
+        "z_score": -1.35,
+        "is_spike": false
+      },
+      {
+        "period_start": "2025-09-22",
+        "order_count": 272,
+        "chargeback_count": 43,
+        "chargeback_rate": 0.1581,
+        "rolling_mean": 0.1311,
+        "rolling_std": 0.0223,
+        "z_score": 1.21,
+        "is_spike": false
+      },
+      {
+        "period_start": "2025-09-29",
+        "order_count": 269,
+        "chargeback_count": 37,
+        "chargeback_rate": 0.1375,
+        "rolling_mean": 0.1342,
+        "rolling_std": 0.0243,
+        "z_score": 0.14,
+        "is_spike": false
+      },
+      {
+        "period_start": "2025-10-06",
+        "order_count": 263,
+        "chargeback_count": 29,
+        "chargeback_rate": 0.1103,
+        "rolling_mean": 0.1355,
+        "rolling_std": 0.0241,
+        "z_score": -1.05,
+        "is_spike": false
+      },
+      {
+        "period_start": "2025-10-13",
+        "order_count": 232,
+        "chargeback_count": 22,
+        "chargeback_rate": 0.0948,
+        "rolling_mean": 0.1286,
+        "rolling_std": 0.0222,
+        "z_score": -1.52,
+        "is_spike": false
+      },
+      {
+        "period_start": "2025-10-20",
+        "order_count": 251,
+        "chargeback_count": 30,
+        "chargeback_rate": 0.1195,
+        "rolling_mean": 0.1205,
+        "rolling_std": 0.021,
+        "z_score": -0.05,
+        "is_spike": false
+      },
+      {
+        "period_start": "2025-10-27",
+        "order_count": 234,
+        "chargeback_count": 20,
+        "chargeback_rate": 0.0855,
+        "rolling_mean": 0.1217,
+        "rolling_std": 0.0206,
+        "z_score": -1.76,
+        "is_spike": false
+      },
+      {
+        "period_start": "2025-11-03",
+        "order_count": 242,
+        "chargeback_count": 30,
+        "chargeback_rate": 0.124,
+        "rolling_mean": 0.1159,
+        "rolling_std": 0.0236,
+        "z_score": 0.34,
+        "is_spike": false
+      },
+      {
+        "period_start": "2025-11-10",
+        "order_count": 239,
+        "chargeback_count": 33,
+        "chargeback_rate": 0.1381,
+        "rolling_mean": 0.1163,
+        "rolling_std": 0.0237,
+        "z_score": 0.92,
+        "is_spike": false
+      },
+      {
+        "period_start": "2025-11-17",
+        "order_count": 255,
+        "chargeback_count": 26,
+        "chargeback_rate": 0.102,
+        "rolling_mean": 0.121,
+        "rolling_std": 0.0239,
+        "z_score": -0.79,
+        "is_spike": false
+      },
+      {
+        "period_start": "2025-11-24",
+        "order_count": 242,
+        "chargeback_count": 27,
+        "chargeback_rate": 0.1116,
+        "rolling_mean": 0.114,
+        "rolling_std": 0.0193,
+        "z_score": -0.12,
+        "is_spike": false
+      },
+      {
+        "period_start": "2025-12-01",
+        "order_count": 267,
+        "chargeback_count": 40,
+        "chargeback_rate": 0.1498,
+        "rolling_mean": 0.1107,
+        "rolling_std": 0.0168,
+        "z_score": 2.33,
+        "is_spike": true
+      },
+      {
+        "period_start": "2025-12-08",
+        "order_count": 247,
+        "chargeback_count": 19,
+        "chargeback_rate": 0.0769,
+        "rolling_mean": 0.1157,
+        "rolling_std": 0.0217,
+        "z_score": -1.78,
+        "is_spike": false
+      },
+      {
+        "period_start": "2025-12-15",
+        "order_count": 280,
+        "chargeback_count": 28,
+        "chargeback_rate": 0.1,
+        "rolling_mean": 0.1134,
+        "rolling_std": 0.0249,
+        "z_score": -0.54,
+        "is_spike": false
+      },
+      {
+        "period_start": "2025-12-22",
+        "order_count": 232,
+        "chargeback_count": 24,
+        "chargeback_rate": 0.1034,
+        "rolling_mean": 0.111,
+        "rolling_std": 0.0251,
+        "z_score": -0.3,
+        "is_spike": false
+      },
+      {
+        "period_start": "2025-12-29",
+        "order_count": 254,
+        "chargeback_count": 37,
+        "chargeback_rate": 0.1457,
+        "rolling_mean": 0.1132,
+        "rolling_std": 0.0233,
+        "z_score": 1.39,
+        "is_spike": false
+      },
+      {
+        "period_start": "2026-01-05",
+        "order_count": 273,
+        "chargeback_count": 40,
+        "chargeback_rate": 0.1465,
+        "rolling_mean": 0.1159,
+        "rolling_std": 0.0258,
+        "z_score": 1.18,
+        "is_spike": false
+      },
+      {
+        "period_start": "2026-01-12",
+        "order_count": 271,
+        "chargeback_count": 28,
+        "chargeback_rate": 0.1033,
+        "rolling_mean": 0.117,
+        "rolling_std": 0.027,
+        "z_score": -0.51,
+        "is_spike": false
+      },
+      {
+        "period_start": "2026-01-19",
+        "order_count": 269,
+        "chargeback_count": 39,
+        "chargeback_rate": 0.145,
+        "rolling_mean": 0.1172,
+        "rolling_std": 0.0269,
+        "z_score": 1.03,
+        "is_spike": false
+      },
+      {
+        "period_start": "2026-01-26",
+        "order_count": 253,
+        "chargeback_count": 37,
+        "chargeback_rate": 0.1462,
+        "rolling_mean": 0.1213,
+        "rolling_std": 0.0285,
+        "z_score": 0.88,
+        "is_spike": false
+      },
+      {
+        "period_start": "2026-02-02",
+        "order_count": 238,
+        "chargeback_count": 29,
+        "chargeback_rate": 0.1218,
+        "rolling_mean": 0.1209,
+        "rolling_std": 0.028,
+        "z_score": 0.03,
+        "is_spike": false
+      },
+      {
+        "period_start": "2026-02-09",
+        "order_count": 240,
+        "chargeback_count": 28,
+        "chargeback_rate": 0.1167,
+        "rolling_mean": 0.1265,
+        "rolling_std": 0.0217,
+        "z_score": -0.45,
+        "is_spike": false
+      },
+      {
+        "period_start": "2026-02-16",
+        "order_count": 259,
+        "chargeback_count": 20,
+        "chargeback_rate": 0.0772,
+        "rolling_mean": 0.1286,
+        "rolling_std": 0.0195,
+        "z_score": -2.64,
+        "is_spike": false
+      },
+      {
+        "period_start": "2026-02-23",
+        "order_count": 254,
+        "chargeback_count": 33,
+        "chargeback_rate": 0.1299,
+        "rolling_mean": 0.1253,
+        "rolling_std": 0.0256,
+        "z_score": 0.18,
+        "is_spike": false
+      },
+      {
+        "period_start": "2026-03-02",
+        "order_count": 255,
+        "chargeback_count": 34,
+        "chargeback_rate": 0.1333,
+        "rolling_mean": 0.1233,
+        "rolling_std": 0.0243,
+        "z_score": 0.41,
+        "is_spike": false
+      },
+      {
+        "period_start": "2026-03-09",
+        "order_count": 228,
+        "chargeback_count": 24,
+        "chargeback_rate": 0.1053,
+        "rolling_mean": 0.1217,
+        "rolling_std": 0.023,
+        "z_score": -0.72,
+        "is_spike": false
+      },
+      {
+        "period_start": "2026-03-16",
+        "order_count": 262,
+        "chargeback_count": 28,
+        "chargeback_rate": 0.1069,
+        "rolling_mean": 0.1219,
+        "rolling_std": 0.0227,
+        "z_score": -0.66,
+        "is_spike": false
+      },
+      {
+        "period_start": "2026-03-23",
+        "order_count": 257,
+        "chargeback_count": 26,
+        "chargeback_rate": 0.1012,
+        "rolling_mean": 0.1172,
+        "rolling_std": 0.0212,
+        "z_score": -0.76,
+        "is_spike": false
+      },
+      {
+        "period_start": "2026-03-30",
+        "order_count": 268,
+        "chargeback_count": 30,
+        "chargeback_rate": 0.1119,
+        "rolling_mean": 0.1115,
+        "rolling_std": 0.0181,
+        "z_score": 0.02,
+        "is_spike": false
+      },
+      {
+        "period_start": "2026-04-06",
+        "order_count": 273,
+        "chargeback_count": 34,
+        "chargeback_rate": 0.1245,
+        "rolling_mean": 0.1103,
+        "rolling_std": 0.0176,
+        "z_score": 0.81,
+        "is_spike": false
+      },
+      {
+        "period_start": "2026-04-13",
+        "order_count": 236,
+        "chargeback_count": 31,
+        "chargeback_rate": 0.1314,
+        "rolling_mean": 0.1113,
+        "rolling_std": 0.0182,
+        "z_score": 1.1,
+        "is_spike": false
+      },
+      {
+        "period_start": "2026-04-20",
+        "order_count": 259,
+        "chargeback_count": 31,
+        "chargeback_rate": 0.1197,
+        "rolling_mean": 0.118,
+        "rolling_std": 0.0131,
+        "z_score": 0.13,
+        "is_spike": false
+      },
+      {
+        "period_start": "2026-04-27",
+        "order_count": 266,
+        "chargeback_count": 41,
+        "chargeback_rate": 0.1541,
+        "rolling_mean": 0.1168,
+        "rolling_std": 0.0123,
+        "z_score": 3.05,
+        "is_spike": true
+      },
+      {
+        "period_start": "2026-05-04",
+        "order_count": 251,
+        "chargeback_count": 25,
+        "chargeback_rate": 0.0996,
+        "rolling_mean": 0.1194,
+        "rolling_std": 0.0174,
+        "z_score": -1.14,
+        "is_spike": false
+      },
+      {
+        "period_start": "2026-05-11",
+        "order_count": 214,
+        "chargeback_count": 20,
+        "chargeback_rate": 0.0935,
+        "rolling_mean": 0.1187,
+        "rolling_std": 0.0182,
+        "z_score": -1.39,
+        "is_spike": false
+      },
+      {
+        "period_start": "2026-05-18",
+        "order_count": 271,
+        "chargeback_count": 33,
+        "chargeback_rate": 0.1218,
+        "rolling_mean": 0.117,
+        "rolling_std": 0.0199,
+        "z_score": 0.24,
+        "is_spike": false
+      },
+      {
+        "period_start": "2026-05-25",
+        "order_count": 259,
+        "chargeback_count": 27,
+        "chargeback_rate": 0.1042,
+        "rolling_mean": 0.1196,
+        "rolling_std": 0.0189,
+        "z_score": -0.81,
+        "is_spike": false
+      },
+      {
+        "period_start": "2026-06-01",
+        "order_count": 265,
+        "chargeback_count": 33,
+        "chargeback_rate": 0.1245,
+        "rolling_mean": 0.1186,
+        "rolling_std": 0.0195,
+        "z_score": 0.3,
+        "is_spike": false
+      },
+      {
+        "period_start": "2026-06-08",
+        "order_count": 288,
+        "chargeback_count": 34,
+        "chargeback_rate": 0.1181,
+        "rolling_mean": 0.1186,
+        "rolling_std": 0.0195,
+        "z_score": -0.03,
+        "is_spike": false
+      },
+      {
+        "period_start": "2026-06-15",
+        "order_count": 215,
+        "chargeback_count": 22,
+        "chargeback_rate": 0.1023,
+        "rolling_mean": 0.1169,
+        "rolling_std": 0.0188,
+        "z_score": -0.78,
+        "is_spike": false
+      },
+      {
+        "period_start": "2026-06-22",
+        "order_count": 239,
+        "chargeback_count": 18,
+        "chargeback_rate": 0.0753,
+        "rolling_mean": 0.1148,
+        "rolling_std": 0.0195,
+        "z_score": -2.03,
+        "is_spike": false
+      }
+    ],
+    "spike_count": 3,
+    "latest_period": {
+      "period_start": "2026-06-22",
+      "order_count": 239,
+      "chargeback_count": 18,
+      "chargeback_rate": 0.0753,
+      "rolling_mean": 0.1148,
+      "rolling_std": 0.0195,
+      "z_score": -2.03,
+      "is_spike": false
+    },
+    "z_score_threshold": 2,
+    "alert_configured": true,
+    "alert_sent_for_current_spike": false
+  }
+}

@@ -1,0 +1,83 @@
+{
+  "consoleLogs": [],
+  "networkRequests": [
+    {
+      "url": "https://fraud-risk-manager.vercel.app/",
+      "method": "GET"
+    },
+    {
+      "url": "https://fraud-risk-manager.vercel.app/assets/index-B6pZVuKT.js",
+      "method": "GET"
+    },
+    {
+      "url": "https://fraud-risk-manager.vercel.app/assets/index-DaAOu7oC.css",
+      "method": "GET"
+    },
+    {
+      "url": "https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap",
+      "method": "GET"
+    },
+    {
+      "url": "https://fonts.gstatic.com/s/syne/v24/8vIH7w4qzmVxm2BL9A.woff2",
+      "method": "GET"
+    },
+    {
+      "url": "https://fonts.gstatic.com/s/ibmplexmono/v20/-F63fjptAgt5VM-kVkqdyU8n1i8q1w.woff2",
+      "method": "GET"
+    },
+    {
+      "url": "https://fonts.gstatic.com/s/ibmplexsans/v23/zYXzKVElMYYaJe8bpLHnCwDKr932-G7dytD-Dmu1syxeKYY.woff2",
+      "method": "GET"
+    },
+    {
+      "url": "https://fonts.gstatic.com/s/ibmplexmono/v20/-F6qfjptAgt5VM-kVkqdyU8n3vAOwlBFgg.woff2",
+      "method": "GET"
+    },
+    {
+      "url": "https://fonts.gstatic.com/s/ibmplexsans/v23/zYXzKVElMYYaJe8bpLHnCwDKr932-G7dytD-Dmu1syxQKYbABA.woff2",
+      "method": "GET"
+    },
+    {
+      "url": "https://fraud-risk-manager.vercel.app/favicon.svg",
+      "method": "GET"
+    }
+  ],
+  "elements": [
+    {
+      "tag": "BUTTON",
+      "role": null,
+      "text": "Open console →",
+      "className": ""
+    },
+    {
+      "tag": "BUTTON",
+      "role": null,
+      "text": "Try the console now",
+      "className": ""
+    },
+    {
+      "tag": "A",
+      "role": null,
+      "text": "See what it does",
+      "className": ""
+    },
+    {
+      "tag": "BUTTON",
+      "role": null,
+      "text": "Try now",
+      "className": ""
+    },
+    {
+      "tag": "A",
+      "role": null,
+      "text": "Source",
+      "className": ""
+    },
+    {
+      "tag": "BUTTON",
+      "role": null,
+      "text": "Skip intro →",
+      "className": ""
+    }
+  ]
+}

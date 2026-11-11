@@ -1,0 +1,94 @@
+{
+  "title": "Fraud Risk Manager",
+  "headings": [
+    "Stop losing margin to fraud, returns, and chargebacks.",
+    "One console, four loss categories solved end to end",
+    "Chargeback risk scoring",
+    "Return risk, from a separate model",
+    "Fraud-spike detector",
+    "Abuse-ring sentinel",
+    "Chargeback evidence, auto-compiled",
+    "Batch CSV scoring",
+    "Cost-weighted decisions",
+    "Policy simulator",
+    "Drift monitoring",
+    "ROC curve & confusion matrix",
+    "Baseline-tested, not assumed",
+    "Real webhook alerts, not a dashboard to remember",
+    "See the model score a real order"
+  ],
+  "interactiveElementsCount": 5,
+  "interactiveElements": [
+    {
+      "text": "Open console →",
+      "tagName": "BUTTON",
+      "role": null,
+      "href": null,
+      "className": ""
+    },
+    {
+      "text": "Try the console now",
+      "tagName": "BUTTON",
+      "role": null,
+      "href": null,
+      "className": ""
+    },
+    {
+      "text": "See what it does",
+      "tagName": "A",
+      "role": null,
+      "href": "#features",
+      "className": ""
+    },
+    {
+      "text": "Try now",
+      "tagName": "BUTTON",
+      "role": null,
+      "href": null,
+      "className": ""
+    },
+    {
+      "text": "Source",
+      "tagName": "A",
+      "role": null,
+      "href": "https://github.com/aaryanpawar16/fraud-risk-manager",
+      "className": ""
+    }
+  ],
+  "networkRequestsSummary": {
+    "total": 24,
+    "onrenderCalls": [
+      {
+        "type": "request",
+        "url": "https://fraud-risk-manager.onrender.com/",
+        "method": "GET",
+        "headers": {
+          "sec-ch-ua-platform": "\"Windows\"",
+          "referer": "https://fraud-risk-manager.vercel.app/",
+          "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36 Edg/130.0.0.0",
+          "sec-ch-ua": "\"Not-A.Brand\";v=\"99\", \"Microsoft Edge\";v=\"157\", \"Chromium\";v=\"157\"",
+          "content-type": "application/json",
+          "sec-ch-ua-mobile": "?0"
+        },
+        "postData": null
+      },
+      {
+        "type": "request",
+        "url": "https://fraud-risk-manager.onrender.com/metrics",
+        "method": "GET",
+        "headers": {
+          "sec-ch-ua-platform": "\"Windows\"",
+          "referer": "https://fraud-risk-manager.vercel.app/",
+          "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36 Edg/130.0.0.0",
+          "sec-ch-ua": "\"Not-A.Brand\";v=\"99\", \"Microsoft Edge\";v=\"157\", \"Chromium\";v=\"157\"",
+          "content-type": "application/json",
+          "sec-ch-ua-mobile": "?0"
+        },
+        "postData": null
+      }
+    ],
+    "failures": []
+  },
+  "consoleMessages": [],
+  "timestamp": "2026-11-11T08:07:57.226Z"
+}
