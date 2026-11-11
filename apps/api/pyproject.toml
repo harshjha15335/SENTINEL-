@@ -57,6 +57,8 @@ ignore = ["S101", "B008"]
 "tests/**" = ["S105", "S106"]
 
 [tool.pytest.ini_options]
+# CLI/CI runs from apps/api; diagnostic script tests also import the repository package.
+pythonpath = ["../.."]
 testpaths = ["tests"]
 addopts = "-q"
 
