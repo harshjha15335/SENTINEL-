@@ -1,3 +1,9 @@
+# Local acceptance-blocker remediation — 11 November 2026
+
+Local branch `fix/sentinel-v2-acceptance-blockers` corrects S01–S04 and local H01 handoff. Final local verification: **508 passed, 1 live-AI skipped** (356 API, 53 frontend, 7 ML, 34 auxiliary, 58 browser). Formatting/lint/typing, production/portable/Pages builds and production isolation passed. Earlier failed/interrupted runs and frontend timeout instability are retained in external evidence. No tests/timeouts/Axe rules weakened.
+
+Approved V2 presentation, models/migrations and payment/scoring/investigation semantics remain preserved outside the scoped fixes. H02 remains a merge blocker; H01 hosted rollout and H03 hosting approval/acceptance remain open. PR #2/main unchanged. No push, merge, deployment or paid/provider execution. See [remediation handoff](remediation/2026-11-11/README.md), hosting proposal and owner verification checklist. Exact final SHA is in the external delivery report.
+
 # Implementation Status
 
 ## SENTINEL UI/implementation integration — 11 November 2026

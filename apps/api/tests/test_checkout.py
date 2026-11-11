@@ -172,7 +172,8 @@ def test_checkout_return_and_cancel_endpoints(app_client: TestClient) -> None:
     assert "text/html" in resp.headers["content-type"]
     assert "TEST-TOKEN-123" in resp.text
     assert "TEST-PAYER-456" in resp.text
-    assert "SANDBOX APPROVAL RECORDED" in resp.text
+    assert "SANDBOX RETURN RECEIVED" in resp.text
+    assert "Approval Not Verified" in resp.text
 
     # Test GET /api/v1/paypal/cancel with token
     cancel_resp = app_client.get(
@@ -182,7 +183,7 @@ def test_checkout_return_and_cancel_endpoints(app_client: TestClient) -> None:
     assert cancel_resp.status_code == 200
     assert "text/html" in cancel_resp.headers["content-type"]
     assert "TEST-CANCEL-789" in cancel_resp.text
-    assert "SANDBOX APPROVAL CANCELLED" in cancel_resp.text
+    assert "SANDBOX CANCEL RETURN" in cancel_resp.text
 
     # Verify query parameter HTML escaping protects against injection
     xss_resp = app_client.get(

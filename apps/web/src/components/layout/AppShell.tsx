@@ -152,7 +152,7 @@ function AccountBar({
     mode = status.data?.mode,
     healthy = status.data?.token_check === "ok";
   return (
-    <div className="workspace-account-bar">
+    <section className="workspace-account-bar" aria-label="Workspace account">
       <div className="workspace-merchant">
         <span>{merchant}</span>
         {mode && (
@@ -174,13 +174,19 @@ function AccountBar({
           </span>
         )}
       </div>
+      {logout.isError && (
+        <p role="alert" className="text-critical text-sm">
+          Sign out failed. Your session may still be active. Please retry sign
+          out.
+        </p>
+      )}
       <div className="workspace-account">
         <span>
           {email} <small>{role}</small>
         </span>
         {!STATIC_DEMO && (
           <button
-            aria-label="Sign out"
+            aria-label={logout.isError ? "Retry sign out" : "Sign out"}
             onClick={() => logout.mutate()}
             disabled={logout.isPending}
           >
@@ -188,6 +194,6 @@ function AccountBar({
           </button>
         )}
       </div>
-    </div>
+    </section>
   );
 }

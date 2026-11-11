@@ -305,7 +305,7 @@ def verify_offline_wire_schema() -> tuple[bool, str]:
             )
 
     provider = GoogleProvider(
-        api_key="AIzaSyMockKeyForVerificationOfflineOnly123456",
+        api_key="offline-test-not-a-provider-credential",
         retry_options=HttpRetryOptions(attempts=1),
         http_client=httpx2.AsyncClient(transport=MockTransport()),
     )

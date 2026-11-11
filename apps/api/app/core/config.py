@@ -1,10 +1,13 @@
 """Typed application configuration loaded from environment variables."""
 
 import os
+import re
 import subprocess
 import sys
+import unicodedata
 from enum import StrEnum
 from functools import lru_cache
+from ipaddress import ip_address
 from urllib.parse import urlsplit
 from uuid import UUID
 
@@ -23,23 +26,41 @@ def validate_checkout_url(url: str, *, name: str = "checkout URL") -> str:
     """
     if not url or not isinstance(url, str):
         raise ValueError(f"{name} must be a non-empty string")
-    cleaned = url.strip()
-    if any(c in cleaned for c in ("\r", "\n", "\t", " ")):
+    # Check the original input: urlsplit strips some controls during parsing.
+    if any(c.isspace() or unicodedata.category(c).startswith("C") for c in url):
         raise ValueError(f"{name} must not contain whitespace or control characters")
-    if len(cleaned) > 2048:
+    if len(url) > 2048:
         raise ValueError(f"{name} exceeds PayPal 2048-character limit")
-    parsed = urlsplit(cleaned)
+    try:
+        parsed = urlsplit(url)
+        host = parsed.hostname
+        port = parsed.port  # Access validates malformed and out-of-range ports.
+    except ValueError as exc:
+        raise ValueError(f"{name} has an invalid host or port") from exc
     if parsed.scheme not in ("http", "https"):
-        raise ValueError(f"{name} must use http or https scheme (got {parsed.scheme!r})")
-    if parsed.scheme == "http":
-        host = (parsed.hostname or "").lower()
-        if host not in ("127.0.0.1", "localhost", "::1"):
-            raise ValueError(
-                f"{name} insecure http is only permitted on loopback (got {parsed.hostname!r})"
-            )
-    if parsed.username or parsed.password:
+        raise ValueError(f"{name} must use http or https scheme")
+    if not host or not parsed.netloc:
+        raise ValueError(f"{name} must contain a valid hostname")
+    try:
+        ip_address(host)
+    except ValueError:
+        try:
+            ascii_host = host.encode("idna").decode("ascii")
+        except UnicodeError as exc:
+            raise ValueError(f"{name} has an invalid hostname") from exc
+        labels = ascii_host.rstrip(".").split(".")
+        if len(ascii_host) > 253 or any(
+            not re.fullmatch(r"[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?", label)
+            for label in labels
+        ):
+            raise ValueError(f"{name} has an invalid hostname") from None
+    if parsed.netloc.endswith(":") or port == 0:
+        raise ValueError(f"{name} has an invalid port")
+    if parsed.username is not None or parsed.password is not None:
         raise ValueError(f"{name} must not contain user credentials")
-    return cleaned
+    if parsed.scheme == "http" and host.lower() not in ("127.0.0.1", "localhost", "::1"):
+        raise ValueError(f"{name} insecure http is only permitted on loopback")
+    return url
 
 
 def _populate_windows_user_env() -> None:
@@ -191,7 +212,7 @@ class Settings(BaseSettings):
     @field_validator("paypal_return_url", "paypal_cancel_url")
     @classmethod
     def _validate_paypal_redirect_url(cls, value: str | None) -> str | None:
-        if not value:
+        if value is None:
             return None
         return validate_checkout_url(value)
 
@@ -208,6 +229,20 @@ class Settings(BaseSettings):
                 "Hosted deployment requires production, secure cookies, database storage, "
                 "worker readiness and HTTPS-only CORS origins (or an empty list)"
             )
+        if self.hosted_deployment and self.paypal_mode is PayPalMode.SANDBOX:
+            for value in (self.paypal_return_url, self.paypal_cancel_url):
+                if value is None:
+                    raise ValueError("Hosted sandbox requires explicit public HTTPS callback URLs")
+                parsed = urlsplit(value)
+                host = (parsed.hostname or "").lower().rstrip(".")
+                try:
+                    public = ip_address(host).is_global
+                except ValueError:
+                    public = "." in host and not host.endswith(
+                        (".localhost", ".local", ".internal")
+                    )
+                if parsed.scheme != "https" or not public:
+                    raise ValueError("Hosted sandbox requires explicit public HTTPS callback URLs")
         if self.allow_webhook_fixtures and (
             self.environment == "production" or not self.webhook_fixture_key
         ):
