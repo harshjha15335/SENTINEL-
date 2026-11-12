@@ -156,7 +156,7 @@ export function PolicyLabPage() {
       />
       <div
         role="note"
-        className="mb-4 rounded-md border border-warning/40 bg-warning-soft p-4 text-sm"
+        className="sentinel-inline-provenance mb-5 text-sm"
       >
         <OriginBadge origin="SYNTHETIC_DEMO" />
         <p className="mt-2">

@@ -42,6 +42,10 @@ function DashboardBody({ data }: { data: DashboardSummary }) {
     (data.by_status["ORDER_CREATED"] ?? 0) +
     (data.by_status["CAPTURE_PENDING"] ?? 0);
   const events = Object.values(data.webhook_events).reduce((a, b) => a + b, 0);
+  const firstRecentOrigin = data.recent[0]?.data_origin;
+  const uniformRecentOrigin = firstRecentOrigin && data.recent.every((item) => item.data_origin === firstRecentOrigin)
+    ? firstRecentOrigin
+    : null;
 
   return (
     <div className="command-center">
@@ -65,20 +69,29 @@ function DashboardBody({ data }: { data: DashboardSummary }) {
         {data.recent.length === 0 ? (
           <EmptyState title="No transactions" />
         ) : (
-          <div
-            tabIndex={0}
-            role="region"
-            aria-label="Dashboard data table 1"
-            className="overflow-x-auto"
-          >
-            <table className="w-full min-w-[640px] text-sm">
+          <div>
+            {uniformRecentOrigin && (
+              <p className="workspace-provenance-summary px-4" aria-label="Recent payment data source">
+                <OriginBadge origin={uniformRecentOrigin} />
+                <span>{uniformRecentOrigin === "SYNTHETIC_DEMO"
+                  ? "These recent records are synthetic examples, not PayPal orders."
+                  : "All records below share this data origin."}</span>
+              </p>
+            )}
+            <div
+              tabIndex={0}
+              role="region"
+              aria-label="Dashboard data table 1"
+              className="overflow-x-auto"
+            >
+            <table className="w-full min-w-[540px] text-sm">
               <thead>
                 <tr className="text-left text-xs text-fg-subtle">
-                  <th className="px-4 py-2 font-medium">PayPal order</th>
+                  <th className="px-4 py-2 font-medium">Payment reference</th>
                   <th className="px-4 py-2 font-medium">Item</th>
                   <th className="px-4 py-2 text-right font-medium">Amount</th>
                   <th className="px-4 py-2 font-medium">Status</th>
-                  <th className="px-4 py-2 font-medium">Origin</th>
+                  {!uniformRecentOrigin && <th className="px-4 py-2 font-medium">Origin</th>}
                   <th className="px-4 py-2 font-medium">Created</th>
                 </tr>
               </thead>
@@ -93,7 +106,7 @@ function DashboardBody({ data }: { data: DashboardSummary }) {
                         to={`/app/transactions/${t.id}`}
                         className="text-accent hover:underline"
                       >
-                        {shortId(t.paypal_order_id, 12)}
+                        {shortId(t.paypal_order_id ?? t.id, 12)}
                       </Link>
                     </td>
                     <td className="px-4 py-2.5 text-fg-muted">
@@ -105,9 +118,11 @@ function DashboardBody({ data }: { data: DashboardSummary }) {
                     <td className="px-4 py-2.5">
                       <StatusBadge status={t.status} />
                     </td>
-                    <td className="px-4 py-2.5">
-                      <OriginBadge origin={t.data_origin} />
-                    </td>
+                    {!uniformRecentOrigin && (
+                      <td className="px-4 py-2.5">
+                        <OriginBadge origin={t.data_origin} compact />
+                      </td>
+                    )}
                     <td className="tabular px-4 py-2.5 text-fg-muted">
                       {formatDateTime(t.created_at)}
                     </td>
@@ -115,6 +130,7 @@ function DashboardBody({ data }: { data: DashboardSummary }) {
                 ))}
               </tbody>
             </table>
+            </div>
           </div>
         )}
       </Panel>{" "}

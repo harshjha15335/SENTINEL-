@@ -1,7 +1,7 @@
 import { clsx } from "clsx";
 import { ArrowUpRight, LogOut, UserRound, Settings2, LayoutDashboard, ArrowLeftRight, SearchCheck, BarChart3, SlidersHorizontal, Activity, type LucideIcon } from "lucide-react";
-import { useRef } from "react";
-import { NavLink, Navigate, Outlet, useLocation, Link } from "react-router-dom";
+import { useEffect, useRef, useState } from "react";
+import { NavLink, Navigate, Outlet, useLocation, useNavigate, Link } from "react-router-dom";
 import { AppNavigation } from "./AppNavigation";
 import { ErrorState } from "@/components/ui/States";
 import { Skeleton } from "@/components/ui/States";
@@ -11,7 +11,7 @@ import { STATIC_DEMO } from "@/lib/staticDemo";
 import { StaticDemoBanner } from "@/features/demo/StaticDemoBanner";
 import { WorkspaceFonts } from "./WorkspaceFonts";
 import { WorkspaceMotion } from "./WorkspaceMotion";
-import { CursorGlitter } from "@/components/ui/CursorGlitter";
+import { CursorSmudge } from "@/components/ui/CursorSmudge";
 const PRIMARY: [string, string, Capability][] = [
   ["/app", "Command Center", "dashboard"],
   ["/app/transactions", "Transactions", "transactions"],
@@ -101,7 +101,7 @@ function WorkspaceSession() {
   return (
     <div className="sentinel-workspace">
       <AppNavigation />
-      <CursorGlitter />
+      <CursorSmudge />
       <a
         className="workspace-skip"
         href="#main"
@@ -159,31 +159,75 @@ function WorkspaceSession() {
 }
 function UserAccountMenu({ email, role }: { email: string; role: string }) {
   const logout = useLogout();
-  const userMenu = useRef<HTMLDetailsElement>(null);
+  const navigate = useNavigate();
+  const [open, setOpen] = useState(false);
+  const container = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    const onPointerDown = (event: PointerEvent) => {
+      if (event.target instanceof Node && !container.current?.contains(event.target))
+        setOpen(false);
+    };
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setOpen(false);
+        container.current?.querySelector<HTMLButtonElement>(".workspace-account-trigger")?.focus();
+      }
+    };
+    document.addEventListener("pointerdown", onPointerDown);
+    document.addEventListener("keydown", onKeyDown);
+    return () => {
+      document.removeEventListener("pointerdown", onPointerDown);
+      document.removeEventListener("keydown", onKeyDown);
+    };
+  }, [open]);
+
   return (
-    <details className="workspace-user-menu" ref={userMenu}>
-      <summary aria-label="Open account menu" title="Your account">
+    <div className="workspace-user-menu" ref={container}>
+      <button
+        className="workspace-account-trigger"
+        type="button"
+        aria-label="Open account menu"
+        aria-expanded={open}
+        aria-controls="workspace-account-actions"
+        onClick={() => setOpen((current) => !current)}
+      >
         <UserRound size={20} aria-hidden="true" />
-        <span className="sr-only">Account</span>
-      </summary>
-      <div className="workspace-user-panel">
-        <p className="workspace-user-label">SIGNED IN AS</p>
-        <strong className="workspace-user-email">{email}</strong>
-        <span className="workspace-user-role">{role}</span>
-        <hr />
-        <Link to="/app/settings" onClick={() => { if (userMenu.current) userMenu.current.open = false; }}>
-          <Settings2 size={16} aria-hidden="true" /> Account &amp; integrations
-        </Link>
-        {!STATIC_DEMO && (
-          <button type="button" onClick={() => logout.mutate()} disabled={logout.isPending}>
-            <LogOut size={16} aria-hidden="true" />
-            {logout.isPending ? "Signing out…" : "Sign out"}
-          </button>
-        )}
-        {logout.isError && (
-          <p role="alert" className="workspace-user-error">Sign out failed. Please retry.</p>
-        )}
-      </div>
-    </details>
+      </button>
+      {open && (
+        <div className="workspace-user-panel" id="workspace-account-actions" aria-label="Account actions">
+          <p className="workspace-user-label">SIGNED IN AS</p>
+          <strong className="workspace-user-email">{email}</strong>
+          <span className="workspace-user-role">{role}</span>
+          <hr />
+          <Link to="/app/settings" onClick={() => setOpen(false)}>
+            <Settings2 size={16} aria-hidden="true" /> Account &amp; integrations
+          </Link>
+          {!STATIC_DEMO && (
+            <button
+              type="button"
+              onClick={() =>
+                logout.mutate(undefined, {
+                  onSuccess: () => {
+                    setOpen(false);
+                    navigate("/login", { replace: true });
+                  },
+                })
+              }
+              disabled={logout.isPending}
+            >
+              <LogOut size={16} aria-hidden="true" />
+              {logout.isPending ? "Signing out…" : "Sign out"}
+            </button>
+          )}
+          {logout.isError && (
+            <p role="alert" className="workspace-user-error">
+              Sign out failed. Please retry.
+            </p>
+          )}
+        </div>
+      )}
+    </div>
   );
 }

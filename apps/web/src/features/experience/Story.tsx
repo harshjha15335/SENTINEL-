@@ -5,6 +5,7 @@ import { ArrowUpRight, ArrowDown } from "lucide-react";
 import { useRef, useSyncExternalStore } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { markIntroComplete } from "./introSession";
+import { WorkspaceEntryLink } from "./WorkspaceEntryLink";
 import { ReceiptMorph, receiptMorph } from "./ReceiptMorph";
 import { DemoDossier } from "./Dossier";
 import { storyStages } from "./fixtures";
@@ -49,9 +50,9 @@ function StoryNav({ workspaceTarget }: { workspaceTarget?: string }) {
       </Link>
       <nav aria-label="Preview navigation">
         <button onClick={skipStory}>Skip story</button>
-        <Link to={workspaceTarget ?? "/demo-payment"} onClick={workspaceTarget ? markIntroComplete : undefined} className="v2-nav-cta">
+        <WorkspaceEntryLink to={workspaceTarget ?? "/demo-payment"} animated={Boolean(workspaceTarget)} className="v2-nav-cta">
           {workspaceTarget ? "Enter workspace" : "Explore simulated demo"} <ArrowUpRight size={16} />
-        </Link>
+        </WorkspaceEntryLink>
       </nav>
     </header>
   );
@@ -75,8 +76,7 @@ function DesktopStory({ workspaceTarget }: { workspaceTarget?: string }) {
         frame = el.querySelector<HTMLElement>("[data-dossier-frame]"),
         footer = el.querySelector<HTMLElement>(".v2-scene-footer"),
         stages = el.querySelectorAll<HTMLElement>("[data-story-stage]"),
-        buttons = el.querySelectorAll("[data-chapter]"),
-        bar = el.querySelector<HTMLElement>("[data-progress]");
+        buttons = el.querySelectorAll("[data-chapter]");
       const edition = el.querySelector<HTMLElement>(".v2-story-edition");
       const pin = el.querySelector<HTMLElement>(".v2-story-pin");
       let width = pin?.clientWidth ?? innerWidth,
@@ -195,7 +195,6 @@ function DesktopStory({ workspaceTarget }: { workspaceTarget?: string }) {
         buttons.forEach((n, i) =>
           n.setAttribute("aria-current", i === s.stage ? "step" : "false"),
         );
-        if (bar) bar.style.transform = `scaleX(${p})`;
         el.dataset.progress = p.toFixed(4);
         el.dataset.stage = String(s.stage);
         el.dataset.walletOpen = s.open.toFixed(4);
@@ -393,9 +392,9 @@ function DesktopStory({ workspaceTarget }: { workspaceTarget?: string }) {
                   <p>{s.text}</p>
                   {i === 0 && (
                     <>
-                      <Link className="v2-button" to={workspaceTarget ?? "/demo-payment"} onClick={workspaceTarget ? markIntroComplete : undefined}>
+                      <WorkspaceEntryLink className="v2-button" to={workspaceTarget ?? "/demo-payment"} animated={Boolean(workspaceTarget)}>
                         {workspaceTarget ? "Enter workspace" : "Explore simulated demo"} <ArrowUpRight size={18} />
-                      </Link>
+                      </WorkspaceEntryLink>
                       <small>{workspaceTarget ? "Investigate payments and review evidence using synthetic demo data." : "Explore an interactive, simulated payment."}</small>
                       {!workspaceTarget && (
                         <Link className="v2-auth-link" to="/app">
@@ -435,9 +434,6 @@ function DesktopStory({ workspaceTarget }: { workspaceTarget?: string }) {
               </nav>
               <span>01 PAYMENT. A CLEARER PICTURE.</span>
             </footer>
-            <div className="v2-scene-progress">
-              <i data-progress />
-            </div>
           </section>
         </div>
         <StoryAfter workspaceTarget={workspaceTarget} />
@@ -486,9 +482,9 @@ function CompactStory({ workspaceTarget }: { workspaceTarget?: string }) {
             <span>has a story.</span>
           </h1>
           <p>{storyStages[0].text}</p>
-          <Link className="v2-button" to={workspaceTarget ?? "/demo-payment"} onClick={workspaceTarget ? markIntroComplete : undefined}>
+          <WorkspaceEntryLink className="v2-button" to={workspaceTarget ?? "/demo-payment"} animated={Boolean(workspaceTarget)}>
             {workspaceTarget ? "Enter workspace" : "Explore simulated demo"} <ArrowUpRight size={18} />
-          </Link>
+          </WorkspaceEntryLink>
           {!workspaceTarget && (
             <Link className="v2-auth-link" to="/app">
               Open authenticated workspace <ArrowUpRight size={15} />
@@ -560,9 +556,9 @@ function StoryAfter({ workspaceTarget }: { workspaceTarget?: string }) {
           Investigate high-risk cases, inspect their contributing signals,
           and document the result. This story illustrates a simulated payment.
         </p>
-        <Link className="v2-button" to={workspaceTarget ?? "/demo-payment"} onClick={workspaceTarget ? markIntroComplete : undefined}>
+        <WorkspaceEntryLink className="v2-button" to={workspaceTarget ?? "/demo-payment"} animated={Boolean(workspaceTarget)}>
           {workspaceTarget ? "Enter workspace" : "Open the simulated dossier"} <ArrowUpRight size={18} />
-        </Link>
+        </WorkspaceEntryLink>
         {!workspaceTarget && (
           <Link className="v2-text-link" to="/app">
             Open authenticated workspace <ArrowUpRight size={15} />

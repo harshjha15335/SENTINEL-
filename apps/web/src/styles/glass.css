@@ -227,15 +227,6 @@
   border-color: rgba(217,197,236,.6);
   background-color: rgba(255,255,255,.55);
 }
-.sentinel-cursor-glitter {
-  position: fixed;
-  inset: 0;
-  z-index: 90;
-  width: 100vw;
-  height: 100vh;
-  pointer-events: none;
-  user-select: none;
-}
 /* The login is still a standard secure session form, not an invented SSO flow. */
 .workspace-auth {
   position: relative;
@@ -469,4 +460,151 @@
   .sentinel-workspace .workspace-section,
   .sentinel-workspace .workspace-inset,
   .workspace-auth-form > div { background:rgba(255,255,255,.93); }
+}
+
+/* Refinements: no sparkles, no stretched empty risk panel, no overlaid profile. */
+.sentinel-workspace {
+  grid-template-rows: auto minmax(0, 1fr) auto;
+}
+.sentinel-workspace .workspace-topbar {
+  align-items: flex-start;
+  min-height: 76px;
+  z-index: 65;
+}
+.sentinel-workspace .workspace-topbar-location {
+  padding-top: 12px;
+}
+.sentinel-workspace .workspace-user-menu {
+  display: flex;
+  flex: 0 0 auto;
+  flex-direction: column;
+  align-items: flex-end;
+  position: relative;
+}
+.sentinel-workspace .workspace-account-trigger {
+  list-style: none;
+  display: grid;
+  place-items: center;
+  width: 43px;
+  height: 43px;
+  border: 1px solid rgba(208,183,237,.75);
+  border-radius: 50%;
+  background: rgba(255,255,255,.86);
+  color: #6135c9;
+  box-shadow: inset 0 1px rgba(255,255,255,.9), 0 7px 24px rgba(74,41,120,.11);
+  cursor: pointer;
+}
+.sentinel-workspace .workspace-account-trigger:hover,
+.sentinel-workspace .workspace-account-trigger[aria-expanded="true"] {
+  background: #ede3ff;
+  border-color: #b99bec;
+}
+.sentinel-workspace .workspace-account-trigger:focus-visible {
+  outline: 3px solid #7547eb;
+  outline-offset: 3px;
+}
+.sentinel-workspace .workspace-user-panel {
+  position: static;
+  top: auto;
+  right: auto;
+  flex: 0 0 auto;
+  margin-top: 11px;
+  width: min(350px,calc(100vw - 55px));
+  max-width: 100%;
+  box-shadow: 0 15px 35px rgba(74,41,120,.12);
+}
+.sentinel-workspace .workspace-user-panel a,
+.sentinel-workspace .workspace-user-panel button {
+  min-height: 44px;
+  position: relative;
+  z-index: 1;
+}
+.command-decision-grid {
+  align-items: start;
+  gap: clamp(22px,3vw,48px);
+}
+.sentinel-workspace .command-risk-overview {
+  align-self: start;
+  height: auto;
+  min-height: 0;
+}
+.sentinel-workspace .command-risk-overview > * {
+  min-height: 0;
+}
+.sentinel-cursor-smudge {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 310px;
+  height: 250px;
+  z-index: 0;
+  pointer-events: none;
+  user-select: none;
+  opacity: 0;
+  border-radius: 48% 60% 56% 44%;
+  background:
+    radial-gradient(ellipse at 40% 50%, rgba(157,110,238,.27), transparent 58%),
+    radial-gradient(ellipse at 65% 57%, rgba(198,165,255,.22), transparent 66%),
+    radial-gradient(ellipse at 48% 68%, rgba(224,206,252,.19), transparent 74%);
+  filter: blur(27px);
+  mix-blend-mode: multiply;
+  transition: opacity 200ms ease;
+  will-change: transform;
+}
+@media (max-width: 1120px) {
+  .sentinel-workspace > .workspace-topbar {
+    position: relative;
+    right: auto;
+    top: auto;
+    display: flex;
+    width: 100%;
+    min-height: 60px;
+    padding: 8px 19px;
+    justify-content: flex-end;
+    border-bottom: 1px solid rgba(214,198,229,.45);
+    background: rgba(255,255,255,.34);
+  }
+  .sentinel-workspace .workspace-topbar-location { display:none; }
+  .sentinel-workspace > .workspace-global-header { padding-right: 22px; }
+}
+@media (max-width: 450px) {
+  .sentinel-workspace > .workspace-topbar { padding: 8px 14px; }
+}
+@media (pointer:coarse), (prefers-reduced-motion: reduce) {
+  .sentinel-cursor-smudge { display:none; }
+}
+
+/* Information remains available, without bright yellow warning blocks. */
+.sentinel-inline-notice,
+.sentinel-inline-provenance {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  min-width: 0;
+  padding: 10px 15px;
+  border: 0;
+  border-left: 3px solid rgba(144,102,220,.48);
+  border-radius: 2px 11px 11px 2px;
+  background: rgba(255,255,255,.28);
+  color: #3e3450;
+  line-height: 1.6;
+  box-shadow: none;
+}
+.sentinel-inline-provenance {
+  display: block;
+}
+.sentinel-inline-notice p,
+.sentinel-inline-provenance p { max-width: 84ch; }
+.sentinel-notice-details summary {
+  cursor: pointer;
+  width: fit-content;
+  margin-top: 3px;
+  color: #6135c9;
+  font-size: 12px;
+  font-weight: 600;
+}
+.sentinel-notice-details summary:hover { text-decoration: underline; }
+.sentinel-notice-details summary:focus-visible {
+  outline:2px solid #7547eb;
+  outline-offset:2px;
 }
