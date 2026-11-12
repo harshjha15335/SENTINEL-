@@ -1,5 +1,5 @@
 import { clsx } from "clsx";
-import { ArrowUpRight, LogOut, UserRound, Settings2 } from "lucide-react";
+import { ArrowUpRight, LogOut, UserRound, Settings2, LayoutDashboard, ArrowLeftRight, SearchCheck, BarChart3, SlidersHorizontal, Activity, type LucideIcon } from "lucide-react";
 import { useRef } from "react";
 import { NavLink, Navigate, Outlet, useLocation, Link } from "react-router-dom";
 import { AppNavigation } from "./AppNavigation";
@@ -11,6 +11,7 @@ import { STATIC_DEMO } from "@/lib/staticDemo";
 import { StaticDemoBanner } from "@/features/demo/StaticDemoBanner";
 import { WorkspaceFonts } from "./WorkspaceFonts";
 import { WorkspaceMotion } from "./WorkspaceMotion";
+import { CursorGlitter } from "@/components/ui/CursorGlitter";
 const PRIMARY: [string, string, Capability][] = [
   ["/app", "Command Center", "dashboard"],
   ["/app/transactions", "Transactions", "transactions"],
@@ -19,6 +20,14 @@ const PRIMARY: [string, string, Capability][] = [
   ["/app/policy", "Policy Lab", "policy"],
   ["/app/monitoring", "Monitoring", "monitoring"],
 ];
+const NAV_ICONS: Record<string, LucideIcon> = {
+  "/app": LayoutDashboard,
+  "/app/transactions": ArrowLeftRight,
+  "/app/cases": SearchCheck,
+  "/app/model": BarChart3,
+  "/app/policy": SlidersHorizontal,
+  "/app/monitoring": Activity,
+};
 const MORE: [string, string, Capability][] = [
   ["/app/network", "Relationship explorer", "network"],
   ["/app/refunds", "Refund review", "refunds"],
@@ -66,11 +75,15 @@ function WorkspaceSession() {
       (to != "/app/operations" || me.data?.role === "ADMIN") &&
       (to != "/app/demo" || me.data?.merchant.environment === "DEMO"),
   );
+  const pageLabel = [...PRIMARY, ...more]
+    .filter(([to]) => location.pathname === to || (to !== "/app" && location.pathname.startsWith(`${to}/`)))
+    .sort((a, b) => b[0].length - a[0].length)[0]?.[1] ?? "Workspace";
   const nav = (items: [string, string, Capability][]) =>
     items
       .filter(([, , capability]) => supports(capability))
-      .map(([to, label]) => (
-        <NavLink
+      .map(([to, label]) => {
+        const Icon = NAV_ICONS[to];
+        return <NavLink
           key={to}
           to={to ?? "/app"}
           end={to === "/app"}
@@ -81,12 +94,14 @@ function WorkspaceSession() {
             clsx("workspace-nav-link", isActive && "is-active")
           }
         >
-          {label}
-        </NavLink>
-      ));
+          {Icon && <Icon size={17} aria-hidden="true" />}
+          <span>{label}</span>
+        </NavLink>;
+      });
   return (
     <div className="sentinel-workspace">
       <AppNavigation />
+      <CursorGlitter />
       <a
         className="workspace-skip"
         href="#main"
@@ -116,8 +131,14 @@ function WorkspaceSession() {
             </Link>
           </nav>
         </details>
-        <UserAccountMenu email={me.data.email} role={me.data.role} />
       </header>
+      <div className="workspace-topbar">
+        <div className="workspace-topbar-location">
+          <span>FRAUD OPERATIONS / SENTINEL</span>
+          <strong>{pageLabel}</strong>
+        </div>
+        <UserAccountMenu email={me.data.email} role={me.data.role} />
+      </div>
       {STATIC_DEMO && <StaticDemoBanner />}
       <main
         id="main"
