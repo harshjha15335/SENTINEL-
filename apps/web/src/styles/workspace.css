@@ -618,7 +618,25 @@ button {
 .command-desk-caption {
   font-size: 13px;
   color: #686273;
-  margin: 20px 0 30px;
+  line-height: 1.65;
+  margin: 20px 0 22px;
+}
+.command-queue-summary {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 8px 14px;
+  padding: 0 0 22px;
+  border-bottom: 1px solid #cbbbe8;
+}
+.command-queue-summary strong {
+  color: #201a2b;
+  font: 600 clamp(32px, 3.4vw, 44px)/1 Manrope, sans-serif;
+  letter-spacing: -0.055em;
+}
+.command-queue-summary span {
+  font-size: 13px;
+  color: #56466a;
 }
 .command-focus h3 {
   font-size: 23px;
@@ -640,12 +658,22 @@ button {
 .command-review-button {
   display: inline-flex;
   align-items: center;
-  gap: 25px;
+  justify-content: center;
+  gap: 18px;
+  max-width: 100%;
   background: #7547eb;
   color: white;
   padding: 14px 22px;
   border-radius: 40px;
   font-size: 13px;
+  font-weight: 600;
+  text-align: center;
+}
+.command-review-button:hover {
+  background: #6135c9;
+}
+.command-review-button svg {
+  flex-shrink: 0;
 }
 .command-all-cases {
   display: flex;
