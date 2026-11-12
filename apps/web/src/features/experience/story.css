@@ -113,9 +113,11 @@
   margin: 27px 0;
 }
 .v2-scene-copy section:first-child > p:not(.v2-eyebrow) {
-  font-size: 21px;
+  font-size: clamp(16px, 1.45vw, 18px);
+  line-height: 1.55;
+  max-width: 460px;
   color: var(--foreground);
-  margin: 25px 0 30px;
+  margin: 18px 0 22px;
 }
 .v2-scene-copy .v2-eyebrow {
   margin-bottom: 24px !important;
