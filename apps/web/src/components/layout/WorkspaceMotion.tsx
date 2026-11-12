@@ -1,4 +1,4 @@
-import { useEffect, useRef, type ReactNode } from "react";
+import { useEffect, type ReactNode } from "react";
 
 /**
  * One motion boundary per workspace route. CSS handles route entry while a
@@ -22,13 +22,16 @@ const REVEAL_SELECTOR = [
 ].join(", ");
 
 export function WorkspaceMotion({ children }: { children: ReactNode }) {
-  const root = useRef<HTMLDivElement>(null);
-
   useEffect(() => {
-    const container = root.current;
+    // No wrapper element: direct-child selectors in existing workspace layouts
+    // (monitoring, investigations, policy lab) must keep their original structure.
+    const container = document.getElementById("main");
     if (!container || typeof IntersectionObserver === "undefined") return;
     // Accessibility: content remains visible and still works without motion.
     if (window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) return;
+    container.classList.remove("workspace-route-enter");
+    void container.offsetWidth; // restart CSS page transition on a pathname change
+    container.classList.add("workspace-route-enter");
 
     const visible = new IntersectionObserver(
       (entries) => {
@@ -69,12 +72,9 @@ export function WorkspaceMotion({ children }: { children: ReactNode }) {
       changes.disconnect();
       visible.disconnect();
       if (pending) window.cancelAnimationFrame(pending);
+      container.classList.remove("workspace-route-enter");
     };
   }, []);
 
-  return (
-    <div className="workspace-route-motion" ref={root}>
-      {children}
-    </div>
-  );
+  return <>{children}</>;
 }
