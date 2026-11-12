@@ -170,11 +170,11 @@ export function AppRoutes() {
     <Routes>
       <Route
         path="/"
-        element={STATIC_DEMO ? (
+        element={
           <Suspense fallback={publicFallback}>
             <MarketingHome />
           </Suspense>
-        ) : <Navigate to="/login" replace /> }
+        }
       />
       <Route
         path="/demo-payment"
