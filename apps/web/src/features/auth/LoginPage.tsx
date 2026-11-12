@@ -5,6 +5,8 @@ import { Link, Navigate, useLocation, useNavigate } from "react-router-dom";
 import { z } from "zod";
 
 import { Button } from "@/components/ui/Button";
+import { CursorGlitter } from "@/components/ui/CursorGlitter";
+import { WalletOrbit } from "./WalletOrbit";
 import { introWasCompleted, resetIntro } from "@/features/experience/introSession";
 import { ErrorState } from "@/components/ui/States";
 
@@ -47,11 +49,12 @@ export function LoginPage() {
 
   return (
     <main className="workspace-auth">
+      <CursorGlitter />
       <section className="workspace-auth-story">
         <Link to="/" className="workspace-brand">
           <span>S</span>SENTINEL
         </Link>
-        <div>
+        <div className="workspace-auth-story-copy">
           <p className="workspace-kicker">FOLLOW THE MONEY</p>
           <h2>
             Investigate payments.
@@ -62,7 +65,8 @@ export function LoginPage() {
             human decisions in one workspace.
           </p>
         </div>
-        <p>Sandbox workspace · illustrative payment data.</p>
+        <WalletOrbit />
+        <p className="workspace-auth-provenance">Sandbox workspace · illustrative payment data.</p>
       </section>
       <section className="workspace-auth-form">
         <div>
