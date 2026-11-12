@@ -45,7 +45,9 @@ projects:
               - key: SENTINEL_RENDER_WORKSPACE_ID
                 value: tea-d8gorhflk1mc73f4pmr0
               - key: SENTINEL_RENDER_INTERNAL_TLS_REVIEWED_HOST
-                sync: false
+                fromDatabase:
+                  name: sentinel-v2-staging-db
+                  property: host
               - key: SENTINEL_STORAGE_BACKEND
                 value: database
               - key: SENTINEL_COOKIE_SECURE
@@ -53,7 +55,7 @@ projects:
               - key: SENTINEL_CORS_ORIGINS
                 value: '[]'
               - key: SENTINEL_FORWARDED_ALLOW_IPS
-                sync: false
+                value: '127.0.0.1'
               - key: SENTINEL_REQUIRE_WORKERS_READY
                 value: 'true'
               - key: SENTINEL_AUTO_MIGRATE
