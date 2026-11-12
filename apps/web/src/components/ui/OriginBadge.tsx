@@ -29,7 +29,7 @@ export function originLabel(origin: DataOrigin): string {
   return META[origin].label;
 }
 
-export function OriginBadge({ origin }: { origin: DataOrigin }) {
+export function OriginBadge({ origin, compact = false }: { origin: DataOrigin; compact?: boolean }) {
   const meta = META[origin];
   return (
     <Tooltip.Root delayDuration={150}>
@@ -40,7 +40,7 @@ export function OriginBadge({ origin }: { origin: DataOrigin }) {
           aria-label={`Data origin: ${meta.label}. ${meta.explain}`}
         >
           <span aria-hidden className="size-1.5 rounded-full" style={{ background: meta.color }} />
-          {meta.label}
+          {compact && origin === "SYNTHETIC_DEMO" ? "Demo" : meta.label}
         </span>
       </Tooltip.Trigger>
       <Tooltip.Portal>
