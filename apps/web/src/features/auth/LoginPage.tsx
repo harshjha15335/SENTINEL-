@@ -54,15 +54,15 @@ export function LoginPage() {
         <div>
           <p className="workspace-kicker">FOLLOW THE MONEY</p>
           <h2>
-            Every payment.
-            <br />A clearer perspective.
+            Investigate payments.
+            <br />Decide with evidence.
           </h2>
           <p>
-            Trace the facts. Understand the signals. Keep human judgment at the
-            heart of every decision.
+            Review unusual payment patterns, trace risk signals, and document
+            human decisions in one workspace.
           </p>
         </div>
-        <p>Financial intelligence, in context.</p>
+        <p>Sandbox workspace · illustrative payment data.</p>
       </section>
       <section className="workspace-auth-form">
         <div>
