@@ -89,7 +89,7 @@ export function CursorGlitter() {
           radius: 0.85 + Math.random() * 1.9,
           age: 0,
           life: 300 + Math.random() * 430,
-          color: palette[Math.floor(Math.random() * palette.length)],
+          color: palette[Math.floor(Math.random() * palette.length)] ?? "#7547EB",
         });
       }
       if (particles.length > 36) particles = particles.slice(-36);
