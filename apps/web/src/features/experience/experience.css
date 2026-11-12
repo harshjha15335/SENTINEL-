@@ -1230,3 +1230,64 @@
     max-width: 100%;
   }
 }
+
+/* Payment dossier spacing: keep references and explanations inside their cards. */
+.v2-workspace-main { width: 100%; max-width: 1680px; padding-inline: clamp(24px, 5.75vw, 104px); }
+.v2-dossier, .v2-facts, .v2-dossier-header > div:first-child,
+.v2-fact-grid > div, .v2-review-note, .v2-review-note > span { min-width: 0; }
+.v2-dossier-header {
+  align-items: flex-start; gap: clamp(28px, 4vw, 68px);
+  padding-bottom: clamp(32px, 3vw, 48px);
+}
+.v2-dossier-header > div:first-child { flex: 1 1 0; }
+.v2-dossier-header h2 { line-height: 1.14; overflow-wrap: anywhere; }
+.v2-dossier-header p, .v2-classification, .v2-provenance,
+.v2-review-note > span, .v2-evidence-ledger li { overflow-wrap: anywhere; }
+.v2-record-status { flex: 0 1 360px; min-width: 0; row-gap: 14px; }
+.v2-classification, .v2-provenance, .v2-status { max-width: 100%; }
+.v2-evidence-ledger { padding-block: clamp(28px, 3.3vw, 44px); }
+.v2-dossier-body { gap: clamp(36px, 4vw, 62px); padding-top: clamp(28px, 3vw, 44px); }
+.v2-risk {
+  grid-template-columns: minmax(190px, .8fr) minmax(0, 2.1fr) minmax(180px, .9fr);
+  column-gap: clamp(22px, 2.6vw, 44px); row-gap: 12px;
+  padding: clamp(28px, 3vw, 45px);
+}
+.v2-risk > .v2-section-label { gap: 10px; flex-wrap: wrap; overflow-wrap: anywhere; }
+.v2-factors { min-width: 0; }
+.v2-factors li > div:first-child { align-items: flex-start; gap: 16px; }
+.v2-factors li > div:first-child > span { min-width: 0; overflow-wrap: anywhere; }
+.v2-factors strong { flex-shrink: 0; white-space: normal; text-align: right; overflow-wrap: anywhere; }
+.v2-review-note { gap: 12px; padding-left: clamp(18px, 2vw, 30px); }
+.v2-review-note > span { line-height: 1.65; }
+.v2-facts { padding-inline: clamp(4px, 1.4vw, 24px); }
+.v2-tabs { gap: 34px; margin-bottom: clamp(30px, 3vw, 48px); }
+.v2-fact-grid {
+  gap: clamp(26px, 2.5vw, 42px) clamp(20px, 3.2vw, 56px);
+  margin-bottom: clamp(34px, 3vw, 48px);
+}
+.v2-context-note { padding-top: clamp(28px, 3vw, 46px); }
+.v2-context-note > div { min-width: 0; }
+.v2-context-note p { max-width: 74ch; overflow-wrap: anywhere; }
+@media (max-width: 1280px) {
+  .v2-risk { grid-template-columns: minmax(175px, .8fr) minmax(0, 2.2fr); }
+  .v2-review-note {
+    grid-column: 1 / -1; grid-row: 6; border-left: 0;
+    border-top: 1px solid #d9d2e6; margin-top: 0; padding: 20px 0 0;
+  }
+  .v2-risk > .v2-policy, .v2-risk > details { grid-column: 1 / -1; }
+}
+@media (max-width: 760px) {
+  .v2-workspace-main { padding-inline: clamp(18px, 4vw, 30px); }
+  .v2-dossier-header { display: block; }
+  .v2-record-status { margin-top: 22px; max-width: none; justify-content: flex-start; }
+  .v2-record-status time { text-align: left; }
+  .v2-risk { display: block; padding: clamp(24px, 4vw, 32px); }
+  .v2-risk > h3 { margin: 30px 0 20px; }
+  .v2-review-note { margin-top: 26px; padding-top: 24px; }
+  .v2-facts { padding-inline: 0; }
+  .v2-fact-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 460px) {
+  .v2-fact-grid { grid-template-columns: minmax(0, 1fr); }
+  .v2-dossier-header h2 { font-size: clamp(34px, 10vw, 44px); }
+}
