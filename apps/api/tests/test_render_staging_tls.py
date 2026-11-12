@@ -112,6 +112,108 @@ def test_saved_provider_credentials_remain_dormant_in_render_fixture_staging():
     assert config.worker_configuration_ready
 
 
+def test_explicit_staging_gemini_gate_preserves_fixture_and_dormant_bridge():
+    config = settings(
+        staging_ai_enabled=True,
+        ai_provider="google",
+        ai_api_key="OFFLINE_AI_KEY",
+        ai_model="gemini-3.1-flash-lite",
+        ai_sdk_max_retries=0,
+        ai_request_limit=4,
+        ai_max_output_tokens=1024,
+        supabase_url="https://offline.supabase.co",
+        supabase_service_role_key="OFFLINE_ROLE",
+    )
+    assert config.ai_configured
+    assert config.paypal_mode.value == "fixture"
+    assert not config.bridge_required
+    assert session.database_connect_args(config)["sslmode"] == "require"
+
+
+def test_explicit_staging_sandbox_gate_requires_full_bridge():
+    config = settings(
+        staging_paypal_sandbox_enabled=True,
+        paypal_mode="sandbox",
+        paypal_client_id="OFFLINE_CLIENT",
+        paypal_client_secret="OFFLINE_SECRET",
+        paypal_webhook_id="OFFLINE_WEBHOOK",
+        paypal_return_url="https://sentinel-v2-staging.onrender.com/return",
+        paypal_cancel_url="https://sentinel-v2-staging.onrender.com/cancel",
+        supabase_url="https://offline.supabase.co",
+        supabase_service_role_key="OFFLINE_ROLE",
+    )
+    assert config.bridge_required
+    assert config.worker_configuration_ready
+    assert config.paypal_credentials_configured
+    assert session.database_connect_args(config)["sslmode"] == "require"
+
+
+def test_explicit_staging_combined_integrations_require_both_gates():
+    config = settings(
+        staging_ai_enabled=True,
+        staging_paypal_sandbox_enabled=True,
+        ai_provider="google",
+        ai_api_key="OFFLINE_AI_KEY",
+        ai_model="gemini-3.1-flash-lite",
+        ai_sdk_max_retries=0,
+        ai_request_limit=4,
+        ai_max_output_tokens=1024,
+        paypal_mode="sandbox",
+        paypal_client_id="OFFLINE_CLIENT",
+        paypal_client_secret="OFFLINE_SECRET",
+        paypal_webhook_id="OFFLINE_WEBHOOK",
+        paypal_return_url="https://sentinel-v2-staging.onrender.com/return",
+        paypal_cancel_url="https://sentinel-v2-staging.onrender.com/cancel",
+        supabase_url="https://offline.supabase.co",
+        supabase_service_role_key="OFFLINE_ROLE",
+    )
+    assert config.ai_configured and config.bridge_required
+    assert session.database_connect_args(config)["sslmode"] == "require"
+
+
+@pytest.mark.parametrize(
+    "changes",
+    [
+        {"staging_ai_enabled": True},
+        {"staging_ai_enabled": True, "ai_provider": "google"},
+        {"staging_ai_enabled": True, "ai_provider": "openai", "ai_api_key": "KEY"},
+        {
+            "staging_ai_enabled": True,
+            "ai_provider": "google",
+            "ai_api_key": "KEY",
+            "ai_model": "unreviewed-model",
+        },
+        {
+            "staging_ai_enabled": True,
+            "ai_provider": "google",
+            "ai_api_key": "KEY",
+            "ai_model": "gemini-3.1-flash-lite",
+            "ai_sdk_max_retries": 1,
+        },
+        {
+            "staging_ai_enabled": True,
+            "ai_provider": "google",
+            "ai_api_key": "KEY",
+            "ai_model": "gemini-3.1-flash-lite",
+            "ai_request_limit": 12,
+        },
+        {"staging_paypal_sandbox_enabled": True},
+        {"staging_paypal_sandbox_enabled": True, "paypal_mode": "sandbox"},
+        {
+            "staging_paypal_sandbox_enabled": True,
+            "paypal_mode": "sandbox",
+            "paypal_client_id": "OFFLINE_CLIENT",
+            "paypal_client_secret": "OFFLINE_SECRET",
+            "paypal_return_url": "https://sentinel-v2-staging.onrender.com/return",
+            "paypal_cancel_url": "https://sentinel-v2-staging.onrender.com/cancel",
+        },
+    ],
+)
+def test_staging_flags_fail_closed_without_required_provider_configuration(changes):
+    with pytest.raises(ValidationError):
+        settings(**changes)
+
+
 @pytest.mark.parametrize(
     "override",
     [

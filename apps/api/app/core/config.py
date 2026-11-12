@@ -133,6 +133,9 @@ class Settings(BaseSettings):
     database_tls_policy: Literal["verify_full", "render_internal_staging"] = "verify_full"
     render_internal_tls_reviewed_host: str | None = None
     deployment_stage: str | None = None
+    # Independent, explicit staging gates. Credentials alone never activate providers.
+    staging_ai_enabled: bool = False
+    staging_paypal_sandbox_enabled: bool = False
     render_project_id: str | None = None
     render_workspace_id: str | None = None
     cors_origins: list[str] = Field(default_factory=lambda: ["http://localhost:5173"])
@@ -334,10 +337,34 @@ class Settings(BaseSettings):
                 and self.deployment_stage == "staging"
                 and self.render_project_id == "prj-dbq48lon74is739m7nl0"
                 and self.render_workspace_id == "tea-d8gorhflk1mc73f4pmr0"
-                and self.paypal_mode is PayPalMode.FIXTURE
-                and self.ai_provider is AIProvider.NONE
-                # Saved secrets are allowed ONLY when no provider can use them:
-                # fixture mode, AI provider none and dormant staging bridge.
+                and (
+                    (
+                        not self.staging_paypal_sandbox_enabled
+                        and self.paypal_mode is PayPalMode.FIXTURE
+                    )
+                    or (
+                        self.staging_paypal_sandbox_enabled
+                        and self.paypal_mode is PayPalMode.SANDBOX
+                        and self.paypal_credentials_configured
+                        and bool(self.paypal_webhook_id)
+                        and self.supabase_configured
+                    )
+                )
+                and (
+                    (not self.staging_ai_enabled and self.ai_provider is AIProvider.NONE)
+                    or (
+                        self.staging_ai_enabled
+                        and self.ai_provider is AIProvider.GOOGLE
+                        and self.ai_configured
+                        and self.ai_model == "gemini-3.1-flash-lite"
+                        and self.ai_sdk_max_retries == 0
+                        and self.ai_request_limit <= 4
+                        and self.ai_max_output_tokens <= 1024
+                    )
+                )
+                # Saved provider secrets are dormant until the corresponding
+                # explicit staging gate is on; the database still uses the
+                # exact pinned encrypted-only internal staging connection.
                 and not self.refund_execution_enabled
                 and not self.allow_webhook_fixtures
                 and self.cookie_secure
@@ -399,7 +426,7 @@ class Settings(BaseSettings):
             self.hosted_deployment
             and self.deployment_stage == "staging"
             and self.paypal_mode is PayPalMode.FIXTURE
-            and self.ai_provider is AIProvider.NONE
+            and not self.staging_paypal_sandbox_enabled
         ):
             return False
         return self.paypal_mode is PayPalMode.SANDBOX or self.supabase_configured
