@@ -7,7 +7,13 @@ from sqlalchemy.orm import Session
 from app.auth.deps import Principal, any_member, current_principal
 from app.auth.passwords import verify_password
 from app.auth.rate_limit import SlidingWindowLimiter
-from app.auth.sessions import CSRF_COOKIE, SESSION_COOKIE, find_active_session, issue_session, revoke
+from app.auth.sessions import (
+    CSRF_COOKIE,
+    SESSION_COOKIE,
+    find_active_session,
+    issue_session,
+    revoke,
+)
 from app.core.config import get_settings
 from app.core.errors import (
     AuthenticationError,
@@ -119,12 +125,22 @@ def enter_read_only_demo(
     db.commit()
     response.headers["Cache-Control"] = "no-store"
     response.set_cookie(
-        SESSION_COOKIE, issued.session_token,
-        max_age=ttl * 60, httponly=True, secure=True, samesite="lax", path="/",
+        SESSION_COOKIE,
+        issued.session_token,
+        max_age=ttl * 60,
+        httponly=True,
+        secure=True,
+        samesite="lax",
+        path="/",
     )
     response.set_cookie(
-        CSRF_COOKIE, issued.csrf_token,
-        max_age=ttl * 60, httponly=False, secure=True, samesite="strict", path="/",
+        CSRF_COOKIE,
+        issued.csrf_token,
+        max_age=ttl * 60,
+        httponly=False,
+        secure=True,
+        samesite="strict",
+        path="/",
     )
     return SessionOut(
         user=MeOut.model_validate(user),
