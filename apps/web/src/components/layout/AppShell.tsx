@@ -11,6 +11,7 @@ import { supports, type Capability } from "@/lib/capabilities";
 import { STATIC_DEMO } from "@/lib/staticDemo";
 import { StaticDemoBanner } from "@/features/demo/StaticDemoBanner";
 import { WorkspaceFonts } from "./WorkspaceFonts";
+import { WorkspaceMotion } from "./WorkspaceMotion";
 const PRIMARY: [string, string, Capability][] = [
   ["/app", "Command Center", "dashboard"],
   ["/app/transactions", "Transactions", "transactions"],
@@ -126,7 +127,9 @@ function WorkspaceSession() {
         className="workspace-main"
         data-workspace-route={location.pathname}
       >
-        <Outlet />
+        <WorkspaceMotion key={location.pathname}>
+          <Outlet />
+        </WorkspaceMotion>
       </main>
       <footer className="workspace-footer">
         <span>SENTINEL / FOLLOW THE MONEY</span>
@@ -155,7 +158,7 @@ function AccountBar({ merchant }: { merchant: string }) {
             )}
           >
             {mode === "fixture"
-              ? "Simulated gateway"
+              ? "Demo dataset · offline gateway"
               : healthy
                 ? "PayPal sandbox connected"
                 : "PayPal sandbox unavailable"}

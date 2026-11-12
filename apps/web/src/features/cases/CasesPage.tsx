@@ -65,6 +65,10 @@ export function CasesPage() {
 
   const total = q.data?.total ?? 0;
   const pages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+  const firstOrigin = q.data?.items[0]?.data_origin;
+  const uniformOrigin = firstOrigin && q.data?.items.every((item) => item.data_origin === firstOrigin)
+    ? firstOrigin
+    : null;
 
   return (
     <>
@@ -124,6 +128,16 @@ export function CasesPage() {
       {q.isError && (
         <ErrorState error={q.error} onRetry={() => void q.refetch()} />
       )}
+      {uniformOrigin && (
+        <div className="workspace-provenance-summary" aria-label="Data source for listed cases">
+          <OriginBadge origin={uniformOrigin} />
+          <span>
+            {uniformOrigin === "SYNTHETIC_DEMO"
+              ? "All cases shown on this page are generated scenarios, not verified PayPal events."
+              : "All cases shown on this page have this same recorded origin."}
+          </span>
+        </div>
+      )}
       <div className="workspace-list">
         {q.isPending && (
           <div
@@ -151,7 +165,7 @@ export function CasesPage() {
         {q.data && q.data.items.length > 0 && (
           <ul className="divide-y divide-line" aria-label="Cases">
             {q.data.items.map((c) => (
-              <CaseRow key={c.id} c={c} />
+              <CaseRow key={c.id} c={c} showOrigin={!uniformOrigin} />
             ))}
           </ul>
         )}
@@ -191,14 +205,19 @@ export function CasesPage() {
   );
 }
 
-function CaseRow({ c }: { c: Case }) {
+function CaseRow({ c, showOrigin }: { c: Case; showOrigin: boolean }) {
   const overdue = isOverdue(c.due_at, c.status);
   const t = c.transaction;
   return (
     <li>
       <Link
         to={`/app/cases/${c.id}`}
-        className="grid gap-2 px-4 py-3 hover:bg-raised focus-visible:bg-raised md:grid-cols-[minmax(0,2fr)_minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)] md:items-center md:gap-4"
+        className={clsx(
+          "grid gap-3 px-4 py-4 hover:bg-raised focus-visible:bg-raised md:items-center md:gap-6",
+          showOrigin
+            ? "md:grid-cols-[minmax(0,2fr)_minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)]"
+            : "md:grid-cols-[minmax(0,2fr)_minmax(0,1fr)_minmax(0,1fr)]",
+        )}
       >
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-2">
@@ -225,9 +244,11 @@ function CaseRow({ c }: { c: Case }) {
           </p>
           {t.risk_band && <RiskBadge band={t.risk_band} score={t.risk_score} />}
         </div>
-        <div>
-          <OriginBadge origin={c.data_origin} />
-        </div>
+        {showOrigin && (
+          <div>
+            <OriginBadge origin={c.data_origin} compact />
+          </div>
+        )}
         <div className="text-xs md:text-right">
           <p
             className={clsx(

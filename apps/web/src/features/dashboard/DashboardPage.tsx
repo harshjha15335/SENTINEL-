@@ -3,6 +3,7 @@ import { ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
 
 import { PageHeader } from "@/components/layout/PageHeader";
+import { AnimatedCount } from "@/components/ui/AnimatedCount";
 import { useCases } from "@/features/cases/useCases";
 import { OriginBadge } from "@/components/ui/OriginBadge";
 import { Panel } from "@/components/ui/Panel";
@@ -235,7 +236,7 @@ function RiskOverview({ data }: { data: DashboardSummary }) {
                   <OriginBadge origin={o} />
                   <p className="text-sm">
                     <span className="tabular text-xl font-semibold">
-                      {openFor(o)}
+                      <AnimatedCount key={openFor(o)} value={openFor(o)} />
                     </span>
                     <span className="ml-1.5 text-fg-muted">
                       open case{openFor(o) === 1 ? "" : "s"}
@@ -285,12 +286,12 @@ function Stat({
   tone?: "critical";
 }) {
   return (
-    <div>
+    <div data-motion-reveal>
       <dt className="text-xs text-fg-subtle">{label}</dt>
       <dd
         className={`tabular mt-1 text-2xl font-semibold ${tone === "critical" ? "text-critical" : ""}`}
       >
-        {value}
+        <AnimatedCount key={value} value={value} />
       </dd>
     </div>
   );
@@ -333,7 +334,7 @@ function DecisionDesk() {
       {q.data && (
         <>
           <div className="command-queue-summary" aria-label={`${q.data.total} open high-priority review cases`}>
-            <strong className="tabular">{q.data.total.toLocaleString()}</strong>
+            <strong className="tabular"><AnimatedCount key={q.data.total} value={q.data.total} /></strong>
             <span>open high-priority cases</span>
           </div>
           {first ? (
