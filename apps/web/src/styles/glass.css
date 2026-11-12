@@ -573,3 +573,38 @@
 @media (pointer:coarse), (prefers-reduced-motion: reduce) {
   .sentinel-cursor-smudge { display:none; }
 }
+
+/* Information remains available, without bright yellow warning blocks. */
+.sentinel-inline-notice,
+.sentinel-inline-provenance {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  min-width: 0;
+  padding: 10px 15px;
+  border: 0;
+  border-left: 3px solid rgba(144,102,220,.48);
+  border-radius: 2px 11px 11px 2px;
+  background: rgba(255,255,255,.28);
+  color: #3e3450;
+  line-height: 1.6;
+  box-shadow: none;
+}
+.sentinel-inline-provenance {
+  display: block;
+}
+.sentinel-inline-notice p,
+.sentinel-inline-provenance p { max-width: 84ch; }
+.sentinel-notice-details summary {
+  cursor: pointer;
+  width: fit-content;
+  margin-top: 3px;
+  color: #6135c9;
+  font-size: 12px;
+  font-weight: 600;
+}
+.sentinel-notice-details summary:hover { text-decoration: underline; }
+.sentinel-notice-details summary:focus-visible {
+  outline:2px solid #7547eb;
+  outline-offset:2px;
+}
