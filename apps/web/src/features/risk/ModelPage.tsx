@@ -85,7 +85,7 @@ function Card({ m }: { m: ModelCard }) {
     <div className="workspace-analysis-workbench">
       <div
         role="note"
-        className="model-workbench-wide rounded-md border border-warning/40 bg-warning-soft px-4 py-3 text-sm"
+        className="model-workbench-wide sentinel-inline-provenance text-sm"
       >
         <p className="font-medium text-fg">
           Trained and tested on synthetic data only.
