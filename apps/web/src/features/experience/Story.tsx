@@ -3,7 +3,8 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { ArrowUpRight, ArrowDown } from "lucide-react";
 import { useRef, useSyncExternalStore } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { markIntroComplete } from "./introSession";
 import { ReceiptMorph, receiptMorph } from "./ReceiptMorph";
 import { DemoDossier } from "./Dossier";
 import { storyStages } from "./fixtures";
@@ -17,36 +18,45 @@ function subscribe(fn: () => void) {
   m.addEventListener("change", fn);
   return () => m.removeEventListener("change", fn);
 }
-export function MoneyStory() {
+export function MoneyStory({ workspaceTarget }: { workspaceTarget?: string } = {}) {
   const desktop = useSyncExternalStore(
     subscribe,
     () => matchMedia(query).matches,
     () => false,
   );
-  return desktop ? <DesktopStory /> : <CompactStory />;
+  return desktop ? <DesktopStory workspaceTarget={workspaceTarget} /> : <CompactStory workspaceTarget={workspaceTarget} />;
 }
 function skip() {
   const el = document.getElementById("v2-after-story");
   el?.scrollIntoView({ behavior: "instant" });
   el?.focus({ preventScroll: true });
 }
-function StoryNav() {
+function StoryNav({ workspaceTarget }: { workspaceTarget?: string }) {
+  const navigate = useNavigate();
+  const skipStory = () => {
+    if (workspaceTarget) {
+      markIntroComplete();
+      navigate(workspaceTarget);
+    } else {
+      skip();
+    }
+  };
   return (
     <header className="v2-story-nav">
-      <Link className="v2-wordmark" to="/">
+      <Link className="v2-wordmark" to={workspaceTarget ? "/intro" : "/"}>
         <span className="v2-brand-icon">S</span>SENTINEL
         <span className="v2-nav-edition">FOLLOW THE MONEY</span>
       </Link>
       <nav aria-label="Preview navigation">
-        <button onClick={skip}>Skip story</button>
-        <Link to="/demo-payment" className="v2-nav-cta">
-          Explore simulated demo <ArrowUpRight size={16} />
+        <button onClick={skipStory}>Skip story</button>
+        <Link to={workspaceTarget ?? "/demo-payment"} onClick={workspaceTarget ? markIntroComplete : undefined} className="v2-nav-cta">
+          {workspaceTarget ? "Enter workspace" : "Explore simulated demo"} <ArrowUpRight size={16} />
         </Link>
       </nav>
     </header>
   );
 }
-function DesktopStory() {
+function DesktopStory({ workspaceTarget }: { workspaceTarget?: string }) {
   const root = useRef<HTMLDivElement>(null);
   useGSAP(
     () => {
@@ -245,7 +255,7 @@ function DesktopStory() {
       data-stage="0"
       data-progress="0"
     >
-      <StoryNav />
+      <StoryNav workspaceTarget={workspaceTarget} />
       <main>
         <div className="v2-story-track">
           <section className="v2-story-pin" aria-label="Follow the Money story">
@@ -391,12 +401,12 @@ function DesktopStory() {
                   <p>{s.text}</p>
                   {i === 0 && (
                     <>
-                      <Link className="v2-button" to="/demo-payment">
-                        Explore simulated demo <ArrowUpRight size={18} />
+                      <Link className="v2-button" to={workspaceTarget ?? "/demo-payment"} onClick={workspaceTarget ? markIntroComplete : undefined}>
+                        {workspaceTarget ? "Enter workspace" : "Explore simulated demo"} <ArrowUpRight size={18} />
                       </Link>
                       <small>Explore an interactive, simulated payment.</small>
-                      <Link className="v2-auth-link" to="/app">
-                        Open authenticated workspace <ArrowUpRight size={15} />
+                      <Link className="v2-auth-link" to={workspaceTarget ?? "/app"} onClick={workspaceTarget ? markIntroComplete : undefined}>
+                        {workspaceTarget ? "Enter workspace" : "Open authenticated workspace"} <ArrowUpRight size={15} />
                       </Link>
                     </>
                   )}
@@ -438,17 +448,17 @@ function DesktopStory() {
         </div>
         <div className="v2-scene-enter" inert>
           <span>FROM PAYMENT TO PERSPECTIVE.</span>
-          <Link className="v2-button" to="/demo-payment">
-            Explore simulated demo <ArrowUpRight size={18} />
+          <Link className="v2-button" to={workspaceTarget ?? "/demo-payment"} onClick={workspaceTarget ? markIntroComplete : undefined}>
+            {workspaceTarget ? "Enter workspace" : "Explore simulated demo"} <ArrowUpRight size={18} />
           </Link>
         </div>
-        <StoryAfter />
+        <StoryAfter workspaceTarget={workspaceTarget} />
       </main>
       <StoryFooter />
     </div>
   );
 }
-function CompactStory() {
+function CompactStory({ workspaceTarget }: { workspaceTarget?: string }) {
   const root = useRef<HTMLDivElement>(null);
   useGSAP(
     () => {
@@ -478,7 +488,7 @@ function CompactStory() {
   );
   return (
     <div ref={root} className="v2-story v2-compact-story">
-      <StoryNav />
+      <StoryNav workspaceTarget={workspaceTarget} />
       <main>
         <section className="v2-compact-hero" data-story-stage>
           <p className="v2-eyebrow">01 / THE WALLET</p>
@@ -488,11 +498,11 @@ function CompactStory() {
             <span>has a story.</span>
           </h1>
           <p>Not every story ends well.</p>
-          <Link className="v2-button" to="/demo-payment">
-            Explore simulated demo <ArrowUpRight size={18} />
+          <Link className="v2-button" to={workspaceTarget ?? "/demo-payment"} onClick={workspaceTarget ? markIntroComplete : undefined}>
+            {workspaceTarget ? "Enter workspace" : "Explore simulated demo"} <ArrowUpRight size={18} />
           </Link>
-          <Link className="v2-auth-link" to="/app">
-            Open authenticated workspace <ArrowUpRight size={15} />
+          <Link className="v2-auth-link" to={workspaceTarget ?? "/app"} onClick={workspaceTarget ? markIntroComplete : undefined}>
+            {workspaceTarget ? "Enter workspace" : "Open authenticated workspace"} <ArrowUpRight size={15} />
           </Link>
           <div className="v2-compact-wallet">
             <Wallet />
@@ -538,13 +548,13 @@ function CompactStory() {
         <div className="v2-compact-workspace" inert aria-hidden="true">
           <DemoDossier embedded />
         </div>
-        <StoryAfter />
+        <StoryAfter workspaceTarget={workspaceTarget} />
       </main>
       <StoryFooter />
     </div>
   );
 }
-function StoryAfter() {
+function StoryAfter({ workspaceTarget }: { workspaceTarget?: string }) {
   return (
     <section className="v2-after-story" id="v2-after-story" tabIndex={-1}>
       <div>
@@ -560,11 +570,11 @@ function StoryAfter() {
           A clearer view of each payment. A thoughtful place to decide what
           happens next.
         </p>
-        <Link className="v2-button" to="/demo-payment">
-          Open the simulated dossier <ArrowUpRight size={18} />
+        <Link className="v2-button" to={workspaceTarget ?? "/demo-payment"} onClick={workspaceTarget ? markIntroComplete : undefined}>
+          {workspaceTarget ? "Enter workspace" : "Open the simulated dossier"} <ArrowUpRight size={18} />
         </Link>
-        <Link className="v2-text-link" to="/app">
-          Open authenticated workspace <ArrowUpRight size={15} />
+        <Link className="v2-text-link" to={workspaceTarget ?? "/app"} onClick={workspaceTarget ? markIntroComplete : undefined}>
+          {workspaceTarget ? "Enter workspace" : "Open authenticated workspace"} <ArrowUpRight size={15} />
         </Link>
       </div>
     </section>
