@@ -6,7 +6,6 @@ import { AppNavigation } from "./AppNavigation";
 import { ErrorState } from "@/components/ui/States";
 import { Skeleton } from "@/components/ui/States";
 import { useLogout, useMe } from "@/features/auth/session";
-import { usePayPalStatus } from "@/features/settings/usePayPalStatus";
 import { supports, type Capability } from "@/lib/capabilities";
 import { STATIC_DEMO } from "@/lib/staticDemo";
 import { StaticDemoBanner } from "@/features/demo/StaticDemoBanner";
@@ -120,7 +119,6 @@ function WorkspaceSession() {
         <UserAccountMenu email={me.data.email} role={me.data.role} />
       </header>
       {STATIC_DEMO && <StaticDemoBanner />}
-      <AccountBar merchant={me.data.merchant.name} />
       <main
         id="main"
         tabIndex={-1}
@@ -138,38 +136,6 @@ function WorkspaceSession() {
     </div>
   );
 }
-function AccountBar({ merchant }: { merchant: string }) {
-  const status = usePayPalStatus(),
-    mode = status.data?.mode,
-    healthy = status.data?.token_check === "ok";
-  return (
-    <section className="workspace-account-bar" aria-label="Workspace account">
-      <div className="workspace-merchant">
-        <span>{merchant}</span>
-        {mode && (
-          <span
-            className={clsx(
-              "workspace-gateway",
-              mode === "fixture"
-                ? "text-warning"
-                : healthy
-                  ? "text-positive"
-                  : "text-critical",
-            )}
-          >
-            {mode === "fixture"
-              ? "Demo dataset · offline gateway"
-              : healthy
-                ? "PayPal sandbox connected"
-                : "PayPal sandbox unavailable"}
-          </span>
-        )}
-      </div>
-      <span className="workspace-account-hint">Review decisions remain under human control.</span>
-    </section>
-  );
-}
-
 function UserAccountMenu({ email, role }: { email: string; role: string }) {
   const logout = useLogout();
   const userMenu = useRef<HTMLDetailsElement>(null);
