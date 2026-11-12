@@ -5,8 +5,9 @@ import threading
 import unittest
 from contextlib import contextmanager
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+from unittest.mock import patch
 
-from scripts.verify_render_staging_container import fixture_http
+from scripts.verify_render_staging_container import container_http, fixture_http
 
 
 @contextmanager
@@ -44,6 +45,39 @@ def fixture_server():
 
 
 class ContainerProbeTests(unittest.TestCase):
+    def test_isolated_transport_keeps_credentials_off_command_arguments(self):
+        from subprocess import CompletedProcess
+
+        with patch("scripts.verify_render_staging_container._execute") as execute:
+            execute.return_value = CompletedProcess([], 0, '[503, [], "not ready"]', "")
+            status, _, body = container_http(
+                "owned-fixture",
+                "/login",
+                {"password": "fixture-secret"},
+                "fixture=session",
+            )
+        self.assertEqual((status, body), (503, b"not ready"))
+        args, kwargs = execute.call_args
+        self.assertNotIn("fixture-secret", repr(args))
+        self.assertNotIn("fixture=session", repr(args))
+        self.assertEqual(
+            json.loads(kwargs["input"])["payload"], {"password": "fixture-secret"}
+        )
+        self.assertIn("fixture_http(8000", args[0][-1])
+
+    def test_transport_failure_does_not_expose_sensitive_output(self):
+        from subprocess import CompletedProcess
+
+        with patch("scripts.verify_render_staging_container._execute") as execute:
+            execute.return_value = CompletedProcess(
+                [], 1, "fixture-secret", "fixture=session"
+            )
+            with self.assertRaises(ConnectionError) as failure:
+                container_http("owned-fixture", "/ready")
+        self.assertEqual(
+            str(failure.exception), "isolated container HTTP probe unavailable"
+        )
+
     def test_reads_ready_response(self):
         with fixture_server() as port:
             status, _, data = fixture_http(port, "/ready")

@@ -1,3 +1,17 @@
+## Remote staging container acceptance correction — 12 November 2026
+
+The first fresh GitHub image build succeeded, including the legacy startup smoke.
+Strict isolated staging acceptance then failed because its internal Docker network
+exposed no host-port mapping; the runner incorrectly assumed one. The retained
+application-port log reports `index of untyped nil`. The runner now probes the real
+API through loopback INSIDE the running app container with `docker exec -i`, retaining
+network isolation and requiring no published host port. JSON credentials/cookies are
+passed through stdin and never command arguments or public error logs. Six focused
+probe regressions (the original four plus two transport/security cases) pass locally.
+Full fresh image, TLS, readiness, worker recovery and restart acceptance must rerun on
+the corrected revision; a passing build alone is not full acceptance. Application,
+UI, model, dependency, contract and migration source remain unchanged by this fix.
+
 > Latest release authorization (12 November 2026): owner-verified Blueprint,
 > webhook and empty-Staging checks are accepted; remaining uninspected integrations
 > are acknowledged residual risk. Earlier blanket H02 publication blocks below are

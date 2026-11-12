@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import argparse
 import hashlib
+import inspect
 import json
 import os
 import re
@@ -63,6 +64,35 @@ def fixture_http(
         return response.status, response.getheaders(), response.read()
     finally:
         connection.close()
+
+
+def container_http(
+    container: str, path: str, payload: dict | None = None, cookie: str | None = None
+):
+    """Probe the real API inside the isolated network without publishing a host port.
+
+    Login credentials and cookies go through stdin, never command arguments or logs.
+    Reuse the tested loopback probe with only stdlib imports inside the built image.
+    """
+    code = (
+        "import json,sys\nfrom http.client import HTTPConnection\n"
+        + inspect.getsource(fixture_http)
+        + "\nr=json.load(sys.stdin)\n"
+        + "status,headers,body=fixture_http(8000,r['path'],r['payload'],r['cookie'])\n"
+        + "print(json.dumps([status,headers,body.decode('utf-8')]))\n"
+    )
+    result = _execute(
+        ["docker", "exec", "-i", container, "python", "-c", code],
+        input=json.dumps({"path": path, "payload": payload, "cookie": cookie}),
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    if result.returncode:
+        # Never echo stdin, stderr or cookie-bearing output into public CI logs.
+        raise ConnectionError("isolated container HTTP probe unavailable")
+    status, headers, body = json.loads(result.stdout)
+    return status, headers, body.encode("utf-8")
 
 
 def main() -> int:
@@ -421,29 +451,14 @@ def main() -> int:
                     "1",
                     "--env-file",
                     str(app_file),
-                    "-p",
-                    "127.0.0.1::8000",
                     image,
                 ],
             )
             owned_containers.append(app)
             command("application-start", ["docker", "start", app])
-            port = int(
-                command(
-                    "application-port",
-                    [
-                        "docker",
-                        "inspect",
-                        app,
-                        "--format",
-                        '{{(index (index .NetworkSettings.Ports "8000/tcp") 0).HostPort}}',
-                    ],
-                    capture=True,
-                )
-            )
 
             def http(path: str, payload: dict | None = None, cookie: str | None = None):
-                return fixture_http(port, path, payload, cookie)
+                return container_http(app, path, payload, cookie)
 
             def ready():
                 for _ in range(120):
