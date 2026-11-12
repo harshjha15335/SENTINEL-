@@ -95,13 +95,13 @@ function Card({ m }: { m: ModelCard }) {
           scenario; they are not evidence of performance on real PayPal traffic.
         </p>
       </div>
-      <div className="lg:col-span-3">
+      <div className="model-workbench-wide">
         <CapacityWarning card={m} />
       </div>
 
       <Panel
         title="Held-out test results"
-        className="lg:col-span-2"
+        className="model-workbench-wide"
         bodyClassName="p-0"
       >
         <div
@@ -205,7 +205,8 @@ function Card({ m }: { m: ModelCard }) {
       </Panel>
 
       <Panel title="Model selection (validation split)" bodyClassName="p-0">
-        <table className="w-full text-sm">
+        <div className="overflow-x-auto" tabIndex={0} role="region" aria-label="Model validation comparison">
+        <table className="w-full min-w-[310px] text-sm">
           <thead>
             <tr className="text-left text-xs text-fg-subtle">
               <th className="px-4 py-2 font-medium">Candidate</th>
@@ -216,12 +217,12 @@ function Card({ m }: { m: ModelCard }) {
             {Object.entries(m.validation_comparison).map(([name, v]) => (
               <tr key={name} className="border-t border-line">
                 <th scope="row" className="px-4 py-2 text-left font-normal">
-                  {modelName(name)}
-                  {name === m.chosen_model && (
-                    <Badge tone="accent" className="ml-2">
-                      chosen
-                    </Badge>
-                  )}
+                  <span className="inline-flex flex-wrap items-center gap-2">
+                    {modelName(name)}
+                    {name === m.chosen_model && (
+                      <Badge tone="accent">chosen</Badge>
+                    )}
+                  </span>
                 </th>
                 <td className="tabular px-4 py-2 text-right">
                   {num(v["valid_pr_auc"] ?? 0)}
@@ -230,6 +231,7 @@ function Card({ m }: { m: ModelCard }) {
             ))}
           </tbody>
         </table>
+        </div>
         <p className="border-t border-line px-4 py-3 text-xs text-fg-subtle">
           {m.calibration}. Split: {String(m.split["method"])}; training ends{" "}
           {formatDateTime(String(m.split["train_end"]))}.
