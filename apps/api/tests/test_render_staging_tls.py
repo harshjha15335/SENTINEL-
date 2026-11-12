@@ -113,18 +113,26 @@ def test_saved_provider_credentials_remain_dormant_in_render_fixture_staging():
     assert config.worker_configuration_ready
 
 
-@pytest.mark.parametrize("override", [
-    {"paypal_mode": "sandbox",
-     "paypal_return_url": "https://sentinel-v2-staging.onrender.com/api/v1/paypal/return",
-     "paypal_cancel_url": "https://sentinel-v2-staging.onrender.com/api/v1/paypal/cancel"},
-    {"ai_provider": "google", "ai_api_key": "OFFLINE_AI_KEY"},
-    {"paypal_mode": "sandbox", "paypal_client_id": "OFFLINE_CLIENT",
-     "paypal_client_secret": "OFFLINE_SECRET",
-     "paypal_return_url": "https://sentinel-v2-staging.onrender.com/api/v1/paypal/return",
-     "paypal_cancel_url": "https://sentinel-v2-staging.onrender.com/api/v1/paypal/cancel",
-     "supabase_url": "https://offline.supabase.co",
-     "supabase_service_role_key": "OFFLINE_ROLE"},
-])
+@pytest.mark.parametrize(
+    "override",
+    [
+        {
+            "paypal_mode": "sandbox",
+            "paypal_return_url": "https://sentinel-v2-staging.onrender.com/api/v1/paypal/return",
+            "paypal_cancel_url": "https://sentinel-v2-staging.onrender.com/api/v1/paypal/cancel",
+        },
+        {"ai_provider": "google", "ai_api_key": "OFFLINE_AI_KEY"},
+        {
+            "paypal_mode": "sandbox",
+            "paypal_client_id": "OFFLINE_CLIENT",
+            "paypal_client_secret": "OFFLINE_SECRET",
+            "paypal_return_url": "https://sentinel-v2-staging.onrender.com/api/v1/paypal/return",
+            "paypal_cancel_url": "https://sentinel-v2-staging.onrender.com/api/v1/paypal/cancel",
+            "supabase_url": "https://offline.supabase.co",
+            "supabase_service_role_key": "OFFLINE_ROLE",
+        },
+    ],
+)
 def test_saved_credentials_do_not_authorize_integrated_mode(override):
     with pytest.raises(ValidationError, match="Unapproved Render"):
         settings(**override)
