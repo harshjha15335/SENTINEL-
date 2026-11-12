@@ -14,7 +14,7 @@ const OUT = path.resolve(__dirname, '../devpost-gallery');
 fs.mkdirSync(OUT, { recursive: true });
 const entries = [];
 
-async function capture(page, filename, route, { anchor, offset = 0, wait = 900 } = {}) {
+async function capture(page, filename, route, { anchor, anchorText, offset = 0, scrollY, wait = 900 } = {}) {
   const url = BASE + route;
   const response = await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 60000 });
   if (!response || response.status() >= 400) {
@@ -29,6 +29,11 @@ async function capture(page, filename, route, { anchor, offset = 0, wait = 900 }
       console.log('INFO: optional section not visible for ' + route + ': ' + anchor);
     }
   }
+  if (anchorText) {
+    await page.getByText(anchorText, { exact: false }).first().scrollIntoViewIfNeeded({ timeout: 10000 });
+    await page.waitForTimeout(300);
+  }
+  if (scrollY) await page.evaluate((y) => window.scrollTo({ top: y, behavior: 'instant' }), scrollY);
   if (offset) await page.evaluate((y) => window.scrollBy(0, y), offset);
   await page.waitForTimeout(280);
   const filepath = path.join(OUT, filename + '.jpg');
@@ -68,7 +73,9 @@ async function run() {
     if (!/^\/app\/transactions\/[0-9a-f-]{36}$/.test(transaction)) throw new Error('Invalid synthetic payment link');
     if (!/^\/app\/cases\/[0-9a-f-]{36}$/.test(casePath)) throw new Error('Invalid synthetic review case link');
     console.log('Validated synthetic demo links', transaction, casePath);
-    await capture(page, '03-wallet-animation-intro', '/intro', { wait: 1800 });
+    await capture(page, '03-wallet-animation-intro', '/intro', {
+      wait: 1800, scrollY: 2280,
+    });
     await capture(page, '04-read-only-judge-demo', '/app/demo');
     await capture(page, '05-command-center-dashboard', '/app', { wait: 1800 });
     await capture(page, '06-payments-explorer', '/app/transactions', { wait: 1400 });
@@ -84,8 +91,12 @@ async function run() {
       anchor: '#workspace-panel-decision', wait: 1200,
     });
     await capture(page, '12-risk-model-and-shap', '/app/model', { wait: 1400 });
-    await capture(page, '13-policy-lab-roc-and-thresholds', '/app/policy', { wait: 1800, offset: 150 });
-    await capture(page, '14-risk-monitoring', '/app/monitoring', { wait: 1500 });
+    await capture(page, '13-policy-lab-roc-and-thresholds', '/app/policy', {
+      wait: 2000, anchorText: 'ROC · AUC',
+    });
+    await capture(page, '14-risk-monitoring', '/app/monitoring', {
+      wait: 1800, anchorText: 'Current window',
+    });
     await capture(page, '15-relationship-explorer', '/app/network', {
       wait: 1800, anchor: '[aria-label="Relationship diagram"]',
     });
