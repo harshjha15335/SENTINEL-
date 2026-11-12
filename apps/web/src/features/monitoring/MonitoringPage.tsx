@@ -341,13 +341,13 @@ function Bars({
     <ul
       aria-label={label}
       tabIndex={0}
-      className="max-h-64 space-y-2 overflow-y-auto"
+      className="monitoring-bars max-h-64 space-y-2 overflow-y-auto"
     >
       {rows.map((row) => (
         <li key={row.label} className="text-sm">
-          <div className="flex justify-between gap-3">
+          <div className="monitoring-bar-label-row flex justify-between gap-3">
             <span>{row.label}</span>
-            <span className="tabular">{row.count}</span>
+            <span className="monitoring-bar-count tabular">{row.count}</span>
           </div>
           <div aria-hidden className="mt-1 h-1.5 rounded bg-sunken">
             <div

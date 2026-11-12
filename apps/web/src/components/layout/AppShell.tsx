@@ -100,7 +100,7 @@ function WorkspaceSession() {
         Skip to content
       </a>
       <header className="workspace-global-header">
-        <Link to="/" className="workspace-brand">
+        <Link to={STATIC_DEMO ? "/" : "/intro"} className="workspace-brand">
           <span>S</span>SENTINEL
         </Link>
         <nav aria-label="Primary" className="workspace-primary-nav">
@@ -111,8 +111,8 @@ function WorkspaceSession() {
           <nav aria-label="All workspaces">
             <div className="workspace-mobile-links">{nav(PRIMARY)}</div>
             {nav(more)}
-            <Link to="/">
-              Follow the Money <ArrowUpRight size={14} />
+            <Link to={STATIC_DEMO ? "/" : "/intro"}>
+              Replay the wallet story <ArrowUpRight size={14} />
             </Link>
           </nav>
         </details>
