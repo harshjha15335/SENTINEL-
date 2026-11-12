@@ -1,106 +1,218 @@
-Latest release candidate: [Operational finalization](docs/RELEASE_FINALIZATION.md). AI budget/SDK and hosted TLS/proxy controls are locally tested; Supabase remains healthy. External PayPal/OpenAI verification and authorized public hosting remain pending.
+# SENTINEL
 
-Previous verified status: [Post-restoration verification](docs/POST_RESTORATION_REVIEW.md),7 November2026. Supabase is ACTIVE_HEALTHY, real RPC and bridge polling work, and required readiness returns200. PayPal OAuth, real AI and public hosting remain unverified or blocked.
+**Follow the money. Explain the risk. Keep humans in control.**
 
-Previous external release review: [7 November 2026 status and owner actions](docs/PUBLIC_RELEASE_REVIEW.md). Supabase project is INACTIVE; public release remains blocked. Render and OpenAI/gpt-6.1-terra are selected proposals, not verified deployments or paid-use authorization.
+An explainable payment-risk investigation and recovery-control platform built for the **PayPal AI Hackathon**. SENTINEL connects PayPal Sandbox payment events to XGBoost risk scoring, evidence-grounded Gemini investigations, human approvals, and operational analytics.
 
-Previous release verification: [Final release report](SENTINEL_FINAL_RELEASE_REPORT.md) and [deployment requirements](docs/FINAL_DEPLOYMENT.md), 6 November 2026. Local tests pass; genuine bridge/OAuth/AI and continuous public hosting remain blocked or unverified.
+[![CI](https://github.com/harshjha15335/SENTINEL-/actions/workflows/ci.yml/badge.svg)](https://github.com/harshjha15335/SENTINEL-/actions/workflows/ci.yml)
+![Python](https://img.shields.io/badge/Python-3.12%2B-3776AB)
+![React](https://img.shields.io/badge/React-TypeScript-149ECA)
+![PayPal](https://img.shields.io/badge/PayPal-Sandbox_only-003087)
+![License](https://img.shields.io/badge/License-Apache--2.0-blue)
 
-# SENTINEL · AI Payment Trust & Recovery
+**[Live staging website](https://sentinel-v2-staging.onrender.com/)** · **[One-click judge demo](https://sentinel-v2-staging.onrender.com/login)** · **[Public payment dossier](https://sentinel-v2-staging.onrender.com/demo-payment)** · **[Source code](https://github.com/harshjha15335/SENTINEL-)**
 
-SENTINEL helps merchants who take payments with PayPal go from a suspicious payment to an
-explainable, evidence-backed decision. It records PayPal sandbox payments and events, scores risk
-with an explainable model, investigates cases with grounded, read-only AI tools, and routes any
-financial action through human approval.
+> **Scope:** This is a hosted, synthetic-data-focused **staging and hackathon demonstration**, not a production fraud decisioning service. PayPal integrations use **Sandbox only**; no real-money payment or refund execution is enabled. The model was trained and evaluated on generated data, not validated against real merchant losses.
 
-> **Development status (6 November 2026):** the recovered branch now includes a guarded
-> refund ledger/executor, dispute preparation, validation-only Policy Lab, scoped risk
-> monitoring, payer-reference network exploration and a refreshed private judge scenario.
-> Financial execution is disabled by default; dispute submission is disabled. The existing
-> investigation/evidence/approval system is extended, not replaced.
->
-> The Python application is still local. The Supabase bridge is blocked by proxy CONNECT
-> denial, sandbox OAuth returns `401 invalid_client`, and real AI remains unverified.
-> Readiness correctly remains 503 while the required bridge is unhealthy. Fixture status
-> never claims successful provider OAuth. Synthetic benchmark precision remains 28.2%.
->
-> [Technical completion report](docs/NEXT_PHASE_REPORT.md) · [Setup](docs/NEXT_PHASE_SETUP.md) · [Runbook](docs/NEXT_PHASE_RUNBOOK.md) · [Judge guide](docs/NEXT_PHASE_DEMO.md)
+## Why SENTINEL?
 
-## Historical demo launch options
+Fraud dashboards can show a risk score without explaining what an investigator should do next. SENTINEL connects the whole review process:
 
-Public `main` and images built from it do not contain the recovered local branch (`feature/reliability-next-phase`, not yet published). These links are not deployments of the Session 8 implementation. The old free Render blueprint is not a continuous hosting recommendation; use the review-only proposal and readiness checklist after authorization.
+1. **Observe** a PayPal Sandbox payment or a clearly labelled simulated/synthetic record.
+2. **Assess** its risk with a versioned XGBoost model, calibrated bands, and TreeSHAP explanations.
+3. **Investigate** flagged cases with a read-only, tool-using Gemini agent that cites the actual case records it read.
+4. **Collect evidence** and generate a private PDF case packet.
+5. **Escalate to a person** for review, approvals, disputes, and guarded refund preparation.
+6. **Improve decisions** with shadow Policy Lab simulations, monitoring, and relationship exploration.
 
-| Option | What you get | Needs |
-|---|---|---|
-| [![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/harshjha15335/SENTINEL-) | The full app with its database, in your browser, about 2 minutes after opening | A GitHub account. Codespaces usage counts against your account's quota. |
-| [![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/harshjha15335/SENTINEL-) | A public HTTPS URL that redeploys on every push to `main` | A free Render account |
-| [Static demo on GitHub Pages](https://harshjha15335.github.io/SENTINEL-/) | A read-only snapshot of the synthetic demo, browsable without signing in. No server: nothing can be changed and nothing is sent to PayPal. | Nothing |
-| `docker run ghcr.io/harshjha15335/sentinel:main` | The same image CI tests, published from `main` | Docker and a PostgreSQL URL |
+Risk scoring does **not** block payments, and an AI recommendation does **not** execute a financial action.
 
-Every option that runs the server is in **demo mode**:
-| [![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/harshjha15335/SENTINEL-) | A public HTTPS URL that redeploys on every push to `main` | A Render account; verify current limits and pricing |
-| `docker run ghcr.io/harshjha15335/sentinel:main` | The same image CI tests, published from `main` | Docker and a PostgreSQL URL |
+## Try the demo
 
-The historical launch configurations are intended to run in **demo mode**:
-- PayPal runs in fixture mode, so every payment it creates is labelled **Simulated**.
-- The **Synthetic demo** scenario is loaded.
-- Sign-in passwords are generated, never committed.
-- Investigations produce the labelled deterministic summary unless `SENTINEL_AI_PROVIDER` and
-  `SENTINEL_AI_API_KEY` are set.
+| Experience | Link | What to expect |
+| --- | --- | --- |
+| Cinematic public homepage | [Follow the Money](https://sentinel-v2-staging.onrender.com/) | Scroll-driven payment story and entry points |
+| Public simulated payment | [Payment dossier](https://sentinel-v2-staging.onrender.com/demo-payment) | No sign-in or provider request; illustrative payments |
+| One-click judge access | [Enter from login](https://sentinel-v2-staging.onrender.com/login) | Passwordless, time-limited **VIEWER** session in an isolated demo merchant |
+| Authenticated operations | [Merchant sign-in](https://sentinel-v2-staging.onrender.com/login) | Analyst/admin accounts can demonstrate authorized workflows |
 
-Details, and how to switch a deployment to the PayPal sandbox, are in [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md).
+The **judge workspace contains synthetic records and a prebuilt deterministic investigation**. Its viewer cannot initiate new AI runs, upload evidence, approve decisions, check out, or request refunds. A **separate authenticated analyst session** is required to show the genuinely model-generated Gemini investigation workflow.
 
-Every record shows where it came from: **Live sandbox**, **Merchant provided**, **Synthetic demo**
-or **Simulated**.
+### Suggested judge walkthrough
 
-## Run it locally
+Start at the homepage, select **One-click judge demo**, then follow the **Demo guide**. Open a payment's risk explanation, read the prepared investigation with citations, inspect its illustrative evidence and PDF packet, and explore Policy Lab, Risk Monitoring, and the payer relationship graph. Use an authorized analyst/admin account only for actions such as launching a new Gemini run or reviewing approvals.
 
-Prerequisites: Python 3.12+, Node 22.22+ (24 recommended), PostgreSQL 16 (or Docker).
+## Product features
 
-```bash
-# 1. Database
-docker compose up -d db            # or use a local PostgreSQL with databases sentinel + sentinel_test
+| Area | Capabilities |
+| --- | --- |
+| **Command Center** | Payment volumes and states, origin-separated risk bands, recent transactions, urgent review queue |
+| **Transactions & risk** | Search/filter/sort payments; PayPal order/capture references; event timeline; calibrated LOW/MEDIUM/HIGH risk; exact TreeSHAP contributions |
+| **Investigations** | Case triage and deadlines, Gemini-powered read-only tools, deterministic fallback, cited verified facts, risk/counter-indicators, missing evidence, run history and tool traces |
+| **Evidence & recovery** | Private PDF/PNG/JPEG evidence, upload metadata and checksums, evidence checklist, downloadable case packets, notes and activity audit |
+| **Human approvals** | Claim/resolve review cases, independently review actions, prevent self-approval, preserve decision and execution states separately |
+| **Refund review** | Full/partial refund request preparation, independent approval, guarded ledger and reconciliation; financial execution off |
+| **Dispute Copilot** | Dispute context, evidence gaps, grounded response drafts, downloadable private draft PDFs; external submission off |
+| **Policy Lab** | Shadow threshold/cost/capacity simulations, baseline comparisons, confusion matrix, ROC/PR, calibration and financial-impact assumptions |
+| **Risk Monitoring** | Origin/time-window metrics, score distributions, shifts, missingness, case volumes, review capacity and outcomes |
+| **Relationship Explorer** | Merchant-scoped payer/payment/case network, provenance-backed connections and risk/time filters |
+| **Sandbox Checkout** | Merchant-priced catalogue, PayPal Sandbox buyer approval and capture, idempotency and reconciliation |
+| **Operations & integrations** | PayPal OAuth status, Supabase webhook inbox, worker heartbeat/readiness, reconciliation/scoring queues, role-based settings and audit log |
+| **Public experience** | Cinematic landing page, simulated interactive payment dossier, secure one-click read-only judge demo |
 
-# 2. API
-cd apps/api
-python -m venv .venv && .venv/bin/pip install -e ".[dev]"
-cp ../../.env.example .env          # fill in values; see below
-.venv/bin/alembic upgrade head
-SENTINEL_SEED_ADMIN_PASSWORD=... SENTINEL_SEED_ANALYST_PASSWORD=... SENTINEL_SEED_VIEWER_PASSWORD=... \
-  .venv/bin/python -m app.cli seed
-  .venv/bin/python -m app.cli demo-load   # optional: SYNTHETIC_DEMO history, scores and review cases
-.venv/bin/uvicorn app.main:app --reload --port 8000
-.venv/bin/python -m app.workers.events   # optional: webhook retry worker
+## Risk model and evaluation
 
-# 3. Web
-cd ../web && npm ci && npm run dev     # http://localhost:5173
+The **operational model is synthetic-trained**. Its dataset has **9,051 payments from 3,000 generated payers**, using **12 past-only features** (merchant/payer payment history and preceding refunds/disputes). Training uses a chronological **60/20/20 split**; selection compares rules, logistic regression, and XGBoost. The selected XGBoost model uses **Platt calibration** and **TreeSHAP** explanations.
+
+| Metric | Held-out synthetic test |
+| --- | ---: |
+| PR-AUC | 0.348 |
+| ROC-AUC | 0.841 |
+| Precision at selected threshold | 28.2% |
+| Recall at selected threshold | 61.5% |
+| Brier score | 0.033 |
+
+These are **offline synthetic test results**, not production fraud-prevention or recovered-revenue claims. The fixed validation threshold flagged 9.4% of a later test window despite an 8% validation review-capacity goal; monitoring and shadow policies exist partly to reveal such changes. Scores for Sandbox payments illustrate the pipeline, **not a calibrated real-world fraud probability**.
+
+See [ML methodology](docs/ML_METHODOLOGY.md) for split integrity, leakage controls, model comparison, reproducibility, and evaluation limitations.
+
+## Architecture
+
+```mermaid
+flowchart TD
+  PP[PayPal Sandbox API & webhooks] --> ED[Supabase Edge webhook receiver]
+  ED --> IN[(Private durable inbox)]
+  IN --> BR[Supervised bridge / retries / deduplication]
+  BR --> API[FastAPI application]
+  API <--> DB[(PostgreSQL 16)]
+  API --> ML[XGBoost + Platt + TreeSHAP]
+  ML --> CASE[HIGH-risk review case]
+  CASE --> AI[Gemini agent / read-only tools]
+  CASE --> EV[Private evidence + PDF packets]
+  AI --> HUMAN[Human review and approvals]
+  EV --> HUMAN
+  WEB[React + TypeScript web app] <--> API
+  API --> LAB[Policy Lab / monitoring / relationship graph]
 ```
 
-Sign in as `admin@northwind.example`, `analyst@northwind.example` or `viewer@northwind.example`
-with the passwords you seeded.
+| Layer | Technology |
+| --- | --- |
+| Frontend | React 19, TypeScript, Vite, Tailwind CSS, GSAP, React Query, AG Grid |
+| API and auth | Python 3.12+, FastAPI, SQLAlchemy, Pydantic, session cookies, CSRF, merchant-scoped RBAC |
+| Storage | PostgreSQL 16, Alembic migrations; private evidence/packet storage |
+| Risk model | XGBoost, NumPy, scikit-learn and SHAP in offline training/evaluation |
+| AI | Pydantic AI with Google Gemini in the verified hosted staging configuration |
+| Payments and events | PayPal REST Sandbox, Supabase Edge Functions/inbox and durable processing workers |
+| Hosting and QA | Render Docker staging, GitHub Actions, pytest, Vitest, Playwright |
 
-### PayPal sandbox vs offline mode
-- `SENTINEL_PAYPAL_MODE=sandbox` (default) needs `SENTINEL_PAYPAL_CLIENT_ID` and
-  `SENTINEL_PAYPAL_CLIENT_SECRET` from a PayPal Developer sandbox app. Checkout shows PayPal's
-  buttons; approve with a sandbox buyer account. Webhooks need a public HTTPS URL and
-  `SENTINEL_PAYPAL_WEBHOOK_ID`. Details: [`docs/PAYPAL_INTEGRATION.md`](docs/PAYPAL_INTEGRATION.md).
-- `SENTINEL_PAYPAL_MODE=fixture` runs fully offline. Orders and captures are created locally and
-  every one is labelled **Simulated**; nothing reaches PayPal.
+**Data provenance is explicit:** `LIVE_SANDBOX`, `SYNTHETIC_DEMO`, `SIMULATED`, and merchant-provided records are labelled rather than blended into a claim of genuine customer activity.
 
-### Investigation agent (optional)
-Set `SENTINEL_AI_PROVIDER=anthropic` (or `openai`), `SENTINEL_AI_API_KEY` and optionally
-`SENTINEL_AI_MODEL`. Without them, "Generate deterministic summary" produces a rule-based summary
-from stored records, labelled "Deterministic summary — AI provider unavailable". Evidence files are
-stored under `apps/api/var/storage` (or in PostgreSQL with `SENTINEL_STORAGE_BACKEND=database`).
-Design: [`docs/AGENT_DESIGN.md`](docs/AGENT_DESIGN.md).
+## Hosted staging verification
+
+As of **13 November 2026**, the deployed Render staging application has had the following verified or owner-confirmed checks:
+
+- **Render application and PostgreSQL:** deployed with healthy readiness responses.
+- **PayPal Sandbox:** hosted OAuth status displayed **OK**, with credentials and webhook ID configured.
+- **Gemini 3.1 Flash Lite:** a real hosted investigation completed with model-generated, grounded findings, citations, and seven recorded investigation tool calls.
+- **Supabase bridge:** hosted readiness checks passed; the owner also confirmed Sandbox webhook processing.
+- **Judge demo:** isolated synthetic viewer was prepared and the enabled release deployed successfully.
+
+These observations do **not** establish production eligibility, guaranteed availability, external provider certification, or real-money payment/refund functionality. The judge's **prebuilt deterministic** case is different from the **hosted Gemini** case demonstrated through an analyst session.
+
+## Run locally
+
+Prerequisites: **Python 3.12+**, **Node.js 24**, **PostgreSQL 16** (or Docker Desktop), and Git.
+
+### 1. Database
+
+From the repository root:
+
+```bash
+docker compose up -d --wait db
+```
+
+### 2. API
+
+```bash
+cd apps/api
+python -m venv .venv
+# Linux/macOS:
+.venv/bin/python -m pip install -e ".[dev]"
+cp ../../.env.example .env
+```
+
+On Windows PowerShell, use `py -3.12 -m venv .venv`, `.\.venv\Scripts\python.exe` instead of `.venv/bin/python`, and `Copy-Item ..\..\.env.example .env` instead of `cp`.
+
+Before starting, edit **`apps/api/.env`**:
+
+- Keep `SENTINEL_DATABASE_URL=postgresql+psycopg://sentinel:sentinel@127.0.0.1:5432/sentinel` for the example Docker database.
+- Set `SENTINEL_PAYPAL_MODE=fixture` for a safe local demo **without PayPal credentials**.
+- Set `SENTINEL_AI_PROVIDER=none` to use clearly labelled deterministic summaries.
+- Supply a noncommitted `SENTINEL_SEED_ADMIN_PASSWORD`, at least one strong unique password. Optionally supply separate analyst/viewer seed passwords.
+
+Then, from `apps/api`:
+
+```bash
+.venv/bin/alembic upgrade head
+.venv/bin/python -m app.cli seed
+.venv/bin/python -m app.cli demo-load --if-empty
+.venv/bin/uvicorn app.main:app --reload --port 8000
+```
+
+The synthetic scenario contains 9,051 payments; only its held-out portion is scored for the reproducible review demonstration. Seeded logins are `admin@northwind.example` and (if their passwords were set) `analyst@northwind.example` / `viewer@northwind.example`.
+
+### 3. Web app
+
+In another terminal:
+
+```bash
+cd apps/web
+npm ci
+npm run dev
+```
+
+Visit **http://localhost:5173**. The public homepage and simulated payment dossier do not require an account; the authenticated workspace uses the local seeded credentials. The one-click public judge-login flag is **off by default and restricted to the reviewed Render staging environment**.
+
+For intentional Sandbox and Gemini setup, use the separate [PayPal integration guide](docs/PAYPAL_INTEGRATION.md), [agent design](docs/AGENT_DESIGN.md), [provider staging activation](deploy/render-provider-activation.md), and [safe judge access](deploy/public-judge-demo.md). **Do not commit API keys or enable financial execution.**
 
 ## Tests
-See [`docs/TESTING.md`](docs/TESTING.md) for commands and the latest recorded results.
 
-## Documentation
-Product: [`PRODUCT_REQUIREMENTS`](docs/PRODUCT_REQUIREMENTS.md) · Architecture: [`ARCHITECTURE`](docs/ARCHITECTURE.md), [`DATABASE_SCHEMA`](docs/DATABASE_SCHEMA.md), [`decisions/`](docs/decisions) ·
-Research: [`REFERENCE_ANALYSIS`](docs/REFERENCE_ANALYSIS.md), [`RESOURCE_DECISIONS`](docs/RESOURCE_DECISIONS.md), [`BASELINE_COMPARISON`](docs/BASELINE_COMPARISON.md) ·
-[`SECURITY`](docs/SECURITY.md) · [`ML_METHODOLOGY`](docs/ML_METHODOLOGY.md) · [`AGENT_DESIGN`](docs/AGENT_DESIGN.md) · [`DEMO_SCRIPT`](docs/DEMO_SCRIPT.md)
+CI covers backend tests, model reproducibility, OpenAPI contract consistency, frontend type checking/lint/unit tests, and container/browser-specific workflows.
 
-## Licence
-Apache-2.0. Third-party licences are listed in `docs/RESOURCE_DECISIONS.md`.
+```bash
+# From apps/api
+.venv/bin/python -m pytest
+
+# From apps/web
+npm run typecheck
+npm run lint
+npm test
+npm run build
+```
+
+See [GitHub Actions](https://github.com/harshjha15335/SENTINEL-/actions) and [testing notes](docs/TESTING.md). Provider authentication and real webhook delivery are separate from offline unit tests.
+
+## Safety and limitations
+
+- **No PayPal production API mode.** Checkout is restricted to Sandbox or explicitly labelled fixture/simulated activity.
+- **No real-money recovery.** Refund execution and external dispute submission are disabled in staging; approval does not imply execution.
+- **Human-controlled decisions.** AI tools are read-only. Financial actions require separate authorization, and the demonstration viewer cannot perform them.
+- **Synthetic model training.** Scores and model metrics must not be marketed as validated for real customer fraud.
+- **Scoped access.** Sessions, CSRF, merchant isolation, rate limits, protected evidence, webhook verification/deduplication and auditable actions are part of the design.
+- **Staging-only TLS exception.** The approved Render internal PostgreSQL connection uses encrypted `sslmode=require` without server-identity verification. It is not a production security profile.
+
+## Project links and documentation
+
+- **Website:** https://sentinel-v2-staging.onrender.com/
+- **Architecture:** [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
+- **ML methodology:** [docs/ML_METHODOLOGY.md](docs/ML_METHODOLOGY.md)
+- **Webhook operations:** [docs/WEBHOOK_OPERATIONS.md](docs/WEBHOOK_OPERATIONS.md)
+- **Render integration runbook:** [deploy/render-provider-activation.md](deploy/render-provider-activation.md)
+- **Public judge experience:** [deploy/public-judge-demo.md](deploy/public-judge-demo.md)
+- **Security:** [docs/SECURITY.md](docs/SECURITY.md)
+
+Historical development reports under `docs/` document earlier blockers and may predate the current hosted Sandbox/Gemini staging deployment.
+
+## License
+
+[Apache-2.0](LICENSE). SENTINEL is an independent hackathon project; it is not an official PayPal fraud product or a PayPal production integration.
