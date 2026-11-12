@@ -51,6 +51,10 @@ export function TransactionsPage() {
     page,
     pageSize: PAGE_SIZE,
   });
+  const firstOrigin = q.data?.items[0]?.data_origin;
+  const uniformOrigin = firstOrigin && q.data?.items.every((item) => item.data_origin === firstOrigin)
+    ? firstOrigin
+    : null;
 
   const update = (patch: Record<string, string>) => {
     const next = new URLSearchParams(params);
@@ -65,14 +69,14 @@ export function TransactionsPage() {
   const columns = useMemo<ColDef<Transaction>[]>(
     () => [
       {
-        headerName: "PayPal order",
+        headerName: "Order reference",
         field: "paypal_order_id",
         minWidth: 170,
         cellClass: "font-mono text-xs",
         valueFormatter: (p) => p.value ?? "—",
       },
       {
-        headerName: "Capture",
+        headerName: "Capture reference",
         field: "paypal_capture_id",
         minWidth: 160,
         cellClass: "font-mono text-xs",
@@ -124,14 +128,24 @@ export function TransactionsPage() {
         headerName: "Origin",
         field: "data_origin",
         minWidth: 160,
+        hide: Boolean(uniformOrigin),
         cellRenderer: (p: ICellRendererParams<Transaction>) =>
-          p.data ? <OriginBadge origin={p.data.data_origin} /> : null,
+          p.data ? <OriginBadge origin={p.data.data_origin} compact /> : null,
       },
       {
         headerName: "Payment source",
         colId: "source",
-        minWidth: 130,
-        valueGetter: () => "PayPal",
+        minWidth: 150,
+        hide: Boolean(uniformOrigin),
+        valueGetter: (p) => {
+          switch (p.data?.data_origin) {
+            case "LIVE_SANDBOX": return "PayPal sandbox";
+            case "SIMULATED": return "Offline fixture";
+            case "SYNTHETIC_DEMO": return "Demo dataset";
+            case "MERCHANT_PROVIDED": return "Merchant provided";
+            default: return "Unknown";
+          }
+        },
       },
       {
         headerName: "Occurred",
@@ -144,7 +158,7 @@ export function TransactionsPage() {
         valueFormatter: (p) => formatDateTime(p.value as string | undefined),
       },
     ],
-    [],
+    [uniformOrigin],
   );
 
   const total = q.data?.total ?? 0;
@@ -154,7 +168,7 @@ export function TransactionsPage() {
     <>
       <PageHeader
         title="Transactions"
-        description="Every PayPal order SENTINEL has created or reconciled. Select a row to open its record."
+        description="Recorded payments and test scenarios. Sources are disclosed separately from verified PayPal sandbox events. Select a row to open its record."
       />
       <div className="workspace-toolbar">
         <form
@@ -200,6 +214,16 @@ export function TransactionsPage() {
       {q.isError && (
         <ErrorState error={q.error} onRetry={() => void q.refetch()} />
       )}
+      {uniformOrigin && (
+        <div className="workspace-provenance-summary" aria-label="Data source for listed transactions">
+          <OriginBadge origin={uniformOrigin} />
+          <span>
+            {uniformOrigin === "SYNTHETIC_DEMO"
+              ? "All transactions on this page come from the generated demo dataset, not the PayPal API."
+              : "All transactions on this page have this recorded origin."}
+          </span>
+        </div>
+      )}
       {q.data && q.data.total === 0 && !q.isFetching ? (
         <div className="workspace-list-empty">
           <EmptyState
@@ -217,7 +241,7 @@ export function TransactionsPage() {
               </Button>
             }
           >
-            Transactions appear once an order is created through PayPal.
+            Recorded transactions appear here once payment or demo records are available.
           </EmptyState>
         </div>
       ) : (
