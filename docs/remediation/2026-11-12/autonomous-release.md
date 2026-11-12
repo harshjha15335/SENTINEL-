@@ -1,3 +1,9 @@
+> Latest release authorization (12 November 2026): owner-verified Blueprint,
+> webhook and empty-Staging checks are accepted; remaining uninspected integrations
+> are acknowledged residual risk. Earlier blanket H02 publication blocks below are
+> historical and superseded by docs/remediation/2026-11-12/owner-release-evidence.md.
+> Current CI/Docker/source-preservation and billing/plan gates still apply.
+
 # Autonomous release authorization and unresolved gates — 12 November 2026
 
 The uploaded end-to-end execution prompt explicitly authorizes safe local repairs,
