@@ -102,4 +102,3 @@ def test_scoring_job_reuses_existing_capture_assessment(db, tenant):
         select(RiskAssessment).where(RiskAssessment.transaction_id == txn.id)
     ).all()
     assert len(assessments) == 1
-

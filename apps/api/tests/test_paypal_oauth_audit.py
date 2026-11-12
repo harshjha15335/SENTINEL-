@@ -87,9 +87,7 @@ def test_5_response_parsing_and_token_caching():
             },
         )
 
-    gw = SandboxPayPalGateway(
-        "cid", "secret", transport=httpx.MockTransport(mock_handler)
-    )
+    gw = SandboxPayPalGateway("cid", "secret", transport=httpx.MockTransport(mock_handler))
 
     t1 = gw._access_token()
     t2 = gw._access_token()
@@ -118,9 +116,7 @@ def test_6_and_7_401_error_classification_and_secret_redaction(caplog):
             headers={"paypal-debug-id": "paypal-dbg-401-abc"},
         )
 
-    gw = SandboxPayPalGateway(
-        "client_id", secret, transport=httpx.MockTransport(fail_401)
-    )
+    gw = SandboxPayPalGateway("client_id", secret, transport=httpx.MockTransport(fail_401))
 
     with caplog.at_level(logging.DEBUG), pytest.raises(PayPalError) as exc_info:
         gw.check_credentials()
@@ -180,4 +176,3 @@ def test_8_no_accidental_retries_on_token_failure():
         gw_net._access_token()
     assert exc.value.kind == PayPalErrorKind.NETWORK
     assert net_attempts == 1, "Network errors on OAuth token request must not retry"
-

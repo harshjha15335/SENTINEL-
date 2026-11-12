@@ -12,6 +12,7 @@ from sqlalchemy.orm import Session
 from app.auth.deps import Principal, any_member, operator
 from app.core.config import get_settings
 from app.core.errors import ConflictError
+from app.core.uploads import EvidenceUploadRoute
 from app.db.session import get_db
 from app.models import ApprovalRequest, EvidenceArtifact, EvidencePacket, InvestigationRun
 from app.models.enums import (
@@ -45,6 +46,10 @@ from app.services.investigation.toolbox import evidence_checklist
 
 router = APIRouter(tags=["investigations"])
 case_router = APIRouter(prefix="/cases/{case_id}", tags=["investigations"])
+
+upload_router = APIRouter(
+    prefix="/cases/{case_id}", tags=["investigations"], route_class=EvidenceUploadRoute
+)
 
 AI_LABEL = "AI-generated analysis"
 
@@ -181,7 +186,12 @@ def get_findings(
 # -- evidence ---------------------------------------------------------------------------------
 
 
-@case_router.post("/evidence", response_model=EvidenceOut, status_code=201)
+@upload_router.post(
+    "/evidence",
+    response_model=EvidenceOut,
+    status_code=201,
+    responses={413: {"description": "Evidence request or file exceeds the configured size limit"}},
+)
 def upload_evidence(
     case_id: uuid.UUID,
     file: UploadFile = File(...),
@@ -339,3 +349,4 @@ def reject(
 
 
 router.include_router(case_router)
+router.include_router(upload_router)

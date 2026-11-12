@@ -183,3 +183,44 @@ def test_readiness_gate_slow_startup_recovery(mock_server):
         expected_revision="d105a4143283",
     )
     assert ready is True
+
+
+@pytest.mark.parametrize(
+    "fixture_opt_in,mode,bridge_state,expected",
+    [
+        (True, "fixture", "not_required_fixture_mode", True),
+        (False, "fixture", "not_required_fixture_mode", False),
+        (True, "sandbox", "not_required_fixture_mode", False),
+        (True, "fixture", "not_ready", False),
+    ],
+)
+def test_explicit_fixture_gate_never_exempts_sandbox_or_failed_bridge(
+    monkeypatch, fixture_opt_in, mode, bridge_state, expected
+):
+    monkeypatch.setattr(wait_for_readiness, "check_tcp_port", lambda *a, **k: True)
+    checks = {
+        "database": "ok",
+        "schema": "ok",
+        "pipeline": "ok",
+        "supabase_bridge": bridge_state,
+        "paypal_mode": mode,
+        "supabase_configuration": "absent",
+    }
+
+    def response(url, **kwargs):
+        return (
+            (200, {"status": "ok"})
+            if url.endswith("/health")
+            else (200, {"status": "ready", "checks": checks})
+        )
+
+    monkeypatch.setattr(wait_for_readiness, "http_get_json", response)
+    assert (
+        wait_for_readiness.wait_until_ready(
+            timeout_seconds=0.05,
+            interval_seconds=0.01,
+            require_workers=True,
+            fixture_only=fixture_opt_in,
+        )
+        is expected
+    )

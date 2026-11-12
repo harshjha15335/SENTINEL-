@@ -115,7 +115,9 @@ def test_committed_artifact_is_reproducible(tmp_path: Path) -> None:
         assert cal["a"] == pytest.approx(ref["a"], rel=1e-2)
         assert cal["b"] == pytest.approx(ref["b"], rel=1e-2)
         for band in ("high", "medium"):
-            assert meta["thresholds"][band] == pytest.approx(committed["thresholds"][band], abs=5e-3)
+            assert meta["thresholds"][band] == pytest.approx(
+                committed["thresholds"][band], abs=5e-3
+            )
         assert meta["test_metrics"]["pr_auc"] == pytest.approx(
             committed["test_metrics"]["pr_auc"], abs=1e-3
         )
@@ -125,7 +127,9 @@ def test_committed_artifact_is_reproducible(tmp_path: Path) -> None:
         assert cal["a"] == pytest.approx(ref["a"], rel=0.05)
         assert cal["b"] == pytest.approx(ref["b"], rel=0.05)
         for band in ("high", "medium"):
-            assert meta["thresholds"][band] == pytest.approx(committed["thresholds"][band], abs=0.02)
+            assert meta["thresholds"][band] == pytest.approx(
+                committed["thresholds"][band], abs=0.02
+            )
         assert meta["test_metrics"]["pr_auc"] == pytest.approx(
             committed["test_metrics"]["pr_auc"], abs=0.01
         )

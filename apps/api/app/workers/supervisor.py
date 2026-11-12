@@ -9,6 +9,7 @@ from ipaddress import IPv4Network, IPv6Network, collapse_addresses, ip_network
 from pathlib import Path
 
 from app.core.config import get_settings
+from app.services.worker_health import heartbeat
 
 
 def forwarded_allow_ips(value: str, *, hosted: bool) -> str:
@@ -50,7 +51,10 @@ def main() -> None:
         ],
         [sys.executable, "-m", "app.workers.pipeline"],
     ]
-    if os.environ.get("SENTINEL_SUPABASE_URL"):
+    if settings.require_workers_ready and not settings.worker_configuration_ready:
+        raise SystemExit("Required Supabase integration is not configured")
+    if settings.supabase_configured:
+        heartbeat("supabase_bridge", "STARTING")
         commands.append([sys.executable, "-m", "app.workers.supabase_inbox"])
     children: list[subprocess.Popen[bytes]] = []
     stopping = False
@@ -73,6 +77,12 @@ def main() -> None:
         while not stopping:
             for i, child in enumerate(children):
                 if child.poll() is not None:
+                    if i:
+                        heartbeat(
+                            "pipeline" if i == 1 else "supabase_bridge",
+                            "DEGRADED",
+                            failure="ProcessExited",
+                        )
                     failures[i] += 1
                     if failures[i] >= 5:
                         raise SystemExit("Worker restart budget exhausted")

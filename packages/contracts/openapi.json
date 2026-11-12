@@ -5714,6 +5714,9 @@
             },
             "description": "Successful Response"
           },
+          "413": {
+            "description": "Evidence request or file exceeds the configured size limit"
+          },
           "422": {
             "content": {
               "application/json": {
@@ -6971,6 +6974,55 @@
         ]
       }
     },
+    "/api/v1/paypal/cancel": {
+      "get": {
+        "operationId": "checkout_cancel_api_v1_paypal_cancel_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "token",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Token"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "text/html": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Checkout Cancel",
+        "tags": [
+          "paypal"
+        ]
+      }
+    },
     "/api/v1/paypal/orders": {
       "post": {
         "operationId": "create_order_api_v1_paypal_orders_post",
@@ -7060,6 +7112,71 @@
           }
         },
         "summary": "Capture Order",
+        "tags": [
+          "paypal"
+        ]
+      }
+    },
+    "/api/v1/paypal/return": {
+      "get": {
+        "operationId": "checkout_return_api_v1_paypal_return_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "token",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Token"
+            }
+          },
+          {
+            "in": "query",
+            "name": "PayerID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Payerid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "text/html": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Checkout Return",
         "tags": [
           "paypal"
         ]

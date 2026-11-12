@@ -6,47 +6,47 @@
 @import "tailwindcss";
 
 @theme {
-  --font-sans: "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "DM Sans", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", monospace;
 
-  /* Surfaces (ink) */
-  --color-canvas: #0a0f14;
-  --color-surface: #0f161e;
-  --color-raised: #141d27;
-  --color-sunken: #0b1117;
-  --color-line: #1f2a37;
-  --color-line-strong: #2c3a4b;
+  /* Approved warm editorial surfaces */
+  --color-canvas: #f7f4ee;
+  --color-surface: #ffffff;
+  --color-raised: #efebf5;
+  --color-sunken: #f5f1f8;
+  --color-line: #ded7e5;
+  --color-line-strong: #c8bdda;
 
   /* Foreground */
-  --color-fg: #e6ebf1;
-  --color-fg-muted: #a7b2bf;
-  --color-fg-subtle: #8593a3;
+  --color-fg: #201a2b;
+  --color-fg-muted: #686273;
+  --color-fg-subtle: #686273;
 
-  /* Accent: controlled blue */
-  --color-accent: #5b9bf0;
-  --color-accent-strong: #2b67c6;
-  --color-accent-soft: #15253a;
+  /* Purple brand accent; coral is reserved for narrative emphasis. */
+  --color-accent: #6135c9;
+  --color-accent-strong: #7547eb;
+  --color-accent-soft: #e9e0ff;
 
   /* Status: used only for their meaning */
-  --color-positive: #3fb884;
-  --color-positive-soft: #0f2a20;
-  --color-warning: #e2a33b;
-  --color-warning-soft: #2e2311;
-  --color-critical: #ec6a60;
-  --color-critical-soft: #331615;
+  --color-positive: #15745e;
+  --color-positive-soft: #e3f1eb;
+  --color-warning: #986000;
+  --color-warning-soft: #fff0d7;
+  --color-critical: #c33145;
+  --color-critical-soft: #fceef0;
 
   /* Provenance */
-  --color-origin-sandbox: #5b9bf0;
-  --color-origin-simulated: #e2a33b;
-  --color-origin-synthetic: #4fb3bf;
-  --color-origin-merchant: #a7b2bf;
+  --color-origin-sandbox: #6135c9;
+  --color-origin-simulated: #986000;
+  --color-origin-synthetic: #246c78;
+  --color-origin-merchant: #686273;
 
-  --radius-sm: 4px;
-  --radius-md: 6px;
-  --radius-lg: 10px;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 20px;
 
-  --shadow-raised: 0 1px 0 0 rgb(255 255 255 / 0.03) inset, 0 8px 24px -12px rgb(0 0 0 / 0.6);
-  --shadow-overlay: 0 24px 64px -16px rgb(0 0 0 / 0.75);
+  --shadow-raised: 0 8px 30px -18px rgb(32 26 43 / 0.12);
+  --shadow-overlay: 0 20px 55px -20px rgb(32 26 43 / 0.18);
 
   --ease-standard: cubic-bezier(0.2, 0, 0, 1);
   --duration-fast: 120ms;

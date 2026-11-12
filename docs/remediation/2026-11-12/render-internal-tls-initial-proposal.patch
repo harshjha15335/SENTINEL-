@@ -1,0 +1,104 @@
+--- a/apps/api/app/core/config.py
++++ b/apps/api/app/core/config.py
+@@ -8,6 +8,7 @@
+ from enum import StrEnum
+ from functools import lru_cache
+ from ipaddress import ip_address
++from typing import Literal
+ from urllib.parse import urlsplit
+ from uuid import UUID
+
+@@ -125,6 +126,10 @@
+     hosted_deployment: bool = False
+     database_url: str = "postgresql+psycopg://sentinel:sentinel@127.0.0.1:5432/sentinel"
+     database_ssl_root_cert: str | None = None
++    # Inert until explicitly approved; no Blueprint enables this proposed exception.
++    database_tls_policy: Literal["verify_full", "render_internal_staging"] = "verify_full"
++    render_internal_tls_reviewed_host: str | None = None
++    deployment_stage: str | None = None
+     cors_origins: list[str] = Field(default_factory=lambda: ["http://localhost:5173"])
+     cookie_secure: bool = False
+     session_ttl_minutes: int = 8 * 60
+--- a/apps/api/app/db/session.py
++++ b/apps/api/app/db/session.py
+@@ -1,9 +1,11 @@
++import re
+ import ssl
+ from collections.abc import Iterator
+ from functools import lru_cache
+ from pathlib import Path
+
+ from sqlalchemy import Engine, create_engine
++from sqlalchemy.engine import make_url
+ from sqlalchemy.orm import Session, sessionmaker
+
+ from app.core.config import Settings, get_settings
+@@ -15,6 +17,34 @@
+     Explicit connect arguments override any weaker sslmode in a provider-issued URL.
+     Development loopback databases retain their existing configuration.
+     """
++    if settings.database_tls_policy == "render_internal_staging":
++        destination = make_url(settings.database_url)
++        host = destination.host or ""
++        # Owner must authenticate this exact binding and accept encrypted-only
++        # TLS: require does NOT authenticate the server's certificate/hostname.
++        allowed = (
++            settings.hosted_deployment
++            and settings.environment == "production"
++            and settings.deployment_stage == "staging"
++            and settings.paypal_mode.value == "fixture"
++            and settings.ai_provider.value == "none"
++            and not settings.supabase_configured
++            and not settings.refund_execution_enabled
++            and settings.cookie_secure
++            and settings.require_workers_ready
++            and settings.database_ssl_root_cert is None
++            and destination.drivername == "postgresql+psycopg"
++            and host == settings.render_internal_tls_reviewed_host
++            and re.fullmatch(r"dpg-[a-z0-9]+(?:-[a-z0-9]+)*", host) is not None
++            and destination.port in (None, 5432)
++            and destination.database == "sentinel_staging"
++            and destination.username == "sentinel_staging"
++            and set(destination.query).issubset({"sslmode"})
++            and destination.query.get("sslmode", "require") == "require"
++        )
++        if not allowed:
++            raise RuntimeError("Unapproved Render internal staging TLS scope")
++        return {"sslmode": "require"}
+     if not settings.hosted_deployment:
+         return {}
+     root = settings.database_ssl_root_cert or ssl.get_default_verify_paths().cafile
+--- a/render.yaml
++++ b/render.yaml
+@@ -36,6 +36,14 @@
+                 fromDatabase:
+                   name: sentinel-v2-staging-db
+                   property: connectionString
++              # Enable only after explicit owner approval of encrypted-only TLS
++              # and authenticated review of the actual internal database host.
++              - key: SENTINEL_DATABASE_TLS_POLICY
++                value: render_internal_staging
++              - key: SENTINEL_DEPLOYMENT_STAGE
++                value: staging
++              - key: SENTINEL_RENDER_INTERNAL_TLS_REVIEWED_HOST
++                sync: false
+               - key: SENTINEL_STORAGE_BACKEND
+                 value: database
+               - key: SENTINEL_COOKIE_SECURE
+--- a/deploy/render-staging.yaml
++++ b/deploy/render-staging.yaml
+@@ -35,6 +35,14 @@
+                 fromDatabase:
+                   name: sentinel-v2-staging-db
+                   property: connectionString
++              # Enable only after explicit owner approval of encrypted-only TLS
++              # and authenticated review of the actual internal database host.
++              - key: SENTINEL_DATABASE_TLS_POLICY
++                value: render_internal_staging
++              - key: SENTINEL_DEPLOYMENT_STAGE
++                value: staging
++              - key: SENTINEL_RENDER_INTERNAL_TLS_REVIEWED_HOST
++                sync: false
+               - key: SENTINEL_STORAGE_BACKEND
+                 value: database
+               - key: SENTINEL_COOKIE_SECURE
