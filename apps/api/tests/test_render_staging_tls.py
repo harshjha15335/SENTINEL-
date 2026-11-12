@@ -75,13 +75,6 @@ def test_approved_scope_pins_identity_and_requires_tls():
             "paypal_cancel_url": "https://example.com/cancel",
         },
         {"ai_provider": "google"},
-        {"ai_api_key": "OFFLINE_ONLY"},
-        {"paypal_client_id": "OFFLINE_ID", "paypal_client_secret": "OFFLINE_SECRET"},
-        {"paypal_webhook_id": "OFFLINE_WEBHOOK"},
-        {
-            "supabase_url": "https://offline.supabase.co",
-            "supabase_service_role_key": "OFFLINE_ONLY",
-        },
         {"refund_execution_enabled": True},
         {"allow_webhook_fixtures": True},
         {"cookie_secure": False},
@@ -94,6 +87,54 @@ def test_approved_scope_pins_identity_and_requires_tls():
 def test_exception_rejects_incompatible_profiles(changes):
     with pytest.raises(ValidationError):
         settings(**changes)
+
+
+def test_saved_provider_credentials_remain_dormant_in_render_fixture_staging():
+    """Provisioning secret pairs must never start PayPal/Gemini/bridge traffic."""
+    config = settings(
+        paypal_client_id="OFFLINE_CLIENT",
+        paypal_client_secret="OFFLINE_SECRET",
+        paypal_webhook_id="OFFLINE_WEBHOOK",
+        paypal_return_url="https://sentinel-v2-staging.onrender.com/api/v1/paypal/return",
+        paypal_cancel_url="https://sentinel-v2-staging.onrender.com/api/v1/paypal/cancel",
+        ai_api_key="OFFLINE_AI_KEY",
+        ai_model="gemini-3.1-flash-lite",
+        supabase_url="https://offline.supabase.co",
+        supabase_service_role_key="OFFLINE_ROLE",
+    )
+    # Existing exact URL/host/TLS protections are unchanged.
+    assert session.database_connect_args(config)["sslmode"] == "require"
+    assert config.paypal_mode.value == "fixture"
+    assert config.ai_provider.value == "none"
+    assert config.paypal_credentials_configured
+    assert config.supabase_configured
+    assert not config.bridge_required
+    assert config.worker_configuration_ready
+
+
+@pytest.mark.parametrize(
+    "override",
+    [
+        {
+            "paypal_mode": "sandbox",
+            "paypal_return_url": "https://sentinel-v2-staging.onrender.com/api/v1/paypal/return",
+            "paypal_cancel_url": "https://sentinel-v2-staging.onrender.com/api/v1/paypal/cancel",
+        },
+        {"ai_provider": "google", "ai_api_key": "OFFLINE_AI_KEY"},
+        {
+            "paypal_mode": "sandbox",
+            "paypal_client_id": "OFFLINE_CLIENT",
+            "paypal_client_secret": "OFFLINE_SECRET",
+            "paypal_return_url": "https://sentinel-v2-staging.onrender.com/api/v1/paypal/return",
+            "paypal_cancel_url": "https://sentinel-v2-staging.onrender.com/api/v1/paypal/cancel",
+            "supabase_url": "https://offline.supabase.co",
+            "supabase_service_role_key": "OFFLINE_ROLE",
+        },
+    ],
+)
+def test_saved_credentials_do_not_authorize_integrated_mode(override):
+    with pytest.raises(ValidationError, match="Unapproved Render"):
+        settings(**override)
 
 
 @pytest.mark.parametrize(

@@ -34,8 +34,9 @@ selected as render_internal_staging and passes all of these gates:
 
 - Hosted production SECURITY profile, separate deployment_stage=staging.
 - Exact approved project prj-dbq48lon74is739m7nl0 and workspace tea-d8gorhflk1mc73f4pmr0.
-- Fixture PayPal, AI none, no PayPal/AI/webhook credentials, no configured Supabase,
-  no real refunds and no fixture webhook ingress.
+- Fixture PayPal and AI provider `none`; any previously saved PayPal, Gemini and
+  Supabase secrets remain dormant and do not activate a provider or bridge worker.
+  No real refunds and no fixture webhook ingress.
 - Secure cookies, database evidence storage and mandatory worker readiness.
 - Exact owner-reviewed short dpg-* internal host, database/user sentinel_staging,
   port 5432, nonempty managed password, no CA override or URL query redirects.
@@ -47,7 +48,12 @@ The effective migration URL is validated, including Alembic's context override.
 Host/port/database/user/password are explicitly pinned in connect_args, sslmode is
 require and gssencmode is disable to mandate TLS rather than plaintext fallback or
 another negotiation. Production stage, wrong IDs, provider-enabled settings and
-unexpected endpoints fail closed before connection. Configuration errors suppress
+unexpected endpoints fail closed before connection. Saved credentials in fixture mode
+are NOT permission to start real integration traffic. The Supabase bridge is dormant
+only in the exact approved hosted-staging fixture profile; other environments
+retain their prior configured-bridge requirements. A sandbox/Google switch still
+fails closed under this policy until an operator explicitly approves a separately
+reviewed authenticated-provider connection plan and its internal TLS risk. Configuration errors suppress
 input values so a failed guard does not print database passwords.
 
 `require` encrypts but DOES NOT authenticate the server certificate or hostname.

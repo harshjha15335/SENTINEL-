@@ -129,6 +129,7 @@ class Settings(BaseSettings):
     database_url: str = "postgresql+psycopg://sentinel:sentinel@127.0.0.1:5432/sentinel"
     database_ssl_root_cert: str | None = None
     # Owner-approved synthetic Render staging only; actual host review is still required.
+    # Credentials may be provisioned in fixture mode but MUST remain dormant.
     database_tls_policy: Literal["verify_full", "render_internal_staging"] = "verify_full"
     render_internal_tls_reviewed_host: str | None = None
     deployment_stage: str | None = None
@@ -167,8 +168,10 @@ class Settings(BaseSettings):
     # Local-only deterministic webhook ingress. Never enabled in production.
     allow_webhook_fixtures: bool = False
     require_workers_ready: bool = False
-    # A configured bridge is mandatory even in fixture mode; absence is intentional
-    # only for fixture-only installations. Secrets never appear in health output.
+    # Ordinary fixture installations can poll a configured Supabase bridge. However,
+    # hosted Render synthetic staging explicitly keeps a staged credential dormant
+    # until a separately approved sandbox/TLS profile activates integration workers.
+    # Secrets never appear in health output.
     supabase_url: str | None = None
     supabase_service_role_key: SecretStr | None = None
     # Global inbox aggregates are visible only to this installation operator's merchant.
@@ -333,10 +336,8 @@ class Settings(BaseSettings):
                 and self.render_workspace_id == "tea-d8gorhflk1mc73f4pmr0"
                 and self.paypal_mode is PayPalMode.FIXTURE
                 and self.ai_provider is AIProvider.NONE
-                and self.ai_api_key is None
-                and not self.paypal_credentials_configured
-                and not self.paypal_webhook_id
-                and not self.supabase_configured
+                # Saved secrets are allowed ONLY when no provider can use them:
+                # fixture mode, AI provider none and dormant staging bridge.
                 and not self.refund_execution_enabled
                 and not self.allow_webhook_fixtures
                 and self.cookie_secure
@@ -391,6 +392,16 @@ class Settings(BaseSettings):
 
     @property
     def bridge_required(self) -> bool:
+        # Saving a Supabase service-role key must never silently begin ingestion
+        # on owner-approved synthetic-only Render staging. Activation must be an
+        # explicit sandbox switch after a separately reviewed TLS policy.
+        if (
+            self.hosted_deployment
+            and self.deployment_stage == "staging"
+            and self.paypal_mode is PayPalMode.FIXTURE
+            and self.ai_provider is AIProvider.NONE
+        ):
+            return False
         return self.paypal_mode is PayPalMode.SANDBOX or self.supabase_configured
 
     @property

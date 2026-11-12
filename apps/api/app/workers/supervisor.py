@@ -53,7 +53,7 @@ def main() -> None:
     ]
     if settings.require_workers_ready and not settings.worker_configuration_ready:
         raise SystemExit("Required Supabase integration is not configured")
-    if settings.supabase_configured:
+    if settings.bridge_required and settings.supabase_configured:
         heartbeat("supabase_bridge", "STARTING")
         commands.append([sys.executable, "-m", "app.workers.supabase_inbox"])
     children: list[subprocess.Popen[bytes]] = []
