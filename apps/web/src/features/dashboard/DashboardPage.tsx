@@ -4,7 +4,6 @@ import { Link } from "react-router-dom";
 
 import { PageHeader } from "@/components/layout/PageHeader";
 import { useCases } from "@/features/cases/useCases";
-import { Badge } from "@/components/ui/Badge";
 import { OriginBadge } from "@/components/ui/OriginBadge";
 import { Panel } from "@/components/ui/Panel";
 import { EmptyState, ErrorState, Skeleton } from "@/components/ui/States";
@@ -22,7 +21,7 @@ export function DashboardPage() {
     <>
       <PageHeader
         title="Command Center"
-        description="Payment activity recorded by SENTINEL. Totals are split by data origin; sandbox and simulated money are never added together."
+        description="Investigate unusual payments, review the evidence, and document decisions. Sandbox and simulated activity are reported separately."
       />
       {q.isError && (
         <ErrorState error={q.error} onRetry={() => void q.refetch()} />
@@ -322,10 +321,10 @@ function DecisionDesk() {
   const first = q.data?.items[0];
   return (
     <section className="command-review-desk">
-      <p className="workspace-kicker">START WITH THE EXCEPTIONS</p>
-      <h2>Know what needs attention.</h2>
+      <p className="workspace-kicker">HIGH-PRIORITY REVIEW QUEUE</p>
+      <h2>Investigate flagged payments.</h2>
       <p className="command-desk-caption">
-        New high-priority cases requiring a decision.
+        Review the signals behind each case before recording a decision.
       </p>
       {q.isPending && <Skeleton className="h-48" />}
       {q.isError && (
@@ -333,9 +332,10 @@ function DecisionDesk() {
       )}
       {q.data && (
         <>
-          <p className="workspace-kicker">
-            {q.data.total} OPEN HIGH-PRIORITY CASES
-          </p>
+          <div className="command-queue-summary" aria-label={`${q.data.total} open high-priority review cases`}>
+            <strong className="tabular">{q.data.total.toLocaleString()}</strong>
+            <span>open high-priority cases</span>
+          </div>
           {first ? (
             <>
               <div className="command-focus">
@@ -357,7 +357,7 @@ function DecisionDesk() {
                   className="command-review-button"
                   to={`/app/cases/${first.id}`}
                 >
-                  Review the case <ArrowRight size={18} />
+                  Investigate this case <ArrowRight size={18} />
                 </Link>
               </div>
               <ol className="command-short-queue">
@@ -387,9 +387,8 @@ function DecisionDesk() {
             </EmptyState>
           )}
           <Link to="/app/cases" className="command-all-cases">
-            Open the complete review queue <ArrowRight size={16} />
+            View all open cases <ArrowRight size={16} />
           </Link>
-          <Badge>Merchant review queue</Badge>
         </>
       )}
     </section>
