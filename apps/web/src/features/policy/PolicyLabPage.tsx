@@ -456,7 +456,9 @@ function Chart({
     }
     let best = 0;
     for (let index = 1; index < validPoints.length; index++) {
-      if (Math.abs(validPoints[index]!.x - relativeX) < Math.abs(validPoints[best]!.x - relativeX)) best = index;
+      const candidate = validPoints[index];
+      const incumbent = validPoints[best];
+      if (candidate && incumbent && Math.abs(candidate.x - relativeX) < Math.abs(incumbent.x - relativeX)) best = index;
     }
     setHoverIndex(best);
   };
