@@ -17,6 +17,8 @@ jobs:
       - uses: actions/checkout@v4
         with:
           persist-credentials: false
+      - name: Verify container acceptance HTTP probes
+        run: python3 -m unittest discover -s scripts/tests -v
       - name: Build exact checkout and verify isolated synthetic staging
         env:
           EXPECTED_SHA: ${{ github.sha }}

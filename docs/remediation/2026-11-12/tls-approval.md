@@ -1,6 +1,11 @@
 # Approved synthetic Render staging TLS policy — 12 November 2026
 
-The owner explicitly approved proceeding with the narrowly scoped internal PostgreSQL
+Authorization update: the subsequent autonomous release prompt conditionally
+supersedes the original no-publication/no-deployment restriction. H02, exact-source
+Docker/CI, reviewed plan and verified credit/budget gates still apply. No new TLS
+policy exception is authorized or needed. See autonomous-release.md.
+
+Original record: the owner explicitly approved proceeding with the narrowly scoped internal PostgreSQL
 TLS exception in the uploaded instruction titled “Approve Scoped Render Staging TLS
 and Finalize Merge Candidate.” This is security-policy approval only, not approval to
 publish, merge, create/apply a Blueprint, provision services or spend credits.

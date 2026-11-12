@@ -18,6 +18,7 @@ import subprocess
 import tempfile
 import time
 import uuid
+from http.client import HTTPConnection, HTTPException
 from http.cookies import SimpleCookie
 from pathlib import Path
 
@@ -38,7 +39,30 @@ def _execute(args, **kwargs):
         "DOCKER_CERT_PATH",
     ):
         environment.pop(key, None)
-    return subprocess.run(args, env=environment, **kwargs)
+    return subprocess.run(
+        args, env=environment, check=kwargs.pop("check", False), **kwargs
+    )
+
+
+def fixture_http(
+    port: int, path: str, payload: dict | None = None, cookie: str | None = None
+):
+    """Probe only the fixture's published loopback port; preserve failure responses."""
+    connection = HTTPConnection("127.0.0.1", port, timeout=5)
+    headers = {"Content-Type": "application/json"}
+    if cookie:
+        headers["Cookie"] = cookie
+    try:
+        connection.request(
+            "POST" if payload is not None else "GET",
+            path,
+            body=json.dumps(payload) if payload is not None else None,
+            headers=headers,
+        )
+        response = connection.getresponse()
+        return response.status, response.getheaders(), response.read()
+    finally:
+        connection.close()
 
 
 def main() -> int:
@@ -419,21 +443,7 @@ def main() -> int:
             )
 
             def http(path: str, payload: dict | None = None, cookie: str | None = None):
-                connection = http.client.HTTPConnection("127.0.0.1", port, timeout=5)
-                headers = {"Content-Type": "application/json"}
-                if cookie:
-                    headers["Cookie"] = cookie
-                connection.request(
-                    "POST" if payload else "GET",
-                    path,
-                    body=json.dumps(payload) if payload else None,
-                    headers=headers,
-                )
-                response = connection.getresponse()
-                data = response.read()
-                result = (response.status, response.getheaders(), data)
-                connection.close()
-                return result
+                return fixture_http(port, path, payload, cookie)
 
             def ready():
                 for _ in range(120):
@@ -449,7 +459,7 @@ def main() -> int:
                             ):
                                 raise RuntimeError("unexpected readiness contract")
                             return checks
-                    except (OSError, http.client.HTTPException):
+                    except (OSError, HTTPException):
                         pass
                     time.sleep(1)
                 raise RuntimeError("fixture readiness timed out")
@@ -540,7 +550,7 @@ def main() -> int:
                 crashRecovery=True,
                 restart=True,
             )
-    except Exception as error:
+    except Exception as error:  # noqa: BLE001 - retain failure and clean owned fixtures
         summary.update(
             passed=False, failureType=type(error).__name__, failure=str(error)
         )

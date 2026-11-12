@@ -1,3 +1,22 @@
+## Autonomous release follow-up — 12 November 2026
+
+The latest owner instruction conditionally authorizes publication, reviewed merges
+and Render-only staging within verified eligible credits. Earlier blanket pending-
+approval statements below are historical; H02, exact-source Docker/CI and billing/
+plan prerequisites remain mandatory. No publication, merge or provisioning occurred.
+
+Fixed a confirmed defect in the prepared container acceptance runner: its local
+`http` function shadowed the module used for HTTP connections and error handling.
+The runner now uses explicitly imported HTTPConnection/HTTPException and a tested
+loopback probe; four new regression cases run before Docker in the CI gate. Existing
+application/runtime source, UI, models, contracts, dependencies and migration revisions
+are unchanged by this follow-up. Full regression rerun evidence is recorded in the
+external autonomous-release report. Full Docker acceptance remains unexecuted because
+local capacity is insufficient and H02 prevents safe publication to run GitHub CI.
+
+See docs/remediation/2026-11-12/autonomous-release.md for the precise owner evidence,
+updated authorization, same-Blueprint sequence and budget/stop prerequisites.
+
 # Scoped Render TLS approval and merge candidate — 12 November 2026 (Asia/Calcutta)
 
 Owner approved only synthetic Render staging's encrypted-only TLS policy; no publication, merge, provisioning or spending approval. Starting 268adacaa0958a7bb5df6cdc576ee2d8e77bbfae is preserved at backup/render-tls-268adac. Applied/hardened policy: default hosted verify-full unchanged; exception requires approved staging/project/workspace tuple, exact reviewed internal host/user/database, secure fixture/no-provider profile, no connection redirects or ambient libpq overrides. Effective Alembic URLs are validated and connection identity/TLS explicitly pinned. Configuration errors suppress input secrets. Actual resource identity still requires owner review when resources exist; require does not authenticate the server certificate.

@@ -1,8 +1,14 @@
 # SENTINEL V2 — Approved Render synthetic staging TLS handoff
 
-Review: 12 November 2026 (Asia/Calcutta). Local work only. The owner approved the
-narrow staging TLS policy, NOT publication, merge, Blueprint creation/application,
-resource provisioning, real payment operations, paid AI or credit spending.
+Current authorization: the owner's later “AUTONOMOUS FINAL INTEGRATION, REMEDIATION,
+MAIN MERGE & RENDER DEPLOYMENT” prompt conditionally authorizes branch publication,
+reviewed merges and Render staging provisioning. Routine reconfirmation is not
+required. Publication still requires H02 evidence; main requires passing exact-source
+Docker/CI acceptance; provisioning requires verified eligible credits, an unambiguous
+reviewed plan and reliable budget controls. These gates remain unresolved. Genuine
+payments, paid AI, out-of-pocket charges and unrelated resource mutations are excluded.
+The earlier narrower TLS authorization remains historical below; it no longer defines
+the entire action scope. See docs/remediation/2026-11-12/autonomous-release.md.
 
 ## Source and approval
 
@@ -130,7 +136,7 @@ The reproducible entrypoint is:
 The script/workflow pass syntax/lint/static YAML checks. Full container acceptance
 is NOT executed locally or remotely. A PR can build GitHub's merge SHA; review the
 reported exact SHA, not just the branch label. A fresh passing container job is a
-merge gate after safe, explicitly approved publication. Do not dispatch the legacy
+merge gate after H02-cleared publication under the current conditional authorization. Do not dispatch the legacy
 Image workflow on main if registry publication is not separately authorized.
 
 ## H02 and controlled release sequence
@@ -146,7 +152,7 @@ Owner read-only checks remain necessary; blocked external APIs were not retried:
    Render-only policy does not disable existing external settings. No new configuration
    for either platform was prepared. Report discovered bindings before modifying them.
 
-After H02 evidence establishes safety, explicit authorization is still required:
+After H02 evidence establishes safety, the current autonomous authorization permits:
 
 1. Push only the approved fix-branch SHA to the canonical GitHub URL, create one draft
    PR into integration/sentinel-v2-antigravity-20261111. Local origin is the recovery
@@ -154,8 +160,8 @@ After H02 evidence establishes safety, explicit authorization is still required:
 2. Verify fresh CI INCLUDING the new container acceptance at its actual source SHA;
    review all diffs and the browser coverage outside normal CI. Draft is not deployment
    protection. New workflow adds one CI job; existing manual publishers are unchanged.
-3. Separately approve merging remediation into integration. Recheck existing PR #2,
-   then separately approve main merge after all merge gates pass.
+3. Merge remediation into integration only after review and mandatory checks pass.
+   Recheck PR #2 and merge to main only after every specified merge gate passes.
 4. Freeze the actual approved post-merge release SHA/ref. Confirm account quote/credits,
    seven-day budget/alerts, backup/rollback and existing project placement.
 5. Only with CREATE/PLAN authorization create ONE manual Blueprint, autoSync=false,
