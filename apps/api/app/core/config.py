@@ -136,6 +136,8 @@ class Settings(BaseSettings):
     # Independent, explicit staging gates. Credentials alone never activate providers.
     staging_ai_enabled: bool = False
     staging_paypal_sandbox_enabled: bool = False
+    # Guest sessions are only available in the exact isolated Render staging project.
+    public_demo_login_enabled: bool = False
     render_project_id: str | None = None
     render_workspace_id: str | None = None
     cors_origins: list[str] = Field(default_factory=lambda: ["http://localhost:5173"])
@@ -274,6 +276,24 @@ class Settings(BaseSettings):
             raise ValueError(
                 "SENTINEL_PAYPAL_CLIENT_ID and SENTINEL_PAYPAL_CLIENT_SECRET must be set together"
             )
+        return self
+
+    @model_validator(mode="after")
+    def _public_demo_scope(self) -> "Settings":
+        if self.public_demo_login_enabled and not (
+            self.hosted_deployment
+            and self.environment == "production"
+            and self.deployment_stage == "staging"
+            and self.render_project_id == "prj-dbq48lon74is739m7nl0"
+            and self.render_workspace_id == "tea-d8gorhflk1mc73f4pmr0"
+            and self.database_tls_policy == "render_internal_staging"
+            and self.cookie_secure
+            and self.require_workers_ready
+            and self.storage_backend is StorageBackend.DATABASE
+            and not self.refund_execution_enabled
+            and not self.allow_webhook_fixtures
+        ):
+            raise ValueError("Public judge access is restricted to approved synthetic staging")
         return self
 
     @model_validator(mode="after")
