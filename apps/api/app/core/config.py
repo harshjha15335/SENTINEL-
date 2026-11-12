@@ -315,7 +315,10 @@ class Settings(BaseSettings):
 
     @model_validator(mode="after")
     def _scoped_database_tls(self) -> "Settings":
-        if self.database_tls_policy in ("render_internal_staging", "render_internal_integrated_staging"):
+        if self.database_tls_policy in (
+            "render_internal_staging",
+            "render_internal_integrated_staging",
+        ):
             self.render_internal_database_args()
         return self
 
