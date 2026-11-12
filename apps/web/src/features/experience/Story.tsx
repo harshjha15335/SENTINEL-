@@ -436,6 +436,7 @@ function DesktopStory({ workspaceTarget }: { workspaceTarget?: string }) {
             </footer>
           </section>
         </div>
+        <InteractiveStoryDossier />
         <StoryAfter workspaceTarget={workspaceTarget} />
       </main>
       <StoryFooter />
@@ -531,15 +532,32 @@ function CompactStory({ workspaceTarget }: { workspaceTarget?: string }) {
             </section>
           ))}
         </div>
-        <div className="v2-compact-workspace" inert aria-hidden="true">
-          <DemoDossier embedded />
-        </div>
+        <InteractiveStoryDossier />
         <StoryAfter workspaceTarget={workspaceTarget} />
       </main>
       <StoryFooter />
     </div>
   );
 }
+function InteractiveStoryDossier() {
+  return (
+    <section
+      className="v2-story-interactive-dossier"
+      aria-label="Interactive payment dossier demonstration"
+    >
+      <div className="v2-story-interactive-head">
+        <p className="v2-eyebrow">EXPLORE THE EVIDENCE / SIMULATED EXAMPLE</p>
+        <h2>Open the payment dossier.</h2>
+        <p>
+          Switch between payment examples, inspect the timeline and review the
+          illustrative risk factors. This is an interactive demo, not a live PayPal payment.
+        </p>
+      </div>
+      <DemoDossier embedded />
+    </section>
+  );
+}
+
 function StoryAfter({ workspaceTarget }: { workspaceTarget?: string }) {
   return (
     <section className="v2-after-story" id="v2-after-story" tabIndex={-1}>
