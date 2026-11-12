@@ -13,7 +13,9 @@ import { examples, fixtureTransaction, FIXTURE_VERSION } from "./fixtures";
 
 export function DemoDossier({ embedded = false }: { embedded?: boolean }) {
   const [params, setParams] = useSearchParams();
-  const index = !embedded && params.get("example") === "1" ? 1 : 0;
+  // The inline post-story dossier is interactive too. The pinned morph-only
+  // preview remains inert and hidden from assistive technology.
+  const index = params.get("example") === "1" ? 1 : 0;
   return (
     <Workspace demo embedded={embedded}>
       <div className="v2-notice">
