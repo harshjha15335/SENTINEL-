@@ -8,6 +8,7 @@ import unicodedata
 from enum import StrEnum
 from functools import lru_cache
 from ipaddress import ip_address
+from typing import Literal
 from urllib.parse import urlsplit
 from uuid import UUID
 
@@ -119,12 +120,20 @@ class StorageBackend(StrEnum):
 
 
 class Settings(BaseSettings):
-    model_config = SettingsConfigDict(env_prefix="SENTINEL_", env_file=".env", extra="ignore")
+    model_config = SettingsConfigDict(
+        env_prefix="SENTINEL_", env_file=".env", extra="ignore", hide_input_in_errors=True
+    )
 
     environment: str = "development"
     hosted_deployment: bool = False
     database_url: str = "postgresql+psycopg://sentinel:sentinel@127.0.0.1:5432/sentinel"
     database_ssl_root_cert: str | None = None
+    # Owner-approved synthetic Render staging only; actual host review is still required.
+    database_tls_policy: Literal["verify_full", "render_internal_staging"] = "verify_full"
+    render_internal_tls_reviewed_host: str | None = None
+    deployment_stage: str | None = None
+    render_project_id: str | None = None
+    render_workspace_id: str | None = None
     cors_origins: list[str] = Field(default_factory=lambda: ["http://localhost:5173"])
     cookie_secure: bool = False
     session_ttl_minutes: int = 8 * 60
@@ -296,6 +305,89 @@ class Settings(BaseSettings):
     @property
     def supabase_configured(self) -> bool:
         return bool(self.supabase_url and self.supabase_service_role_key)
+
+    @model_validator(mode="after")
+    def _scoped_database_tls(self) -> "Settings":
+        if self.database_tls_policy == "render_internal_staging":
+            self.render_internal_database_args()
+        return self
+
+    def render_internal_database_args(self, database_url: str | None = None) -> dict[str, str]:
+        """Validate effective migration/runtime destination, never claim server identity.
+
+        `require` encrypts but does not authenticate the server. The exact private
+        host/account binding is an operator-reviewed trust input, not attestation.
+        """
+        from sqlalchemy.engine import make_url
+        from sqlalchemy.exc import ArgumentError
+
+        try:
+            destination = make_url(self.database_url if database_url is None else database_url)
+            host = destination.host or ""
+            allowed = (
+                self.database_tls_policy == "render_internal_staging"
+                and self.hosted_deployment
+                and self.environment == "production"
+                and self.deployment_stage == "staging"
+                and self.render_project_id == "prj-dbq48lon74is739m7nl0"
+                and self.render_workspace_id == "tea-d8gorhflk1mc73f4pmr0"
+                and self.paypal_mode is PayPalMode.FIXTURE
+                and self.ai_provider is AIProvider.NONE
+                and self.ai_api_key is None
+                and not self.paypal_credentials_configured
+                and not self.paypal_webhook_id
+                and not self.supabase_configured
+                and not self.refund_execution_enabled
+                and not self.allow_webhook_fixtures
+                and self.cookie_secure
+                and self.require_workers_ready
+                and self.storage_backend is StorageBackend.DATABASE
+                and self.database_ssl_root_cert is None
+                and destination.drivername == "postgresql+psycopg"
+                and host == self.render_internal_tls_reviewed_host
+                and re.fullmatch(r"dpg-[a-z0-9]+(?:-[a-z0-9]+)*", host) is not None
+                and destination.port in (None, 5432)
+                and destination.database == "sentinel_staging"
+                and destination.username == "sentinel_staging"
+                and bool(destination.password)
+                and set(destination.query).issubset({"sslmode"})
+                and destination.query.get("sslmode", "require") == "require"
+            )
+        except (ArgumentError, ValueError):
+            raise ValueError("Invalid Render internal staging database destination") from None
+        # Render supplies DATABASE_URL, not libpq routing/services/client files.
+        # Reject ambient settings rather than silently ignoring or trusting them.
+        overrides = {
+            "PGHOST",
+            "PGHOSTADDR",
+            "PGPORT",
+            "PGDATABASE",
+            "PGUSER",
+            "PGPASSWORD",
+            "PGPASSFILE",
+            "PGSERVICE",
+            "PGSERVICEFILE",
+            "PGSSLMODE",
+            "PGSSLROOTCERT",
+            "PGSSLCERT",
+            "PGSSLKEY",
+            "PGSSLCRL",
+            "PGSSLCRLDIR",
+            "PGGSSENCMODE",
+            "PGTARGETSESSIONATTRS",
+            "PGOPTIONS",
+        }
+        if not allowed or any(os.environ.get(name) for name in overrides):
+            raise ValueError("Unapproved Render internal staging TLS scope")
+        return {
+            "sslmode": "require",
+            "gssencmode": "disable",
+            "host": host,
+            "port": "5432",
+            "dbname": "sentinel_staging",
+            "user": "sentinel_staging",
+            "password": destination.password or "",
+        }
 
     @property
     def bridge_required(self) -> bool:

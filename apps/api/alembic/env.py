@@ -16,7 +16,9 @@ def run() -> None:
         with context.begin_transaction():
             context.run_migrations()
         return
-    engine = create_engine(url, connect_args=database_connect_args(get_settings()))
+    engine = create_engine(
+        url, connect_args=database_connect_args(get_settings(), database_url=url)
+    )
     with engine.connect() as conn:
         context.configure(connection=conn, target_metadata=target_metadata, compare_type=True)
         with context.begin_transaction():
