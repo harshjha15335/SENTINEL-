@@ -351,10 +351,7 @@ class Settings(BaseSettings):
                     )
                 )
                 and (
-                    (
-                        not self.staging_ai_enabled
-                        and self.ai_provider is AIProvider.NONE
-                    )
+                    (not self.staging_ai_enabled and self.ai_provider is AIProvider.NONE)
                     or (
                         self.staging_ai_enabled
                         and self.ai_provider is AIProvider.GOOGLE
