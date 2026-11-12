@@ -5,6 +5,7 @@ import { Link, Navigate, useLocation, useNavigate } from "react-router-dom";
 import { z } from "zod";
 
 import { Button } from "@/components/ui/Button";
+import { introWasCompleted, resetIntro } from "@/features/experience/introSession";
 import { ErrorState } from "@/components/ui/States";
 
 import { useLogin, useMe } from "./session";
@@ -30,11 +31,17 @@ export function LoginPage() {
     formState: { errors },
   } = useForm<FormValues>({ resolver: zodResolver(schema) });
 
-  if (me.data) return <Navigate to={from} replace />;
+  if (me.data) {
+    const finishedIntro = introWasCompleted();
+    return <Navigate to={finishedIntro ? from : "/intro"} replace state={finishedIntro ? undefined : { from }} />;
+  }
 
   const onSubmit = handleSubmit((values) =>
     login.mutate(values, {
-      onSuccess: () => navigate(from, { replace: true }),
+      onSuccess: () => {
+        resetIntro();
+        navigate("/intro", { replace: true, state: { from } });
+      },
     }),
   );
 
