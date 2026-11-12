@@ -25,7 +25,6 @@ import { LoginPage } from "@/features/auth/LoginPage";
 import { DashboardPage } from "@/features/dashboard/DashboardPage";
 import { SettingsPage } from "@/features/settings/SettingsPage";
 import { ApiError } from "@/lib/api";
-import { STATIC_DEMO } from "@/lib/staticDemo";
 import { NotFoundPage } from "@/pages/NotFoundPage";
 
 // Heavy screens load on demand: AG Grid (transactions) and the PayPal SDK (checkout).
