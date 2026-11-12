@@ -128,9 +128,13 @@ class Settings(BaseSettings):
     hosted_deployment: bool = False
     database_url: str = "postgresql+psycopg://sentinel:sentinel@127.0.0.1:5432/sentinel"
     database_ssl_root_cert: str | None = None
-    # Owner-approved synthetic Render staging only; actual host review is still required.
-    # Credentials may be provisioned in fixture mode but MUST remain dormant.
-    database_tls_policy: Literal["verify_full", "render_internal_staging"] = "verify_full"
+    # Synthetic Render staging is owner-approved. An integrated sandbox/AI variant
+    # must separately be acknowledged, because the self-signed internal TLS only
+    # encrypts traffic and cannot authenticate the database server identity.
+    database_tls_policy: Literal[
+        "verify_full", "render_internal_staging", "render_internal_integrated_staging"
+    ] = "verify_full"
+    render_integration_tls_approved: bool = False
     render_internal_tls_reviewed_host: str | None = None
     deployment_stage: str | None = None
     render_project_id: str | None = None
@@ -311,7 +315,7 @@ class Settings(BaseSettings):
 
     @model_validator(mode="after")
     def _scoped_database_tls(self) -> "Settings":
-        if self.database_tls_policy == "render_internal_staging":
+        if self.database_tls_policy in ("render_internal_staging", "render_internal_integrated_staging"):
             self.render_internal_database_args()
         return self
 
@@ -327,17 +331,37 @@ class Settings(BaseSettings):
         try:
             destination = make_url(self.database_url if database_url is None else database_url)
             host = destination.host or ""
-            allowed = (
+            synthetic_scope = (
                 self.database_tls_policy == "render_internal_staging"
+                and not self.render_integration_tls_approved
+                and self.paypal_mode is PayPalMode.FIXTURE
+                and self.ai_provider is AIProvider.NONE
+            )
+            integrated_scope = (
+                self.database_tls_policy == "render_internal_integrated_staging"
+                and self.render_integration_tls_approved
+                and self.paypal_mode is PayPalMode.SANDBOX
+                and self.paypal_credentials_configured
+                and bool(self.paypal_webhook_id and self.paypal_webhook_id.strip())
+                and self.supabase_configured
+                and self.supabase_url == "https://cfslzvvdjxstpupkqbpw.supabase.co"
+                and self.ai_provider is AIProvider.GOOGLE
+                and self.ai_configured
+                and self.ai_model in {"gemini-3.1-flash-lite", "gemini-3.5-flash-lite"}
+                and self.paypal_return_url
+                == "https://sentinel-v2-staging.onrender.com/api/v1/paypal/return"
+                and self.paypal_cancel_url
+                == "https://sentinel-v2-staging.onrender.com/api/v1/paypal/cancel"
+            )
+            allowed = (
+                (synthetic_scope or integrated_scope)
                 and self.hosted_deployment
                 and self.environment == "production"
                 and self.deployment_stage == "staging"
                 and self.render_project_id == "prj-dbq48lon74is739m7nl0"
                 and self.render_workspace_id == "tea-d8gorhflk1mc73f4pmr0"
-                and self.paypal_mode is PayPalMode.FIXTURE
-                and self.ai_provider is AIProvider.NONE
-                # Saved secrets are allowed ONLY when no provider can use them:
-                # fixture mode, AI provider none and dormant staging bridge.
+                # Stored credentials cannot override the active mode, the exact
+                # account/host/database pin, or the separate approval gate.
                 and not self.refund_execution_enabled
                 and not self.allow_webhook_fixtures
                 and self.cookie_secure
