@@ -7,19 +7,27 @@ from sqlalchemy.orm import Session
 from app.auth.deps import Principal, any_member, current_principal
 from app.auth.passwords import verify_password
 from app.auth.rate_limit import SlidingWindowLimiter
-from app.auth.sessions import CSRF_COOKIE, SESSION_COOKIE, issue_session, revoke
+from app.auth.sessions import CSRF_COOKIE, SESSION_COOKIE, find_active_session, issue_session, revoke
 from app.core.config import get_settings
-from app.core.errors import AuthenticationError, RateLimitedError
+from app.core.errors import (
+    AuthenticationError,
+    ConflictError,
+    NotFoundError,
+    PermissionDeniedError,
+    RateLimitedError,
+)
 from app.db.session import get_db
 from app.models import User
 from app.schemas.api import LoginRequest, MeOut, SessionOut
 from app.services import audit
+from app.services.demo.public_access import demo_viewer
 
 router = APIRouter(tags=["auth"])
 _settings = get_settings()
 _limiter = SlidingWindowLimiter(
     _settings.login_rate_limit_attempts, _settings.login_rate_limit_window_seconds
 )
+_demo_limiter = SlidingWindowLimiter(8, 300)
 
 
 @router.post("/auth/login", response_model=SessionOut)
@@ -81,6 +89,47 @@ def login(
     )
     return SessionOut(
         user=MeOut.model_validate(user), csrf_token=issued.csrf_token, expires_at=issued.expires_at
+    )
+
+
+@router.post("/auth/demo", response_model=SessionOut)
+def enter_read_only_demo(
+    request: Request, response: Response, db: Session = Depends(get_db)
+) -> SessionOut:
+    """Public, rate-limited entry into the verified SYNTHETIC_DEMO viewer only."""
+    settings = get_settings()
+    if not settings.public_demo_login_enabled:
+        raise NotFoundError("Read-only judge preview is unavailable")
+    # Cross-site forms and CSRF must not silently replace a visitor's session.
+    if request.headers.get("origin") != "https://sentinel-v2-staging.onrender.com":
+        raise PermissionDeniedError("Use the SENTINEL website to open the demo")
+    if request.headers.get("sec-fetch-site", "same-origin") != "same-origin":
+        raise PermissionDeniedError("Cross-origin demo access is unavailable")
+    existing = request.cookies.get(SESSION_COOKIE)
+    if existing and find_active_session(db, existing) is not None:
+        raise ConflictError("Sign out before switching to the read-only demo")
+    client = request.client.host if request.client else "unknown"
+    if not _demo_limiter.hit(client):
+        raise RateLimitedError("Too many demo sessions from this connection")
+    user = demo_viewer(db)
+    if user is None:
+        raise NotFoundError("Read-only judge scenario has not been prepared")
+    ttl = min(settings.session_ttl_minutes, 45)
+    issued = issue_session(db, user, ttl)
+    db.commit()
+    response.headers["Cache-Control"] = "no-store"
+    response.set_cookie(
+        SESSION_COOKIE, issued.session_token,
+        max_age=ttl * 60, httponly=True, secure=True, samesite="lax", path="/",
+    )
+    response.set_cookie(
+        CSRF_COOKIE, issued.csrf_token,
+        max_age=ttl * 60, httponly=False, secure=True, samesite="strict", path="/",
+    )
+    return SessionOut(
+        user=MeOut.model_validate(user),
+        csrf_token=issued.csrf_token,
+        expires_at=issued.expires_at,
     )
 
 
