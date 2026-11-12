@@ -322,7 +322,7 @@ function MonitoringBody({ data }: { data: Monitoring }) {
 
 function Metric({ label, value }: { label: string; value: string }) {
   return (
-    <div>
+    <div data-motion-reveal>
       <dt className="text-fg-subtle">{label}</dt>
       <dd className="tabular mt-1 text-lg">{value}</dd>
     </div>
