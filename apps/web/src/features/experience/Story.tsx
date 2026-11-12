@@ -73,7 +73,6 @@ function DesktopStory({ workspaceTarget }: { workspaceTarget?: string }) {
         accent = el.querySelector("[data-hero-receipt] [data-receipt-accent]"),
         copy = el.querySelector<HTMLElement>(".v2-scene-copy"),
         frame = el.querySelector<HTMLElement>("[data-dossier-frame]"),
-        enter = el.querySelector<HTMLElement>(".v2-scene-enter"),
         footer = el.querySelector<HTMLElement>(".v2-scene-footer"),
         stages = el.querySelectorAll<HTMLElement>("[data-story-stage]"),
         buttons = el.querySelectorAll("[data-chapter]"),
@@ -192,13 +191,6 @@ function DesktopStory({ workspaceTarget }: { workspaceTarget?: string }) {
         if (footer) {
           footer.style.opacity = String(1 - ease(phase(p, 0.77, 0.88)));
           footer.inert = p > 0.88;
-        }
-        if (enter) {
-          const show = p >= 0.97;
-          enter.style.visibility = show ? "visible" : "hidden";
-          enter.inert = !show;
-          if (show && footer?.contains(document.activeElement))
-            enter.querySelector<HTMLAnchorElement>("a")?.focus();
         }
         buttons.forEach((n, i) =>
           n.setAttribute("aria-current", i === s.stage ? "step" : "false"),
@@ -447,12 +439,6 @@ function DesktopStory({ workspaceTarget }: { workspaceTarget?: string }) {
               <i data-progress />
             </div>
           </section>
-        </div>
-        <div className="v2-scene-enter" inert>
-          <span>FROM PAYMENT TO PERSPECTIVE.</span>
-          <Link className="v2-button" to={workspaceTarget ?? "/demo-payment"} onClick={workspaceTarget ? markIntroComplete : undefined}>
-            {workspaceTarget ? "Enter workspace" : "Explore simulated demo"} <ArrowUpRight size={18} />
-          </Link>
         </div>
         <StoryAfter workspaceTarget={workspaceTarget} />
       </main>
