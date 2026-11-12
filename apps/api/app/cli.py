@@ -117,7 +117,9 @@ def demo_load(seed_value: int, *, if_empty: bool = False) -> None:
 
 def main() -> None:
     parser = argparse.ArgumentParser(prog="sentinel")
-    parser.add_argument("command", choices=["seed", "demo-load", "judge-demo", "public-demo-init", "check-schema"])
+    parser.add_argument(
+        "command", choices=["seed", "demo-load", "judge-demo", "public-demo-init", "check-schema"]
+    )
     parser.add_argument("--seed", type=int, default=2026, help="scenario seed for demo-load")
     parser.add_argument(
         "--rotate-passwords",
