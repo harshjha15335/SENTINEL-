@@ -3,9 +3,9 @@
 from types import SimpleNamespace
 
 from app.api.v1 import auth
+from app.auth.passwords import hash_password
 from app.models import Merchant, User
 from app.models.enums import MerchantEnvironment, Role
-from app.auth.passwords import hash_password
 from app.services.demo.judge import JUDGE_EMAIL, MERCHANT, prepare
 
 
@@ -43,6 +43,8 @@ def test_guest_login_rejects_wrong_origin_and_unprepared_tenant(app_client, monk
 
 def test_guest_login_is_tenant_isolated_and_read_only(app_client, db, monkeypatch, tenant):
     _enable(monkeypatch)
+    # Secure cookies must be tested over HTTPS, not TestClient's default HTTP.
+    app_client.base_url = "https://testserver"
     prepared = prepare(db, password="synthetic-demo-test-password", fresh=False)
     result = app_client.post(
         "/api/v1/auth/demo",
@@ -55,7 +57,7 @@ def test_guest_login_is_tenant_isolated_and_read_only(app_client, db, monkeypatc
     assert body["user"]["email"] == JUDGE_EMAIL
     assert "HttpOnly" in result.headers["set-cookie"]
     assert "Secure" in result.headers["set-cookie"]
-    assert "no-store" == result.headers.get("cache-control")
+    assert result.headers.get("cache-control") == "no-store"
     assert app_client.get("/api/v1/demo/scenario").status_code == 200
     assert app_client.get(f"/api/v1/cases/{prepared['case_id']}").status_code == 200
     # Unrelated merchant's records are not visible.
