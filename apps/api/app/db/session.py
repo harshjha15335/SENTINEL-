@@ -17,7 +17,10 @@ def database_connect_args(settings: Settings, database_url: str | None = None) -
     encrypted-only TLS. No server-identity claim is made. Development loopback
     databases retain their existing configuration.
     """
-    if settings.database_tls_policy in ("render_internal_staging", "render_internal_integrated_staging"):
+    if settings.database_tls_policy in (
+        "render_internal_staging",
+        "render_internal_integrated_staging",
+    ):
         return settings.render_internal_database_args(database_url)
     if not settings.hosted_deployment:
         return {}
