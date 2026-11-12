@@ -438,10 +438,32 @@ function Chart({
   yLabel: string;
 }) {
   // All five validation charts are on a zero-to-one rate scale.
+  const [hoverIndex, setHoverIndex] = useState<number | null>(null);
+  const validPoints = points.filter((point) => Number.isFinite(point.x) && Number.isFinite(point.y));
+  const selected = hoverIndex !== null ? validPoints[hoverIndex] : undefined;
+  const other = selected && secondary?.reduce<Point | undefined>((closest, point) =>
+    !closest || Math.abs(point.x - selected.x) < Math.abs(closest.x - selected.x) ? point : closest,
+    undefined,
+  );
   const ticks = [0, 0.25, 0.5, 0.75, 1];
   const left = 64, right = 437, top = 28, bottom = 238;
   const x = (value: number) => left + value * (right - left);
   const y = (value: number) => bottom - value * (bottom - top);
+  const changePoint = (relativeX: number) => {
+    if (relativeX < 0 || relativeX > 1 || validPoints.length === 0) {
+      setHoverIndex(null);
+      return;
+    }
+    let best = 0;
+    for (let index = 1; index < validPoints.length; index++) {
+      const candidate = validPoints[index];
+      const incumbent = validPoints[best];
+      if (candidate && incumbent && Math.abs(candidate.x - relativeX) < Math.abs(incumbent.x - relativeX)) best = index;
+    }
+    setHoverIndex(best);
+  };
+  const tooltipX = selected ? Math.min(278, Math.max(72, x(selected.x) + 12)) : 0;
+  const tooltipY = selected ? Math.max(32, Math.min(174, y(selected.y) - 40)) : 0;
   const path = (rows: Point[]) =>
     rows
       .filter((point) => Number.isFinite(point.x) && Number.isFinite(point.y))
@@ -453,8 +475,21 @@ function Chart({
         <svg
           viewBox="0 0 470 303"
           role="img"
-          aria-label={`${title}. ${xLabel} from 0% to 100% along the horizontal axis and ${yLabel} from 0% to 100% along the vertical axis.`}
-          className="block w-full max-w-full"
+          tabIndex={0}
+          aria-label={`${title}. ${xLabel} from 0% to 100% along the horizontal axis and ${yLabel} from 0% to 100% along the vertical axis. Hover to inspect a point or use left and right arrow keys.`}
+          className="block w-full max-w-full cursor-crosshair"
+          onPointerMove={(event) => {
+            const bounds = event.currentTarget.getBoundingClientRect();
+            if (bounds.width) changePoint((((event.clientX - bounds.left) / bounds.width) * 470 - left) / (right - left));
+          }}
+          onPointerLeave={() => setHoverIndex(null)}
+          onKeyDown={(event) => {
+            if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key) || !validPoints.length) return;
+            event.preventDefault();
+            if (event.key === "Home") setHoverIndex(0);
+            else if (event.key === "End") setHoverIndex(validPoints.length - 1);
+            else setHoverIndex((current) => Math.max(0, Math.min(validPoints.length - 1, (current ?? 0) + (event.key === "ArrowRight" ? 1 : -1))));
+          }}
         >
           <title>{title}</title>
           {ticks.map((tick) => (
@@ -473,6 +508,24 @@ function Chart({
           <path d={path(points)} fill="none" stroke="#7547EB" strokeWidth="2.8" strokeLinecap="round" strokeLinejoin="round" />
           {secondary && (
             <path d={path(secondary)} fill="none" stroke="#C33145" strokeWidth="2.8" strokeLinecap="round" strokeLinejoin="round" />
+          )}
+          {selected && (
+            <g pointerEvents="none">
+              <line x1={x(selected.x)} x2={x(selected.x)} y1={top} y2={bottom} stroke="#7547EB" strokeDasharray="4 4" opacity=".7" />
+              <circle cx={x(selected.x)} cy={y(selected.y)} r="5" fill="#7547EB" stroke="white" strokeWidth="2" />
+              <rect x={tooltipX} y={tooltipY} width="180" height={other ? 74 : 58} rx="10" fill="#292135" opacity=".97" />
+              <text x={tooltipX + 11} y={tooltipY + 19} fill="white" fontSize="12">
+                {xLabel}: {(selected.x * 100).toFixed(1)}%
+              </text>
+              <text x={tooltipX + 11} y={tooltipY + 38} fill="#D4B4FF" fontSize="12">
+                {secondary ? "Precision" : yLabel}: {(selected.y * 100).toFixed(1)}%
+              </text>
+              {other && (
+                <text x={tooltipX + 11} y={tooltipY + 57} fill="#F5AAB8" fontSize="12">
+                  Recall: {(other.y * 100).toFixed(1)}%
+                </text>
+              )}
+            </g>
           )}
           <text x={(left + right) / 2} y="291" textAnchor="middle" fill="#201A2B" fontSize="13">
             {xLabel}
@@ -494,7 +547,7 @@ function Chart({
           )}
         </div>
         <p className="mt-2 text-xs leading-relaxed text-fg-muted">
-          Each axis shows rates from 0% to 100%. Synthetic validation observations only, not live PayPal outcomes.
+          Each axis shows rates from 0% to 100%. Hover or use arrow keys for exact points. Synthetic validation observations only, not live PayPal outcomes.
         </p>
       </div>
     </Panel>

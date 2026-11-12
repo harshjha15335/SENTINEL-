@@ -7,6 +7,7 @@ import "@fontsource/ibm-plex-mono/latin-400.css";
 import "./styles/tokens.css";
 import "./styles/grid.css";
 import "./styles/workspace.css";
+import "./styles/glass.css";
 
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";

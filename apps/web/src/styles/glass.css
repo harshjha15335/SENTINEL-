@@ -1,0 +1,472 @@
+/*
+ * SENTINEL glass treatment — deliberately retains the original ivory canvas,
+ * Manrope typography and lavender brand accent. Decorative only: charts,
+ * risk classifications, data provenance, workflows and semantics are untouched.
+ */
+.sentinel-workspace {
+  display: grid;
+  grid-template-columns: 236px minmax(0, 1fr);
+  grid-template-rows: 76px minmax(0, 1fr) auto;
+  min-height: 100dvh;
+  isolation: isolate;
+  position: relative;
+  background: #f7f4ee;
+}
+.sentinel-workspace::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 62% 45% at 86% 6%, rgba(192,157,250,.57), transparent 75%),
+    radial-gradient(ellipse 48% 48% at 13% 95%, rgba(216,186,255,.52), transparent 76%),
+    radial-gradient(ellipse 40% 38% at 49% 46%, rgba(244,223,255,.58), transparent 76%),
+    linear-gradient(145deg,#f9f7f3 2%,#f4eff9 53%,#f7f3ef 100%);
+}
+.sentinel-workspace > .workspace-global-header,
+.sentinel-workspace > .workspace-topbar,
+.sentinel-workspace > .workspace-main,
+.sentinel-workspace > .workspace-footer {
+  position: relative;
+  z-index: 1;
+}
+/* The operational navigation is a vertical rail; only the account icon lives
+ * in the top right, not a second copy of the navigation. */
+.sentinel-workspace > .workspace-global-header {
+  grid-column: 1;
+  grid-row: 1 / 4;
+  position: sticky;
+  top: 0;
+  align-self: start;
+  height: 100dvh;
+  min-height: 0;
+  width: 100%;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0;
+  padding: 30px 15px;
+  background: linear-gradient(155deg,rgba(255,255,255,.76),rgba(249,241,255,.51));
+  border: 1px solid rgba(255,255,255,.89);
+  border-right-color: rgba(197,173,225,.49);
+  border-bottom: 0;
+  box-shadow: 7px 0 44px rgba(96,62,149,.045), inset 1px 1px rgba(255,255,255,.8);
+  backdrop-filter: blur(22px) saturate(1.45);
+}
+.sentinel-workspace .workspace-brand {
+  padding: 0 7px;
+  margin-bottom: 27px;
+  font-size: 20px;
+}
+.sentinel-workspace .workspace-primary-nav {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 4px;
+  margin: 0;
+}
+.sentinel-workspace .workspace-nav-link {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 12px 13px;
+  border: 1px solid transparent;
+  border-radius: 12px;
+  font-size: 12px;
+  line-height: 1.45;
+  white-space: normal;
+  transition: background .22s ease, border-color .22s ease,
+              box-shadow .22s ease, color .22s ease, transform .22s ease;
+}
+.sentinel-workspace .workspace-nav-link svg { flex: 0 0 auto; }
+.sentinel-workspace .workspace-nav-link:hover {
+  color: #6135c9;
+  background: rgba(232,220,255,.56);
+  border-color: rgba(182,148,241,.25);
+  transform: translateX(2px);
+}
+.sentinel-workspace .workspace-nav-link.is-active {
+  background: linear-gradient(115deg,rgba(226,209,255,.95),rgba(243,235,255,.72));
+  color: #6135c9;
+  border-color: rgba(173,133,238,.5);
+  box-shadow: 0 5px 18px rgba(117,71,235,.09), inset 0 1px rgba(255,255,255,.8);
+  font-weight: 700;
+}
+.sentinel-workspace .workspace-nav-link::after { display: none; }
+.sentinel-workspace .workspace-menu {
+  margin: 19px 0 0;
+  width: 100%;
+  flex: 0 0 auto;
+}
+.sentinel-workspace .workspace-menu > summary {
+  background: rgba(255,255,255,.55);
+  border-color: rgba(194,174,219,.64);
+  border-radius: 12px;
+  padding: 11px 15px;
+  font-weight: 600;
+}
+.sentinel-workspace .workspace-menu[open] > summary { background: #ece2fc; }
+.sentinel-workspace .workspace-menu nav {
+  position: static;
+  width: 100%;
+  max-height: min(36vh,350px);
+  overflow-y: auto;
+  margin-top: 7px;
+  padding: 8px;
+  background: rgba(255,255,255,.58);
+  border: 1px solid rgba(194,174,219,.36);
+  border-radius: 12px;
+  box-shadow: none;
+}
+.sentinel-workspace .workspace-menu nav a {
+  font-size: 11px;
+  padding: 10px;
+  white-space: normal;
+  line-height: 1.5;
+}
+.sentinel-workspace .workspace-topbar {
+  grid-column: 2;
+  grid-row: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 13px clamp(22px,3.5vw,55px);
+  border-bottom: 1px solid rgba(214,198,229,.45);
+  background: rgba(255,255,255,.33);
+  backdrop-filter: blur(14px) saturate(1.3);
+}
+.workspace-topbar-location {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+  min-width: 0;
+}
+.workspace-topbar-location > span {
+  font: 10px "IBM Plex Mono", monospace;
+  letter-spacing: .08em;
+  color: #766b85;
+}
+.workspace-topbar-location > strong {
+  font: 600 13px Manrope, sans-serif;
+  color: #3a2c52;
+}
+.sentinel-workspace .workspace-user-menu > summary,
+.sentinel-workspace .workspace-user-panel {
+  background: rgba(255,255,255,.81);
+  border-color: rgba(208,183,237,.75);
+  box-shadow: inset 0 1px rgba(255,255,255,.93), 0 7px 24px rgba(74,41,120,.11);
+  backdrop-filter: blur(24px) saturate(1.35);
+}
+.sentinel-workspace .workspace-main {
+  grid-column: 2;
+  grid-row: 2;
+  width: 100%;
+  min-width: 0;
+  max-width: 1620px;
+  padding: 35px clamp(20px,3.4vw,56px) 70px;
+  margin: 0 auto;
+}
+.sentinel-workspace .workspace-footer {
+  grid-column: 2;
+  grid-row: 3;
+  border-top-color: rgba(188,164,209,.35);
+  padding-inline: clamp(22px,3.5vw,55px);
+}
+/* Frosted operational cards with distinct glass edges and soft internal glints.
+ * White data labels stay crisp; purple glass stays reserved for priority calls. */
+.sentinel-workspace .workspace-section {
+  position: relative;
+  margin-top: 16px;
+  padding: 18px clamp(15px,2.1vw,26px);
+  border: 1px solid rgba(255,255,255,.89);
+  border-radius: 22px;
+  background: linear-gradient(140deg,rgba(255,255,255,.81),rgba(255,255,255,.43) 64%,rgba(248,238,255,.63));
+  box-shadow: inset 0 1px 1px rgba(255,255,255,.92),
+    inset 0 -1px rgba(197,163,236,.15), 0 14px 38px rgba(75,38,126,.075);
+  backdrop-filter: blur(23px) saturate(1.45);
+}
+.sentinel-workspace .workspace-section-heading { padding-top: 7px; }
+.sentinel-workspace .workspace-section .workspace-section {
+  background: rgba(255,255,255,.48);
+  padding: 14px 18px;
+  margin-top: 17px;
+}
+.sentinel-workspace .workspace-inset,
+.sentinel-workspace .risk-record,
+.sentinel-workspace .command-review-desk,
+.sentinel-workspace .workspace-ledger > * {
+  border: 1px solid rgba(255,255,255,.77);
+  border-radius: 20px;
+  background: linear-gradient(125deg,rgba(255,255,255,.76),rgba(240,224,255,.42));
+  box-shadow: inset 0 1px rgba(255,255,255,.83),0 11px 29px rgba(67,31,119,.055);
+  backdrop-filter: blur(17px) saturate(1.35);
+}
+.sentinel-workspace .command-review-desk {
+  background: linear-gradient(145deg,rgba(219,199,255,.88),rgba(242,230,255,.68) 70%,rgba(255,255,255,.55));
+  border-color: rgba(255,255,255,.86);
+  box-shadow: inset 0 1px rgba(255,255,255,.9),0 15px 42px rgba(117,71,235,.115);
+}
+.sentinel-workspace .workspace-list > ul > li > a {
+  border-radius: 11px;
+  transition: background-color .2s ease, transform .2s ease;
+}
+.sentinel-workspace .workspace-list > ul > li > a:hover {
+  background-color: rgba(239,228,255,.62);
+  transform: translateX(2px);
+}
+.sentinel-workspace .workspace-main table tbody tr:hover {
+  background-color: rgba(239,229,255,.43);
+}
+.sentinel-workspace .workspace-main .rounded-lg.border {
+  border-color: rgba(217,197,236,.6);
+  background-color: rgba(255,255,255,.55);
+}
+.sentinel-cursor-glitter {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  user-select: none;
+}
+/* The login is still a standard secure session form, not an invented SSO flow. */
+.workspace-auth {
+  position: relative;
+  isolation: isolate;
+  grid-template-columns: minmax(0,1.1fr) minmax(360px,.82fr);
+  align-items: stretch;
+  gap: clamp(16px,3vw,55px);
+  padding: clamp(15px,2.4vw,42px);
+  background:
+    radial-gradient(ellipse 57% 65% at 76% 10%, rgba(210,171,252,.65), transparent 77%),
+    radial-gradient(ellipse 56% 70% at 7% 91%, rgba(222,199,255,.66), transparent 78%),
+    linear-gradient(130deg,#f9f7f3,#f3edf9 58%,#f7f3ee);
+}
+.workspace-auth-story {
+  position: relative;
+  min-height: min(800px,calc(100dvh - 40px));
+  padding: clamp(25px,3vw,45px);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 9px;
+  overflow: hidden;
+  border: 1px solid rgba(255,255,255,.93);
+  border-radius: 28px;
+  background: linear-gradient(135deg,rgba(255,255,255,.63),rgba(232,212,255,.43));
+  box-shadow: inset 0 2px 1px rgba(255,255,255,.89),0 20px 70px rgba(75,31,126,.10);
+  backdrop-filter: blur(24px) saturate(1.5);
+}
+.workspace-auth-story::before {
+  content: "";
+  position: absolute;
+  inset: -26% -36%;
+  background: radial-gradient(ellipse at 60% 48%,rgba(197,149,253,.3),transparent 51%);
+  pointer-events: none;
+}
+.workspace-auth-story > * { position: relative; z-index: 1; }
+.workspace-auth-story-copy h2 {
+  margin: 13px 0 12px;
+  font-size: clamp(30px,3.6vw,55px);
+  line-height: 1.12;
+  letter-spacing: -.052em;
+}
+.workspace-auth-story-copy > p:not(.workspace-kicker) {
+  line-height: 1.5;
+  max-width: 470px;
+  font-size: clamp(13px,1.16vw,16px);
+  margin: 0;
+}
+.workspace-auth-story .workspace-kicker { margin-bottom: 10px; }
+.workspace-auth-provenance {
+  margin: 0;
+  font-size: 11px;
+  color: #686273;
+}
+.workspace-auth-form {
+  min-width: 0;
+  padding: 15px 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.workspace-auth-form > div {
+  width: 100%;
+  max-width: 470px;
+  margin: auto;
+  padding: clamp(23px,3vw,48px);
+  border: 1px solid rgba(255,255,255,.97);
+  border-radius: 27px;
+  background: linear-gradient(142deg,rgba(255,255,255,.79),rgba(247,234,255,.58));
+  box-shadow: inset 0 1px 1px rgba(255,255,255,.95), 0 18px 60px rgba(85,48,135,.11);
+  backdrop-filter: blur(25px) saturate(1.5);
+}
+.workspace-auth-form input {
+  background: rgba(255,255,255,.69);
+  border-color: rgba(183,156,213,.62);
+  border-radius: 12px;
+}
+.workspace-auth-form form button[type="submit"] {
+  background: #7547eb;
+  border-radius: 999px;
+  box-shadow: 0 7px 25px rgba(117,71,235,.18);
+}
+/* Wallet / coins: the 3D illustration is the app's existing artwork. */
+.auth-wallet-orbit {
+  position: relative !important;
+  align-self: center;
+  flex: 0 0 auto;
+  width: min(100%,490px);
+  height: clamp(192px,25vh,275px);
+  isolation: isolate;
+  margin: 5px 0;
+}
+.auth-wallet-halo {
+  position: absolute;
+  inset: 12% 7%;
+  background: radial-gradient(ellipse,rgba(171,120,255,.40),rgba(193,158,255,.15) 43%,transparent 71%);
+  filter: blur(14px);
+  pointer-events: none;
+}
+.auth-money-ring {
+  position: absolute;
+  inset: 18% 4%;
+  border: 1.5px dashed rgba(133,78,229,.47);
+  border-radius: 50%;
+  transform: rotate(-23deg);
+  pointer-events: none;
+}
+.auth-money-ring-back { inset: 10% 10%; transform: rotate(27deg); opacity: .55; }
+.auth-money-ring-front { border-style: solid; opacity: .38; }
+.auth-wallet-object {
+  position: absolute;
+  width: 85%;
+  left: 8%;
+  top: 2%;
+  z-index: 3;
+  filter: drop-shadow(0 14px 24px rgba(90,40,170,.2));
+  animation: auth-wallet-float 5.8s ease-in-out infinite;
+}
+.auth-wallet-object .v2-wallet { display:block; width:100%; height:auto; }
+.auth-money-track {
+  position: absolute;
+  inset: 17% 5%;
+  border-radius: 50%;
+  z-index: 4;
+  animation: auth-orbit-spin 12s linear infinite;
+}
+.auth-money-track-two {
+  inset: 9% 13%;
+  z-index: 2;
+  animation-duration: 16s;
+  animation-direction: reverse;
+}
+.auth-money-token {
+  position: absolute;
+  display: grid;
+  place-items: center;
+  color: #7547eb;
+  border: 1px solid rgba(255,255,255,.94);
+  background: linear-gradient(135deg,rgba(255,255,255,.92),rgba(199,161,252,.86));
+  box-shadow: 0 8px 24px rgba(100,47,192,.2),inset 0 1px rgba(255,255,255,.9);
+  backdrop-filter: blur(8px);
+}
+.auth-money-coin { width:46px;height:46px;border-radius:50%;left:0;top:7%; }
+.auth-money-banknote { width:62px;height:38px;border-radius:9px;right:0;bottom:4%;transform:rotate(-16deg); }
+.auth-money-track-two .auth-money-coin { left:auto;right:10%;top:-4%; width:39px;height:39px; }
+.auth-money-track-two .auth-money-banknote { right:auto;left:5%;bottom:-1%;width:55px;height:35px; }
+.auth-money-star { position:absolute;z-index:5;width:5px;height:5px;border-radius:50%;background:#ba85ff;box-shadow:0 0 13px 3px rgba(195,142,255,.45);animation:auth-star-pulse 3s ease-in-out infinite; }
+.auth-money-star-one { top:15%;left:20%; }
+.auth-money-star-two { top:70%;right:9%;animation-delay:1s; }
+.auth-money-star-three { bottom:12%;left:35%;animation-delay:2s; }
+@keyframes auth-orbit-spin { from {transform:rotate(-22deg)} to {transform:rotate(338deg)} }
+@keyframes auth-wallet-float { 0%,100% {transform:translateY(0) rotate(-7deg)} 50% {transform:translateY(-9px) rotate(-4deg)} }
+@keyframes auth-star-pulse { 0%,100% {opacity:.25;transform:scale(.65)} 50% {opacity:1;transform:scale(1.4)} }
+@media (max-width: 1280px) and (min-width: 1121px) {
+  .sentinel-workspace { grid-template-columns: 212px minmax(0,1fr); }
+  .sentinel-workspace .workspace-global-header { padding-inline: 12px; }
+  .sentinel-workspace .workspace-nav-link { padding-inline: 10px; gap:9px; }
+  .sentinel-workspace .workspace-main { padding-inline:26px; }
+}
+@media (max-width: 1120px) {
+  .sentinel-workspace { display: block; }
+  .sentinel-workspace > .workspace-global-header {
+    display:flex;
+    position:relative;
+    width:100%;
+    height:auto;
+    min-height:72px;
+    overflow:visible;
+    flex-direction:row;
+    align-items:center;
+    justify-content:space-between;
+    padding:10px 85px 10px 22px;
+    border-right:0;
+    border-bottom:1px solid rgba(210,193,225,.55);
+  }
+  .sentinel-workspace .workspace-brand { margin:0;padding:0; }
+  .sentinel-workspace .workspace-primary-nav { display:none; }
+  .sentinel-workspace .workspace-menu { width:auto; margin:0 0 0 auto; }
+  .sentinel-workspace .workspace-menu nav {
+    position:absolute;top:calc(100% + 8px);right:0;
+    width:min(280px,calc(100vw - 40px));max-height:70vh;
+    padding:10px;
+    background:rgba(255,255,255,.93);
+    box-shadow:0 15px 40px rgba(66,33,111,.13);
+  }
+  .sentinel-workspace .workspace-mobile-links { display:flex; }
+  .sentinel-workspace > .workspace-topbar {
+    display:flex; position:absolute;right:20px;top:16px;
+    width:auto;height:auto;padding:0;z-index:40;
+    background:transparent;border:0;backdrop-filter:none;
+  }
+  .workspace-topbar-location { display:none; }
+  .sentinel-workspace .workspace-main {
+    width:100%;
+    padding:30px clamp(18px,4vw,44px) 65px;
+  }
+  .sentinel-workspace .workspace-footer { padding-inline:clamp(18px,4vw,44px); }
+  .workspace-auth { grid-template-columns: minmax(0,1fr) minmax(335px,.86fr);gap:15px; }
+  .workspace-auth-story { padding:25px; }
+}
+@media (max-width: 780px) {
+  .workspace-auth { display:block;padding:16px; }
+  .workspace-auth-story {
+    min-height:auto;
+    height:auto;
+    padding:18px 22px;
+    gap:0;
+  }
+  .workspace-auth-story-copy { display:none; }
+  .workspace-auth-story .workspace-brand { margin-bottom:0; }
+  .workspace-auth-story .auth-wallet-orbit { height:135px;width:min(90%,290px);margin:-12px auto -15px; }
+  .workspace-auth-provenance { font-size:10px; }
+  .workspace-auth-form { min-height:auto; padding:18px 0 28px; }
+  .workspace-auth-form > div { padding:25px 22px; }
+  .workspace-auth-form .auth-brand { display:none; }
+}
+@media (max-width: 450px) {
+  .sentinel-workspace > .workspace-global-header { padding-left:15px;padding-right:67px; }
+  .sentinel-workspace .workspace-brand { font-size:17px; }
+  .sentinel-workspace .workspace-menu > summary { padding:8px 11px; }
+  .sentinel-workspace > .workspace-topbar { right:13px;top:15px; }
+  .workspace-auth { padding:9px; }
+  .workspace-auth-form > div { padding:22px 16px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .auth-wallet-object,.auth-money-track,.auth-money-star { animation:none!important; }
+  .sentinel-workspace .workspace-nav-link:hover { transform:none; }
+}
+@media (pointer: coarse) { .sentinel-cursor-glitter {display:none;} }
+@supports not (backdrop-filter: blur(1px)) {
+  .sentinel-workspace .workspace-section,
+  .sentinel-workspace .workspace-inset,
+  .workspace-auth-form > div { background:rgba(255,255,255,.93); }
+}
