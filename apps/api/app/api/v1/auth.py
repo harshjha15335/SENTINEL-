@@ -98,7 +98,8 @@ def login(
     )
 
 
-@router.post("/auth/demo", response_model=SessionOut)
+# UI-only guest entry; the external merchant API contract remains unchanged.
+@router.post("/auth/demo", response_model=SessionOut, include_in_schema=False)
 def enter_read_only_demo(
     request: Request, response: Response, db: Session = Depends(get_db)
 ) -> SessionOut:
