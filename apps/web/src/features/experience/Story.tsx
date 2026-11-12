@@ -28,7 +28,7 @@ export function MoneyStory({ workspaceTarget }: { workspaceTarget?: string } = {
   return desktop ? <DesktopStory workspaceTarget={workspaceTarget} /> : <CompactStory workspaceTarget={workspaceTarget} />;
 }
 function skip() {
-  const el = document.getElementById("v2-after-story");
+  const el = document.getElementById("v2-interactive-dossier") ?? document.getElementById("v2-after-story");
   el?.scrollIntoView({ behavior: "instant" });
   el?.focus({ preventScroll: true });
 }
@@ -543,6 +543,8 @@ function InteractiveStoryDossier() {
   return (
     <section
       className="v2-story-interactive-dossier"
+      id="v2-interactive-dossier"
+      tabIndex={-1}
       aria-label="Interactive payment dossier demonstration"
     >
       <div className="v2-story-interactive-head">
