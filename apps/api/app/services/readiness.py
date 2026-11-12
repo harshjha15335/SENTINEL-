@@ -8,7 +8,7 @@ from alembic.script import ScriptDirectory
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
-from app.core.config import get_settings
+from app.core.config import PayPalMode, get_settings
 from app.models import WorkerHealth
 
 
@@ -43,9 +43,14 @@ def readiness(db: Session) -> tuple[bool, dict[str, str]]:
     checks["paypal_provider_verification"] = "unverified_by_readiness"
     checks["ai_provider_verification"] = "unverified_by_readiness"
     ok = checks["database"] == "ok" and checks["schema"] == "ok"
+    checks["supabase_configuration"] = "configured" if settings.supabase_configured else "absent"
     if ok and settings.require_workers_ready:
-        # This deployment contract explicitly requires a genuine-origin bridge.
-        for name in ("pipeline", "supabase_bridge"):
+        # Sandbox and every configured integration retain the bridge gate.
+        # A genuinely absent fixture integration has no heartbeat to fabricate.
+        if not settings.bridge_required:
+            checks["supabase_bridge"] = "not_required_fixture_mode"
+        names = ("pipeline", "supabase_bridge") if settings.bridge_required else ("pipeline",)
+        for name in names:
             worker = db.get(WorkerHealth, name)
             healthy = (
                 worker is not None
@@ -54,4 +59,7 @@ def readiness(db: Session) -> tuple[bool, dict[str, str]]:
             )
             checks[name] = "ok" if healthy else "not_ready"
             ok = ok and healthy
+        ok = ok and settings.worker_configuration_ready
+        if settings.paypal_mode is PayPalMode.SANDBOX:
+            ok = ok and settings.paypal_credentials_configured
     return ok, checks

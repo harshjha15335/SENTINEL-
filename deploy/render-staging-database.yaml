@@ -1,0 +1,19 @@
+# REVIEW ONLY: database-first phase of ONE manual Blueprint, not a second stack.
+# Target existing prj-dbq48lon74is739m7nl0 / Staging; confirm actual plan identity.
+# No apply until H02, exact SHA, TLS strategy and costs are explicitly approved.
+# After provisioning approval, authenticate the assigned DB host before app phase.
+previews:
+  generation: 'off'
+projects:
+- name: Sentinel
+  environments:
+  - name: Staging
+    databases:
+    - name: sentinel-v2-staging-db
+      databaseName: sentinel_staging
+      user: sentinel_staging
+      postgresMajorVersion: '16'
+      plan: 0.5c-1g
+      region: singapore
+      diskSizeGB: 1
+      ipAllowList: []

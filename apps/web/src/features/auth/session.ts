@@ -33,15 +33,25 @@ export function useLogin() {
 
 export function useLogout() {
   const qc = useQueryClient();
+  const clearSession = async () => {
+    // Only discard session state after revocation or an authoritative 401.
+    await qc.cancelQueries();
+    qc.setQueryData(meKey, null);
+    qc.removeQueries({
+      predicate: (query) => query.queryKey[0] !== meKey[0],
+    });
+  };
   return useMutation({
     mutationFn: () => api<undefined>("/auth/logout", { method: "POST" }),
-    onSettled: async () => {
-      // Keep the active session observer attached while removing private data.
-      await qc.cancelQueries();
-      qc.setQueryData(meKey, null);
-      qc.removeQueries({
-        predicate: (query) => query.queryKey[0] !== meKey[0],
-      });
+    onSuccess: clearSession,
+    onError: async (error) => {
+      if (error instanceof ApiError && error.status === 401) {
+        await clearSession();
+      } else {
+        // The mutation remains failed and retryable. Recheck expiry without
+        // pretending a failed request revoked the server session.
+        await qc.invalidateQueries({ queryKey: meKey });
+      }
     },
   });
 }

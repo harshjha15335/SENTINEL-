@@ -95,9 +95,10 @@ def capture_order(
 _CARD_CSS = (
     "body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;"
     " background: #0f172a; color: #f8fafc; display: flex; align-items: center;"
-    " justify-content: center; height: 100vh; margin: 0; }"
+    " justify-content: center; min-height: 100dvh; margin: 0;"
+    " padding: 1rem; box-sizing: border-box; }"
     " .card { background: #1e293b; padding: 2rem; border-radius: 0.75rem;"
-    " border: 1px solid #334155; max-width: 480px; width: 100%;"
+    " border: 1px solid #334155; max-width: 480px; width: 100%; box-sizing: border-box;"
     " box-shadow: 0 10px 25px rgba(0,0,0,0.5); }"
     " .badge { display: inline-block; padding: 0.25rem 0.75rem; border-radius: 9999px;"
     " font-size: 0.875rem; font-weight: 600; margin-bottom: 1rem; }"
@@ -114,18 +115,31 @@ def checkout_return(token: str | None = None, PayerID: str | None = None) -> HTM
     safe_payer = html.escape(PayerID or "—")
     content = (
         "<!DOCTYPE html><html lang='en'><head><meta charset='utf-8'>"
-        "<title>SENTINEL — PayPal Sandbox Approval Confirmed</title>"
+        "<meta name='viewport' content='width=device-width, initial-scale=1'>"
+        "<title>SENTINEL — PayPal Sandbox Return Received</title>"
         f"<style>{_CARD_CSS} .badge {{ background: #166534; color: #4ade80; }}</style>"
         "</head><body><div class='card'>"
-        "<div class='badge'>SANDBOX APPROVAL RECORDED</div>"
-        "<h1>Buyer Approval Confirmed</h1>"
-        "<p>PayPal Sandbox buyer approval succeeded for this order session.</p>"
+        "<div class='badge'>SANDBOX RETURN RECEIVED</div>"
+        "<h1>Approval Not Verified</h1>"
+        "<p>A checkout return was received. This page does not verify "
+        "buyer approval or payment capture.</p>"
         f"<p>Order Token: <code>{safe_token}</code></p>"
         f"<p>Payer ID: <code>{safe_payer}</code></p>"
-        "<p><strong>Next step:</strong> Return to your SENTINEL terminal to verify approval.</p>"
+        "<p><strong>Next step:</strong> Return to your SENTINEL workspace "
+        "to inspect the server-recorded payment status.</p>"
         "</div></body></html>"
     )
-    return HTMLResponse(content=content)
+    return HTMLResponse(
+        content=content,
+        headers={
+            "Content-Security-Policy": (
+                "default-src 'none'; style-src 'unsafe-inline'; frame-ancestors 'none'; "
+                "base-uri 'none'; form-action 'none'"
+            ),
+            "Cache-Control": "no-store",
+            "Referrer-Policy": "no-referrer",
+        },
+    )
 
 
 @router.get("/cancel", response_class=HTMLResponse)
@@ -133,14 +147,26 @@ def checkout_cancel(token: str | None = None) -> HTMLResponse:
     safe_token = html.escape(token or "—")
     content = (
         "<!DOCTYPE html><html lang='en'><head><meta charset='utf-8'>"
-        "<title>SENTINEL — PayPal Sandbox Approval Cancelled</title>"
+        "<meta name='viewport' content='width=device-width, initial-scale=1'>"
+        "<title>SENTINEL — PayPal Sandbox Cancel Return</title>"
         f"<style>{_CARD_CSS} .badge {{ background: #991b1b; color: #f87171; }}</style>"
         "</head><body><div class='card'>"
-        "<div class='badge'>SANDBOX APPROVAL CANCELLED</div>"
-        "<h1>Buyer Approval Cancelled</h1>"
-        "<p>The buyer cancelled the PayPal Sandbox checkout session.</p>"
+        "<div class='badge'>SANDBOX CANCEL RETURN</div>"
+        "<h1>Checkout Cancel Return</h1>"
+        "<p>A checkout cancellation return was received. This page does not "
+        "change or verify the payment status.</p>"
         f"<p>Order Token: <code>{safe_token}</code></p>"
-        "<p>You may return to your terminal to inspect the cancelled transaction.</p>"
+        "<p>You may return to your terminal to inspect the recorded transaction status.</p>"
         "</div></body></html>"
     )
-    return HTMLResponse(content=content)
+    return HTMLResponse(
+        content=content,
+        headers={
+            "Content-Security-Policy": (
+                "default-src 'none'; style-src 'unsafe-inline'; frame-ancestors 'none'; "
+                "base-uri 'none'; form-action 'none'"
+            ),
+            "Cache-Control": "no-store",
+            "Referrer-Policy": "no-referrer",
+        },
+    )

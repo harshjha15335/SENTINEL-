@@ -5714,6 +5714,9 @@
             },
             "description": "Successful Response"
           },
+          "413": {
+            "description": "Evidence request or file exceeds the configured size limit"
+          },
           "422": {
             "content": {
               "application/json": {

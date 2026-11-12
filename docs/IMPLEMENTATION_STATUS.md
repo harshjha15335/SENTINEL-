@@ -1,3 +1,68 @@
+## Remote staging container acceptance correction — 12 November 2026
+
+The first fresh GitHub image build succeeded, including the legacy startup smoke.
+Strict isolated staging acceptance then failed because its internal Docker network
+exposed no host-port mapping; the runner incorrectly assumed one. The retained
+application-port log reports `index of untyped nil`. The runner now probes the real
+API through loopback INSIDE the running app container with `docker exec -i`, retaining
+network isolation and requiring no published host port. JSON credentials/cookies are
+passed through stdin and never command arguments or public error logs. Six focused
+probe regressions (the original four plus two transport/security cases) pass locally.
+Full fresh image, TLS, readiness, worker recovery and restart acceptance must rerun on
+the corrected revision; a passing build alone is not full acceptance. Application,
+UI, model, dependency, contract and migration source remain unchanged by this fix.
+
+> Latest release authorization (12 November 2026): owner-verified Blueprint,
+> webhook and empty-Staging checks are accepted; remaining uninspected integrations
+> are acknowledged residual risk. Earlier blanket H02 publication blocks below are
+> historical and superseded by docs/remediation/2026-11-12/owner-release-evidence.md.
+> Current CI/Docker/source-preservation and billing/plan gates still apply.
+
+## Autonomous release follow-up — 12 November 2026
+
+The latest owner instruction conditionally authorizes publication, reviewed merges
+and Render-only staging within verified eligible credits. Earlier blanket pending-
+approval statements below are historical; H02, exact-source Docker/CI and billing/
+plan prerequisites remain mandatory. No publication, merge or provisioning occurred.
+
+Fixed a confirmed defect in the prepared container acceptance runner: its local
+`http` function shadowed the module used for HTTP connections and error handling.
+The runner now uses explicitly imported HTTPConnection/HTTPException and a tested
+loopback probe; four new regression cases run before Docker in the CI gate. Existing
+application/runtime source, UI, models, contracts, dependencies and migration revisions
+are unchanged by this follow-up. Full regression rerun evidence is recorded in the
+external autonomous-release report. Full Docker acceptance remains unexecuted because
+local capacity is insufficient and H02 prevents safe publication to run GitHub CI.
+
+See docs/remediation/2026-11-12/autonomous-release.md for the precise owner evidence,
+updated authorization, same-Blueprint sequence and budget/stop prerequisites.
+
+# Scoped Render TLS approval and merge candidate — 12 November 2026 (Asia/Calcutta)
+
+Owner approved only synthetic Render staging's encrypted-only TLS policy; no publication, merge, provisioning or spending approval. Starting 268adacaa0958a7bb5df6cdc576ee2d8e77bbfae is preserved at backup/render-tls-268adac. Applied/hardened policy: default hosted verify-full unchanged; exception requires approved staging/project/workspace tuple, exact reviewed internal host/user/database, secure fixture/no-provider profile, no connection redirects or ambient libpq overrides. Effective Alembic URLs are validated and connection identity/TLS explicitly pinned. Configuration errors suppress input secrets. Actual resource identity still requires owner review when resources exist; require does not authenticate the server certificate.
+
+Fresh full matrix **597 passed, one live-AI skipped**: 445 API, 53 frontend, 7 ML, 34 auxiliary, 34 operational browser, 24 static browser; 63 new security cases. Lint/types/format, three builds, contracts, disposable migrations/schema, security/keyboard/production isolation pass; 51 visual checks report no defects. Approved UI/model/revision/financial-control sources unchanged. Local Docker remains capacity-blocked (~8 GB filesystem, <0.25 GB free, VFS, no build cache); no unrelated files/worktrees/recovery backups deleted. Prepared build-only GitHub container acceptance with read-only token, exact SHA/clean tree, generated credentials, isolated internal fixtures, mandatory TLS/default verification checks, migrations/worker/UI/restart evidence, no deployment/registry push. Workflow is NOT executed. Three Blueprint schemas/manual controls pass; 2 GB app + 1 GB DB proposal stays $44.30/month base. No push, PR action, merge, Render creation/application, genuine provider call, paid AI or credits spent. H02, fresh Docker CI, actual host/proxy/account/quote review and separate approvals remain. See deploy/render-staging.md and docs/remediation/2026-11-12/tls-approval.md.
+
+# Render staging compatibility remediation — 12 November 2026 (Asia/Calcutta)
+
+Local-only correction on fix/sentinel-v2-acceptance-blockers, preserving checkpoint 8993816840192e259cedc2e02809d455328a85ff at backup/render-staging-8993816. Mode-aware readiness now permits intentionally unconfigured fixture staging while requiring genuine pipeline/schema/database health; configured/sandbox bridges remain mandatory and incomplete settings fail closed. Supervisor restart states and graceful pipeline STOPPED heartbeat are truthful. Strict database verify-full remains active. A narrow encrypted-only internal Render policy is an INERT approval-pending patch, not applied runtime code.
+
+Fresh full matrix: **534 passed, 1 credential-gated live-AI skipped** (382 API, 53 frontend, 7 ML, 34 auxiliary, 34 operational browser, 24 static browser), 26 new cases over 508. Backend/frontend lint/types and formatting, ML checks, three frontend builds, contracts, disposable schema/migrations, security/keyboard/production isolation pass; 51 visual checks have no reported layout/accessibility/page defects. Actual local hosted-profile entrypoint, strict TLS 1.3 DB sessions, crash-induced 503/recovery, graceful STOPPED and restart pass. Real queued-job owner-death handoff yields one assessment/one attempt after duplicate enqueue.
+
+Database sizing: capped 256 MiB/0.1 CPU stayed functional but p95 5.80 s failed the pre-set 2 s four-reader workload target; capped 1 GiB/0.5 CPU passed at 0.74 s. Keep 1 GB PostgreSQL and 2 GB web: published base $44.30/month, actual fees/credits unverified. Original local test-server limits/TLS settings and all databases were preserved/restored. Full Dockerfile build and container startup remain BLOCKED by local VFS disk exhaustion; failed attempts retained, not presented as passes. Approved UI, models, financial controls, migrations, contracts, Dockerfile and dependency pins are unchanged. Root/staging manifests are canonical mirrors; database-only first phase belongs to the SAME future manual Blueprint. No push, PR update, merge, Render creation/application/resource change, genuine provider call, paid AI or credit spend. H02, TLS security decision, fresh Docker evidence and explicit approvals remain open. See [full staging handoff](../deploy/render-staging.md).
+
+# Render-only staging Blueprint preparation — 11 November 2026
+
+Owner-verified Sentinel / My Workspace / Staging has 0 services, 0 environment groups and no deployed resources; this does not prove no Blueprint or external binding. Root `render.yaml` now uses `autoDeployTrigger: 'off'` and disabled previews. New review-only `deploy/render-staging.yaml` proposes the unchanged FastAPI/React Docker application and PostgreSQL 16 for the existing project; Blueprint Auto Sync must separately be false in account metadata. Current published base estimate is $44.30/month (2 GB web, 1 GB PostgreSQL, 1 GB DB disk), excluding extras and workspace fees; actual billing/credits are not verified.
+
+Verified: both manifests pass current public JSON Schema, two existing Render contract tests pass, actual Settings accepts fixture/none flags, migration target matches the source graph, and an offline no-network readiness probe fails closed without the required Supabase bridge. Also identified a hosting incompatibility: internal Render PostgreSQL TLS does not support the application's required verify-full mode. These are unresolved application compatibility blockers, not successful hosted acceptance. No backend/UI/models/dependencies were changed; full 508-test suite was not rerun. Render CLI is absent; no platform-side validation. Historical continuous proposal remains intentionally unresolved. See [staging handoff](../deploy/render-staging.md) for findings, evidence limits, H02 checklist, exact approval gates, budget and deployment procedure. No push, merge, provisioning, deployment, hosting mutation or credits spent.
+
+# Local acceptance-blocker remediation — 11 November 2026
+
+Local branch `fix/sentinel-v2-acceptance-blockers` corrects S01–S04 and local H01 handoff. Final local verification: **508 passed, 1 live-AI skipped** (356 API, 53 frontend, 7 ML, 34 auxiliary, 58 browser). Formatting/lint/typing, production/portable/Pages builds and production isolation passed. Earlier failed/interrupted runs and frontend timeout instability are retained in external evidence. No tests/timeouts/Axe rules weakened.
+
+Approved V2 presentation, models/migrations and payment/scoring/investigation semantics remain preserved outside the scoped fixes. H02 remains a merge blocker; H01 hosted rollout and H03 hosting approval/acceptance remain open. PR #2/main unchanged. No push, merge, deployment or paid/provider execution. See [remediation handoff](remediation/2026-11-11/README.md), hosting proposal and owner verification checklist. Exact final SHA is in the external delivery report.
+
 # Implementation Status
 
 ## SENTINEL UI/implementation integration — 11 November 2026

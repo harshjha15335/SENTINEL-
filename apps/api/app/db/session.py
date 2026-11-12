@@ -9,12 +9,15 @@ from sqlalchemy.orm import Session, sessionmaker
 from app.core.config import Settings, get_settings
 
 
-def database_connect_args(settings: Settings) -> dict[str, str]:
-    """Hosted connections must verify PostgreSQL encryption and server identity.
+def database_connect_args(settings: Settings, database_url: str | None = None) -> dict[str, str]:
+    """Default hosted policy verifies PostgreSQL encryption and server identity.
 
     Explicit connect arguments override any weaker sslmode in a provider-issued URL.
-    Development loopback databases retain their existing configuration.
+    Only the owner-approved synthetic Render staging profile uses encrypted-only
+    TLS. Development loopback databases retain their existing configuration.
     """
+    if settings.database_tls_policy == "render_internal_staging":
+        return settings.render_internal_database_args(database_url)
     if not settings.hosted_deployment:
         return {}
     root = settings.database_ssl_root_cert or ssl.get_default_verify_paths().cafile

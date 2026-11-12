@@ -3327,6 +3327,13 @@ export interface operations {
                     "application/json": components["schemas"]["EvidenceOut"];
                 };
             };
+            /** @description Evidence request or file exceeds the configured size limit */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
             /** @description Validation Error */
             422: {
                 headers: {
