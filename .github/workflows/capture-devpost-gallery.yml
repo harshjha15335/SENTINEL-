@@ -1,0 +1,51 @@
+name: Capture authentic Devpost gallery (staging only)
+
+"on":
+  push:
+    branches:
+      - assets/devpost-gallery-20261113
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  gallery:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: apps/web
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: npm
+          cache-dependency-path: apps/web/package-lock.json
+      - name: Install locked web dependencies
+        run: npm ci
+      - name: Install browser and OS dependencies
+        run: npx playwright install --with-deps chromium
+      - name: Capture 15 real 3:2 staging screens with public read-only demo
+        run: node scripts/capture-devpost-gallery.cjs
+      - name: Verify image dimensions, count and size
+        if: success()
+        run: |
+          python3 - <<'PY'
+          import pathlib, json, struct
+          p=pathlib.Path('devpost-gallery')
+          images=sorted(p.glob('*.jpg'))
+          assert len(images)==15, f'expected 15, got {len(images)}'
+          assert all(20000 < x.stat().st_size < 5*1024*1024 for x in images)
+          assert len(json.loads((p/'manifest.json').read_text())['images'])==15
+          print('Verified',len(images),'real 1440x960 screenshots under 5 MB')
+          PY
+      - name: Upload browser-captured Devpost images
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: SENTINEL-Devpost-Real-Website-Gallery
+          path: apps/web/devpost-gallery/
+          retention-days: 14
+          if-no-files-found: error
