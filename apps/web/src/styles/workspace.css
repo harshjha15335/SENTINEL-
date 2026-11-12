@@ -127,6 +127,80 @@ button {
   background: #efebf5;
   border-radius: 8px;
 }
+.workspace-user-menu {
+  position: relative;
+  z-index: 40;
+  flex: 0 0 auto;
+}
+.workspace-user-menu > summary {
+  list-style: none;
+  display: grid;
+  place-items: center;
+  width: 43px;
+  height: 43px;
+  border: 1px solid #ded7e5;
+  border-radius: 50%;
+  background: #f7f4ee;
+  color: #201a2b;
+  cursor: pointer;
+}
+.workspace-user-menu > summary::-webkit-details-marker { display: none; }
+.workspace-user-menu[open] > summary,
+.workspace-user-menu > summary:hover { color: #6135c9; border-color: #bda7ee; }
+.workspace-user-menu > summary:focus-visible { outline: 3px solid #7547eb; outline-offset: 3px; }
+.workspace-user-panel {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  width: min(310px, calc(100vw - 32px));
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  padding: 19px;
+  border: 1px solid #ded7e5;
+  border-radius: 16px;
+  background: white;
+  box-shadow: 0 20px 45px #201a2b18;
+  color: #201a2b;
+  font-size: 13px;
+}
+.workspace-user-panel .workspace-user-label {
+  font: 10px "IBM Plex Mono", monospace;
+  letter-spacing: .09em;
+  color: #686273;
+}
+.workspace-user-email { overflow-wrap: anywhere; font-weight: 600; }
+.workspace-user-role {
+  align-self: flex-start;
+  border-radius: 16px;
+  background: #e9e0ff;
+  color: #6135c9;
+  padding: 4px 10px;
+  font: 11px "IBM Plex Mono", monospace;
+}
+.workspace-user-panel hr { border: 0; border-top: 1px solid #ded7e5; width: 100%; margin: 4px 0; }
+.workspace-user-panel a,
+.workspace-user-panel button {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 12px;
+  border: 0;
+  border-radius: 9px;
+  color: #201a2b;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+}
+.workspace-user-panel a:hover, .workspace-user-panel button:hover { background: #efebf5; }
+.workspace-user-panel button:disabled { opacity: .6; cursor: wait; }
+.workspace-user-error { color: #af2538; line-height: 1.5; }
+.workspace-account-hint { font-size: 11px; color: #686273; }
+@media (max-width: 650px) {
+  .workspace-account-hint { display: none; }
+  .workspace-menu nav { right: -58px; max-width: calc(100vw - 36px); }
+}
 .workspace-mobile-links {
   display: none;
 }
