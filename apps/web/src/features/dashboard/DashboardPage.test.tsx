@@ -127,7 +127,7 @@ describe("DashboardPage", () => {
     ]);
     renderWithProviders(<DashboardPage />);
     expect(await screen.findByText("Recorded review case")).toBeInTheDocument();
-    expect(screen.getByLabelText("7 open high-priority review cases")).toHaveTextContent("7open high-priority cases");
+    expect(screen.getByLabelText("7 open high-priority review cases")).toHaveTextContent(/7\s*open high-priority cases/);
     expect(screen.getByText("$99.00")).toBeInTheDocument();
     expect(
       screen.getByRole("link", { name: "Investigate this case" }),
