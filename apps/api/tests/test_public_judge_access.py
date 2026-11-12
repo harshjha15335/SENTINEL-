@@ -1,4 +1,5 @@
 """Regression: public judge login must never create a privileged or real-data session."""
+
 from types import SimpleNamespace
 
 from app.api.v1 import auth
@@ -73,10 +74,13 @@ def test_guest_login_is_tenant_isolated_and_read_only(app_client, db, monkeypatc
         headers={"Origin": "https://sentinel-v2-staging.onrender.com"},
     )
     assert replacement.status_code == 409
-    assert app_client.post(
-        "/api/v1/auth/logout",
-        headers={"X-CSRF-Token": body["csrf_token"]},
-    ).status_code == 204
+    assert (
+        app_client.post(
+            "/api/v1/auth/logout",
+            headers={"X-CSRF-Token": body["csrf_token"]},
+        ).status_code
+        == 204
+    )
 
 
 def test_public_demo_does_not_use_untrusted_merchant(app_client, db, monkeypatch):
