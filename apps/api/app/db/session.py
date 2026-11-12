@@ -13,10 +13,11 @@ def database_connect_args(settings: Settings, database_url: str | None = None) -
     """Default hosted policy verifies PostgreSQL encryption and server identity.
 
     Explicit connect arguments override any weaker sslmode in a provider-issued URL.
-    Only the owner-approved synthetic Render staging profile uses encrypted-only
-    TLS. Development loopback databases retain their existing configuration.
+    Explicit, separately approved Render internal staging profiles may use
+    encrypted-only TLS. No server-identity claim is made. Development loopback
+    databases retain their existing configuration.
     """
-    if settings.database_tls_policy == "render_internal_staging":
+    if settings.database_tls_policy in ("render_internal_staging", "render_internal_integrated_staging"):
         return settings.render_internal_database_args(database_url)
     if not settings.hosted_deployment:
         return {}
