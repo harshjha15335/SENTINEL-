@@ -437,58 +437,66 @@ function Chart({
   xLabel: string;
   yLabel: string;
 }) {
+  // All five validation charts are on a zero-to-one rate scale.
+  const ticks = [0, 0.25, 0.5, 0.75, 1];
+  const left = 64, right = 437, top = 28, bottom = 238;
+  const x = (value: number) => left + value * (right - left);
+  const y = (value: number) => bottom - value * (bottom - top);
   const path = (rows: Point[]) =>
     rows
-      .map((p, i) => `${i ? "L" : "M"}${40 + p.x * 270},${165 - p.y * 135}`)
+      .filter((point) => Number.isFinite(point.x) && Number.isFinite(point.y))
+      .map((point, index) => `${index === 0 ? "M" : "L"}${x(point.x).toFixed(2)} ${y(point.y).toFixed(2)}`)
       .join(" ");
   return (
-    <Panel title={title}>
-      <svg
-        viewBox="0 0 340 205"
-        role="img"
-        aria-label={`${title}. Horizontal axis: ${xLabel}. Vertical axis: ${yLabel}.`}
-        className="w-full"
-      >
-        <path
-          d="M40 30 V165 H310"
-          fill="none"
-          stroke="currentColor"
-          opacity="0.4"
-        />
-        <path d={path(points)} fill="none" stroke="#7547EB" strokeWidth="2" />
-        {secondary && (
-          <path
-            d={path(secondary)}
-            fill="none"
-            stroke="#C33145"
-            strokeWidth="2"
-          />
-        )}
-        <text x="35" y="180" fill="currentColor" fontSize="10">
-          0
-        </text>
-        <text x="300" y="180" fill="currentColor" fontSize="10">
-          1
-        </text>
-        <text x="22" y="35" fill="currentColor" fontSize="10">
-          1
-        </text>
-        <text
-          x="175"
-          y="198"
-          textAnchor="middle"
-          fill="currentColor"
-          fontSize="11"
+    <Panel title={title} className="min-w-0">
+      <div className="min-w-0">
+        <svg
+          viewBox="0 0 470 303"
+          role="img"
+          aria-label={`${title}. ${xLabel} from 0% to 100% along the horizontal axis and ${yLabel} from 0% to 100% along the vertical axis.`}
+          className="block w-full max-w-full"
         >
-          {xLabel}
-        </text>
-      </svg>
-      {secondary && (
-        <p className="text-xs text-fg-muted">Teal: precision · amber: recall</p>
-      )}
-      <p className="text-xs text-fg-muted">
-        {yLabel}; synthetic validation observations only.
-      </p>
+          <title>{title}</title>
+          {ticks.map((tick) => (
+            <g key={tick}>
+              <line x1={left} x2={right} y1={y(tick)} y2={y(tick)} stroke="#DED7E5" strokeWidth="1" />
+              <line x1={x(tick)} x2={x(tick)} y1={top} y2={bottom} stroke="#DED7E5" strokeWidth="1" />
+              <text x={left - 10} y={y(tick) + 4} textAnchor="end" fontSize="12" fill="#686273">
+                {Math.round(tick * 100)}%
+              </text>
+              <text x={x(tick)} y={bottom + 22} textAnchor="middle" fontSize="12" fill="#686273">
+                {Math.round(tick * 100)}%
+              </text>
+            </g>
+          ))}
+          <path d={`M${left} ${top} V${bottom} H${right}`} fill="none" stroke="#51465F" strokeWidth="1.25" />
+          <path d={path(points)} fill="none" stroke="#7547EB" strokeWidth="2.8" strokeLinecap="round" strokeLinejoin="round" />
+          {secondary && (
+            <path d={path(secondary)} fill="none" stroke="#C33145" strokeWidth="2.8" strokeLinecap="round" strokeLinejoin="round" />
+          )}
+          <text x={(left + right) / 2} y="291" textAnchor="middle" fill="#201A2B" fontSize="13">
+            {xLabel}
+          </text>
+          <text transform="translate(16 134) rotate(-90)" textAnchor="middle" fill="#201A2B" fontSize="13">
+            {yLabel}
+          </text>
+        </svg>
+        <div className="mt-1 flex flex-wrap gap-x-5 gap-y-2 text-xs text-fg-muted" aria-label="Chart series">
+          <span className="inline-flex items-center gap-2">
+            <span aria-hidden="true" className="inline-block h-0.5 w-5 bg-[#7547EB]" />
+            {secondary ? "Precision" : yLabel}
+          </span>
+          {secondary && (
+            <span className="inline-flex items-center gap-2">
+              <span aria-hidden="true" className="inline-block h-0.5 w-5 bg-[#C33145]" />
+              Recall
+            </span>
+          )}
+        </div>
+        <p className="mt-2 text-xs leading-relaxed text-fg-muted">
+          Each axis shows rates from 0% to 100%. Synthetic validation observations only, not live PayPal outcomes.
+        </p>
+      </div>
     </Panel>
   );
 }

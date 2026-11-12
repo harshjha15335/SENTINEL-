@@ -1,5 +1,5 @@
 import { clsx } from "clsx";
-import { ArrowUpRight, LogOut } from "lucide-react";
+import { ArrowUpRight, LogOut, UserRound, Settings2 } from "lucide-react";
 import { useRef } from "react";
 import { NavLink, Navigate, Outlet, useLocation, Link } from "react-router-dom";
 import { AppNavigation } from "./AppNavigation";
@@ -116,13 +116,10 @@ function WorkspaceSession() {
             </Link>
           </nav>
         </details>
+        <UserAccountMenu email={me.data.email} role={me.data.role} />
       </header>
       {STATIC_DEMO && <StaticDemoBanner />}
-      <AccountBar
-        email={me.data.email}
-        role={me.data.role}
-        merchant={me.data.merchant.name}
-      />
+      <AccountBar merchant={me.data.merchant.name} />
       <main
         id="main"
         tabIndex={-1}
@@ -138,17 +135,8 @@ function WorkspaceSession() {
     </div>
   );
 }
-function AccountBar({
-  email,
-  role,
-  merchant,
-}: {
-  email: string;
-  role: string;
-  merchant: string;
-}) {
-  const logout = useLogout(),
-    status = usePayPalStatus(),
+function AccountBar({ merchant }: { merchant: string }) {
+  const status = usePayPalStatus(),
     mode = status.data?.mode,
     healthy = status.data?.token_check === "ok";
   return (
@@ -174,26 +162,38 @@ function AccountBar({
           </span>
         )}
       </div>
-      {logout.isError && (
-        <p role="alert" className="text-critical text-sm">
-          Sign out failed. Your session may still be active. Please retry sign
-          out.
-        </p>
-      )}
-      <div className="workspace-account">
-        <span>
-          {email} <small>{role}</small>
-        </span>
+      <span className="workspace-account-hint">Review decisions remain under human control.</span>
+    </section>
+  );
+}
+
+function UserAccountMenu({ email, role }: { email: string; role: string }) {
+  const logout = useLogout();
+  const userMenu = useRef<HTMLDetailsElement>(null);
+  return (
+    <details className="workspace-user-menu" ref={userMenu}>
+      <summary aria-label="Open account menu" title="Your account">
+        <UserRound size={20} aria-hidden="true" />
+        <span className="sr-only">Account</span>
+      </summary>
+      <div className="workspace-user-panel">
+        <p className="workspace-user-label">SIGNED IN AS</p>
+        <strong className="workspace-user-email">{email}</strong>
+        <span className="workspace-user-role">{role}</span>
+        <hr />
+        <Link to="/app/settings" onClick={() => { if (userMenu.current) userMenu.current.open = false; }}>
+          <Settings2 size={16} aria-hidden="true" /> Account &amp; integrations
+        </Link>
         {!STATIC_DEMO && (
-          <button
-            aria-label={logout.isError ? "Retry sign out" : "Sign out"}
-            onClick={() => logout.mutate()}
-            disabled={logout.isPending}
-          >
-            <LogOut size={17} />
+          <button type="button" onClick={() => logout.mutate()} disabled={logout.isPending}>
+            <LogOut size={16} aria-hidden="true" />
+            {logout.isPending ? "Signing out…" : "Sign out"}
           </button>
         )}
+        {logout.isError && (
+          <p role="alert" className="workspace-user-error">Sign out failed. Please retry.</p>
+        )}
       </div>
-    </section>
+    </details>
   );
 }

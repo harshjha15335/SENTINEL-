@@ -63,7 +63,7 @@ export const storyStages = [
     label: "The wallet",
     title: "Every payment",
     subtitle: "has a story.",
-    text: "Not every story ends well.",
+    text: "Spot unusual payments. Investigate risk signals. Document decisions.",
   },
   {
     step: "02",
@@ -103,8 +103,8 @@ export const storyStages = [
   {
     step: "07",
     label: "Product reveal",
-    title: "Your next move,",
-    subtitle: "better informed.",
-    text: "Enter the workspace. Trace the payment. Make the decision.",
+    title: "Review the risk.",
+    subtitle: "Record the decision.",
+    text: "Open a review case, inspect its risk signals and payment history, then document the outcome.",
   },
 ] as const;
