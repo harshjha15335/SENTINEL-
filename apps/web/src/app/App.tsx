@@ -25,6 +25,7 @@ import { LoginPage } from "@/features/auth/LoginPage";
 import { DashboardPage } from "@/features/dashboard/DashboardPage";
 import { SettingsPage } from "@/features/settings/SettingsPage";
 import { ApiError } from "@/lib/api";
+import { STATIC_DEMO } from "@/lib/staticDemo";
 import { NotFoundPage } from "@/pages/NotFoundPage";
 
 // Heavy screens load on demand: AG Grid (transactions) and the PayPal SDK (checkout).
@@ -107,6 +108,11 @@ const PublicDemoPayment = lazy(() =>
     default: m.PublicDemoPayment,
   })),
 );
+const AuthenticatedIntro = lazy(() =>
+  import("@/features/experience/Experience").then((m) => ({
+    default: m.AuthenticatedIntro,
+  })),
+);
 const publicFallback = (
   <main className="experience-loading" role="status">
     <div className="workspace-brand">
@@ -164,11 +170,11 @@ export function AppRoutes() {
     <Routes>
       <Route
         path="/"
-        element={
+        element={STATIC_DEMO ? (
           <Suspense fallback={publicFallback}>
             <MarketingHome />
           </Suspense>
-        }
+        ) : <Navigate to="/login" replace /> }
       />
       <Route
         path="/demo-payment"
@@ -179,6 +185,14 @@ export function AppRoutes() {
         }
       />
       <Route path="/login" element={<LoginPage />} />
+      <Route
+        path="/intro"
+        element={
+          <Suspense fallback={publicFallback}>
+            <AuthenticatedIntro />
+          </Suspense>
+        }
+      />
       <Route path="/app" element={<AppShell />}>
         <Route index element={<DashboardPage />} />
         <Route
