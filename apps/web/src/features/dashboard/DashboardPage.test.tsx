@@ -127,10 +127,10 @@ describe("DashboardPage", () => {
     ]);
     renderWithProviders(<DashboardPage />);
     expect(await screen.findByText("Recorded review case")).toBeInTheDocument();
-    expect(screen.getByText("7 OPEN HIGH-PRIORITY CASES")).toBeInTheDocument();
+    expect(screen.getByLabelText("7 open high-priority review cases")).toHaveTextContent("7open high-priority cases");
     expect(screen.getByText("$99.00")).toBeInTheDocument();
     expect(
-      screen.getByRole("link", { name: "Review the case" }),
+      screen.getByRole("link", { name: "Investigate this case" }),
     ).toHaveAttribute("href", "/app/cases/real-case");
   });
   it("keeps a queue API failure as an error rather than showing illustrative cases", async () => {
@@ -160,7 +160,7 @@ describe("DashboardPage", () => {
       "Review queue unavailable",
     );
     expect(
-      screen.queryByRole("link", { name: "Review the case" }),
+      screen.queryByRole("link", { name: "Investigate this case" }),
     ).not.toBeInTheDocument();
   });
 });
