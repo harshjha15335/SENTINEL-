@@ -3,6 +3,7 @@
 Only operator-side provision() may seed data. The public login endpoint only issues
 short-lived VIEWER sessions after verifying the tenant contains no provider data.
 """
+
 import secrets
 
 from sqlalchemy import and_, func, or_, select
@@ -22,11 +23,7 @@ def demo_viewer(db: Session) -> User | None:
     ):
         return None
     viewer = db.scalar(select(User).where(User.email == JUDGE_EMAIL))
-    if (
-        viewer is None
-        or viewer.merchant_id != merchant.id
-        or viewer.role is not Role.VIEWER
-    ):
+    if viewer is None or viewer.merchant_id != merchant.id or viewer.role is not Role.VIEWER:
         return None
     # Do not make any records accessible if a provider-origin record has
     # accidentally entered the judge tenant.
