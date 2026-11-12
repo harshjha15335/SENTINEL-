@@ -55,6 +55,8 @@ export function TransactionsPage() {
   const uniformOrigin = firstOrigin && q.data?.items.every((item) => item.data_origin === firstOrigin)
     ? firstOrigin
     : null;
+  const hasOrderReferences = q.data?.items.some((item) => Boolean(item.paypal_order_id)) ?? false;
+  const hasCaptureReferences = q.data?.items.some((item) => Boolean(item.paypal_capture_id)) ?? false;
 
   const update = (patch: Record<string, string>) => {
     const next = new URLSearchParams(params);
@@ -69,18 +71,22 @@ export function TransactionsPage() {
   const columns = useMemo<ColDef<Transaction>[]>(
     () => [
       {
-        headerName: "Order reference",
+        headerName: "PayPal order reference",
         field: "paypal_order_id",
-        minWidth: 170,
+        minWidth: 165,
+        hide: !hasOrderReferences,
+        headerTooltip: "Actual PayPal order ID, if provided by PayPal; synthetic demo records have no PayPal order ID.",
         cellClass: "font-mono text-xs",
-        valueFormatter: (p) => p.value ?? "—",
+        valueFormatter: (p) => p.value ?? "Not applicable",
       },
       {
-        headerName: "Capture reference",
+        headerName: "PayPal capture reference",
         field: "paypal_capture_id",
-        minWidth: 160,
+        minWidth: 165,
+        hide: !hasCaptureReferences,
+        headerTooltip: "Actual PayPal capture ID, if available; never a fabricated demo identifier.",
         cellClass: "font-mono text-xs",
-        valueFormatter: (p) => p.value ?? "—",
+        valueFormatter: (p) => p.value ?? "Not applicable",
       },
       {
         headerName: "Item",
@@ -158,7 +164,7 @@ export function TransactionsPage() {
         valueFormatter: (p) => formatDateTime(p.value as string | undefined),
       },
     ],
-    [uniformOrigin],
+    [uniformOrigin, hasOrderReferences, hasCaptureReferences],
   );
 
   const total = q.data?.total ?? 0;
