@@ -1,0 +1,37 @@
+name: Payment dossier responsive layout
+
+on:
+  pull_request:
+    paths:
+      - "apps/web/src/features/experience/**"
+      - "apps/web/e2e/v2-dossier-spacing.spec.ts"
+      - ".github/workflows/dossier-layout.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  browser-layout:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/web
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: npm
+          cache-dependency-path: apps/web/package-lock.json
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - name: Verify story glass and payment dossier spacing
+        run: |
+          VITE_STATIC_DEMO=true npm run dev -- --host 127.0.0.1 --port 5175 > "$RUNNER_TEMP/dossier-vite.log" 2>&1 &
+          for i in $(seq 1 40); do
+            if curl --fail --silent http://127.0.0.1:5175/ > /dev/null; then break; fi
+            sleep 1
+          done
+          curl --fail --silent http://127.0.0.1:5175/ > /dev/null
+          npx playwright test --config=playwright.v2.config.ts e2e/v2-dossier-spacing.spec.ts
