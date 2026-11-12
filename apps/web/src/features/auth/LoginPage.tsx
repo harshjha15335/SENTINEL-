@@ -11,6 +11,7 @@ import { introWasCompleted, resetIntro } from "@/features/experience/introSessio
 import { ErrorState } from "@/components/ui/States";
 
 import { useLogin, useMe } from "./session";
+import { DemoAccessButton } from "./DemoAccessButton";
 
 // Keep validation compatible with the existing CSP without probing dynamic code generation.
 z.config({ jitless: true });
@@ -123,6 +124,17 @@ export function LoginPage() {
               Sign in
             </Button>
           </form>
+          <div className="mt-7 border-t border-line pt-5">
+            <p className="text-sm font-semibold">Evaluating SENTINEL?</p>
+            <p className="mb-3 mt-1 text-xs leading-relaxed text-fg-muted">
+              Enter an isolated, read-only workspace with synthetic fraud cases,
+              prepared evidence and cited findings. No account or password needed.
+            </p>
+            <DemoAccessButton />
+            <p className="mt-3 text-xs text-fg-subtle">
+              Viewer access only · no checkout, refunds, approvals or live customer data.
+            </p>
+          </div>
         </div>
       </section>
     </main>

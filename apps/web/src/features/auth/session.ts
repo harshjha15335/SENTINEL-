@@ -31,6 +31,18 @@ export function useLogin() {
   });
 }
 
+/** Create a short-lived, server-scoped VIEWER session for synthetic-only judging. */
+export function useDemoLogin() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: () => api<Session>("/auth/demo", { method: "POST" }),
+    onSuccess: (session) => {
+      qc.clear();
+      qc.setQueryData(meKey, session.user);
+    },
+  });
+}
+
 export function useLogout() {
   const qc = useQueryClient();
   const clearSession = async () => {

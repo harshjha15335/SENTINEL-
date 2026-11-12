@@ -112,6 +112,31 @@ def test_saved_provider_credentials_remain_dormant_in_render_fixture_staging():
     assert config.worker_configuration_ready
 
 
+def test_public_judge_access_is_scoped_to_reviewed_staging():
+    config = settings(public_demo_login_enabled=True)
+    assert config.public_demo_login_enabled
+    assert session.database_connect_args(config)["sslmode"] == "require"
+
+
+@pytest.mark.parametrize(
+    "changes",
+    [
+        {"hosted_deployment": False},
+        {"environment": "development"},
+        {"deployment_stage": "production"},
+        {"render_project_id": "prj-other"},
+        {"render_workspace_id": "tea-other"},
+        {"database_tls_policy": "verify_full"},
+        {"cookie_secure": False},
+        {"refund_execution_enabled": True},
+        {"allow_webhook_fixtures": True},
+    ],
+)
+def test_public_judge_access_rejects_unreviewed_profiles(changes):
+    with pytest.raises(ValidationError):
+        settings(public_demo_login_enabled=True, **changes)
+
+
 def test_explicit_staging_gemini_gate_preserves_fixture_and_dormant_bridge():
     config = settings(
         staging_ai_enabled=True,

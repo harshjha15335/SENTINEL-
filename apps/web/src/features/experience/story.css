@@ -845,3 +845,38 @@
   .v2-story-interactive-dossier { margin: 20px 12px; padding: 20px 12px; }
   .v2-story-interactive-dossier .v2-workspace-main { padding: 0 4px 20px; }
 }
+
+/* Read-only guest access: glass accent consistent with Follow the Money. */
+.v2-story .v2-judge-entry {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  max-width: 100%;
+  min-height: 46px;
+  padding: 11px 17px;
+  margin-top: 15px;
+  color: #4b2b96;
+  background: linear-gradient(125deg, rgba(255,255,255,.88), rgba(236,224,255,.65));
+  border: 1px solid rgba(173,146,216,.64);
+  border-radius: 999px;
+  box-shadow: 0 7px 24px rgba(80,41,136,.08);
+  font-size: 13px;
+  font-weight: 600;
+  white-space: normal;
+  text-align: center;
+  line-height: 1.35;
+}
+.v2-story .v2-judge-entry:hover {
+  background: rgba(234,216,255,.92);
+  border-color: #7547eb;
+}
+.v2-story .v2-judge-entry:focus-visible {
+  outline: 3px solid #7547eb;
+  outline-offset: 3px;
+}
+.v2-story .v2-judge-entry:disabled { opacity: .65; }
+.v2-compact-hero .v2-judge-entry { margin-top: 20px; }
+@media (max-width: 650px) {
+  .v2-story .v2-judge-entry { padding: 11px 14px; font-size: 12px; }
+}

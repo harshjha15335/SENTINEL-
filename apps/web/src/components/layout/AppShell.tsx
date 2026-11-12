@@ -140,6 +140,11 @@ function WorkspaceSession() {
         <UserAccountMenu email={me.data.email} role={me.data.role} />
       </div>
       {STATIC_DEMO && <StaticDemoBanner />}
+      {!STATIC_DEMO && me.data.merchant.environment === "DEMO" && (
+        <div role="note" className="border-y border-accent/20 bg-accent-soft px-5 py-3 text-center text-xs font-medium text-fg">
+          READ-ONLY JUDGE DEMO · SYNTHETIC DATA · No payments or financial actions
+        </div>
+      )}
       <main
         id="main"
         tabIndex={-1}

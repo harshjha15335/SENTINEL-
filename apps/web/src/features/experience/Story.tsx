@@ -6,6 +6,7 @@ import { useRef, useSyncExternalStore } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { markIntroComplete } from "./introSession";
 import { WorkspaceEntryLink } from "./WorkspaceEntryLink";
+import { DemoAccessButton } from "@/features/auth/DemoAccessButton";
 import { ReceiptMorph, receiptMorph } from "./ReceiptMorph";
 import { DemoDossier } from "./Dossier";
 import { storyStages } from "./fixtures";
@@ -397,9 +398,12 @@ function DesktopStory({ workspaceTarget }: { workspaceTarget?: string }) {
                       </WorkspaceEntryLink>
                       <small>{workspaceTarget ? "Investigate payments and review evidence using synthetic demo data." : "Explore an interactive, simulated payment."}</small>
                       {!workspaceTarget && (
-                        <Link className="v2-auth-link" to="/app">
-                          Open authenticated workspace <ArrowUpRight size={15} />
-                        </Link>
+                        <>
+                          <DemoAccessButton className="v2-judge-entry" />
+                          <Link className="v2-auth-link" to="/login">
+                            Merchant sign in <ArrowUpRight size={15} />
+                          </Link>
+                        </>
                       )}
                     </>
                   )}
@@ -487,9 +491,12 @@ function CompactStory({ workspaceTarget }: { workspaceTarget?: string }) {
             {workspaceTarget ? "Enter workspace" : "Explore simulated demo"} <ArrowUpRight size={18} />
           </WorkspaceEntryLink>
           {!workspaceTarget && (
-            <Link className="v2-auth-link" to="/app">
-              Open authenticated workspace <ArrowUpRight size={15} />
-            </Link>
+            <>
+              <DemoAccessButton className="v2-judge-entry" />
+              <Link className="v2-auth-link" to="/login">
+                Merchant sign in <ArrowUpRight size={15} />
+              </Link>
+            </>
           )}
           <div className="v2-compact-wallet">
             <Wallet />
@@ -580,9 +587,12 @@ function StoryAfter({ workspaceTarget }: { workspaceTarget?: string }) {
           {workspaceTarget ? "Enter workspace" : "Open the simulated dossier"} <ArrowUpRight size={18} />
         </WorkspaceEntryLink>
         {!workspaceTarget && (
-          <Link className="v2-text-link" to="/app">
-            Open authenticated workspace <ArrowUpRight size={15} />
-          </Link>
+          <>
+            <DemoAccessButton className="v2-judge-entry" />
+            <Link className="v2-text-link" to="/login">
+              Merchant sign in <ArrowUpRight size={15} />
+            </Link>
+          </>
         )}
       </div>
     </section>
