@@ -89,7 +89,6 @@ def test_exception_rejects_incompatible_profiles(changes):
         settings(**changes)
 
 
-
 def test_saved_provider_credentials_remain_dormant_in_render_fixture_staging():
     """Provisioning secret pairs must never start PayPal/Gemini/bridge traffic."""
     config = settings(
