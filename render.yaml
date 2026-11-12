@@ -22,7 +22,7 @@ projects:
             numInstances: 1
             maxShutdownDelaySeconds: 60
             healthCheckPath: /api/v1/ready
-            preDeployCommand: "sh -c 'alembic upgrade d105a4143283 && python -m app.cli check-schema'"
+            preDeployCommand: ./render-predeploy.sh
             envVars:
               # Existing code requires this production SECURITY profile even in
               # Render's Staging environment. This does not enable live PayPal.

@@ -26,11 +26,12 @@ RUN --mount=type=bind,source=apps/api,target=/source,readonly \
     cp -r /source/alembic ./alembic; \
     cp /source/alembic.ini ./; \
     cp /source/scripts/start.sh ./start.sh; \
+    cp /source/scripts/render-predeploy.sh ./render-predeploy.sh; \
     cp -r /web-dist ./web; \
     if [ -f /run/secrets/build_ca ]; then export PIP_CERT=/run/secrets/build_ca; fi; \
     pip install .; \
     useradd --create-home --uid 10001 sentinel; \
-    chmod -R a+rX /app; chmod 755 /app/start.sh
+    chmod -R a+rX /app; chmod 755 /app/start.sh /app/render-predeploy.sh
 USER sentinel
 EXPOSE 8000
 HEALTHCHECK --interval=30s --timeout=5s --start-period=60s \
