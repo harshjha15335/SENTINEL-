@@ -1,0 +1,332 @@
+[
+  {
+    "path": "public/rebuild/landing-scroll.mp4",
+    "bytes": 796262,
+    "sha256": "ece6e514d35ae6271a4fcd8f9cad54fb8cb78ddca162d76f5c801a5ae2348500",
+    "provenance": "Owner original recording / supplied SENTINEL app / original procedural media, see FEATURE-EVIDENCE-MATRIX.md"
+  },
+  {
+    "path": "public/rebuild/network-live.mp4",
+    "bytes": 559369,
+    "sha256": "03abf1417eb1a8165d25c2a099ad757af4c0cba50a05850a8f19febcb248f2f3",
+    "provenance": "Owner original recording / supplied SENTINEL app / original procedural media, see FEATURE-EVIDENCE-MATRIX.md"
+  },
+  {
+    "path": "public/rebuild/evidence.mp4",
+    "bytes": 288826,
+    "sha256": "25100c48f9a48b6ebb970862e02ee4b4d70b5ad8529d5797d4d81c76635a3c94",
+    "provenance": "Owner original recording / supplied SENTINEL app / original procedural media, see FEATURE-EVIDENCE-MATRIX.md"
+  },
+  {
+    "path": "public/rebuild/model-detail.png",
+    "bytes": 751113,
+    "sha256": "dfb5a4fdf86c6a33ac5c418872767360ba4f5b1ac8ddb33e894c633a5bd56ff8",
+    "provenance": "Owner original recording / supplied SENTINEL app / original procedural media, see FEATURE-EVIDENCE-MATRIX.md"
+  },
+  {
+    "path": "public/rebuild/network.png",
+    "bytes": 697494,
+    "sha256": "503fac86498f8878f78a8c7d99e56d7a4d40dd160ba96edcbe6b38c41dde9c42",
+    "provenance": "Owner original recording / supplied SENTINEL app / original procedural media, see FEATURE-EVIDENCE-MATRIX.md"
+  },
+  {
+    "path": "public/rebuild/dashboard-live.mp4",
+    "bytes": 457218,
+    "sha256": "a494725f9965886703acac2a6864b3770858397e4d124bf599b51346add6463f",
+    "provenance": "Owner original recording / supplied SENTINEL app / original procedural media, see FEATURE-EVIDENCE-MATRIX.md"
+  },
+  {
+    "path": "public/rebuild/approval-live.mp4",
+    "bytes": 276056,
+    "sha256": "18282cf27ecde5b6f8dac876c85cc32480a1b353cb13ee87a6b109595f98dd30",
+    "provenance": "Owner original recording / supplied SENTINEL app / original procedural media, see FEATURE-EVIDENCE-MATRIX.md"
+  },
+  {
+    "path": "public/rebuild/approval-detail.png",
+    "bytes": 846641,
+    "sha256": "ddda3f7ccc3c0638ab4fdca83368375e9248638317a8d106788e4b203adbb8aa",
+    "provenance": "Owner original recording / supplied SENTINEL app / original procedural media, see FEATURE-EVIDENCE-MATRIX.md"
+  },
+  {
+    "path": "public/rebuild/risk-detail.png",
+    "bytes": 875096,
+    "sha256": "427bc55e446e2f4fd391012f02fda9e18c7691234a084bfeacc10d887cfa3f3c",
+    "provenance": "Owner original recording / supplied SENTINEL app / original procedural media, see FEATURE-EVIDENCE-MATRIX.md"
+  },
+  {
+    "path": "public/rebuild/dashboard-detail.png",
+    "bytes": 887233,
+    "sha256": "2c08fda6b121fcd02db2754524b527ff894ccc30cf6f96471a5019f0ec66ef81",
+    "provenance": "Owner original recording / supplied SENTINEL app / original procedural media, see FEATURE-EVIDENCE-MATRIX.md"
+  },
+  {
+    "path": "public/rebuild/policy.png",
+    "bytes": 724541,
+    "sha256": "053608f528906b3f7fab0ceea2244df04209fe7330e664badf8bdba747ddca91",
+    "provenance": "Owner original recording / supplied SENTINEL app / original procedural media, see FEATURE-EVIDENCE-MATRIX.md"
+  },
+  {
+    "path": "public/rebuild/transactions-live.mp4",
+    "bytes": 223021,
+    "sha256": "573a94dfc96341ca7ad17ea3a0b0861c080c2aee1451a190b5dde51c09455da9",
+    "provenance": "Owner original recording / supplied SENTINEL app / original procedural media, see FEATURE-EVIDENCE-MATRIX.md"
+  },
+  {
+    "path": "public/rebuild/approval.mp4",
+    "bytes": 291399,
+    "sha256": "a26572958dbca03dee27bf56ae28dec654e0d41929eb2326116d219489a20f42",
+    "provenance": "Owner original recording / supplied SENTINEL app / original procedural media, see FEATURE-EVIDENCE-MATRIX.md"
+  },
+  {
+    "path": "public/rebuild/policy-live.mp4",
+    "bytes": 397130,
+    "sha256": "16fed79da870ed3ee2a044628d2e5aa6078ca006a8397fc32debfe54a3b40c75",
+    "provenance": "Owner original recording / supplied SENTINEL app / original procedural media, see FEATURE-EVIDENCE-MATRIX.md"
+  },
+  {
+    "path": "public/rebuild/operations.png",
+    "bytes": 844441,
+    "sha256": "16a4433ee3495c6c9124d375ac58e4a66adfe417e77985590d9af06a59ef3282",
+    "provenance": "Owner original recording / supplied SENTINEL app / original procedural media, see FEATURE-EVIDENCE-MATRIX.md"
+  },
+  {
+    "path": "public/rebuild/dashboard.mp4",
+    "bytes": 303675,
+    "sha256": "4fa730ae901cc4b7b4ededa944cc44779e404b9467dabd8bf58ae1324cb994e3",
+    "provenance": "Owner original recording / supplied SENTINEL app / original procedural media, see FEATURE-EVIDENCE-MATRIX.md"
+  },
+  {
+    "path": "public/rebuild/dispute-detail.png",
+    "bytes": 945738,
+    "sha256": "431543783c6264cc9af86634948822db05dfbf3d4f20823fbcc19339d78b6c10",
+    "provenance": "Owner original recording / supplied SENTINEL app / original procedural media, see FEATURE-EVIDENCE-MATRIX.md"
+  },
+  {
+    "path": "public/rebuild/curves.mp4",
+    "bytes": 188523,
+    "sha256": "6d438f41091817ce489e7d8d7b36dcd220976ded71792913660a50497f892dc8",
+    "provenance": "Owner original recording / supplied SENTINEL app / original procedural media, see FEATURE-EVIDENCE-MATRIX.md"
+  },
+  {
+    "path": "public/rebuild/disputes-old.png",
+    "bytes": 905648,
+    "sha256": "c9733c09e12ee6627be0f21cf05d5b2b32c0a257d4f0f9c7f503db8c4886a207",
+    "provenance": "Owner original recording / supplied SENTINEL app / original procedural media, see FEATURE-EVIDENCE-MATRIX.md"
+  },
+  {
+    "path": "public/rebuild/risk.png",
+    "bytes": 845422,
+    "sha256": "02537ef5392d3b93e079ab03614492b724c0047fa0a1b313255bb21c97a3142a",
+    "provenance": "Owner original recording / supplied SENTINEL app / original procedural media, see FEATURE-EVIDENCE-MATRIX.md"
+  },
+  {
+    "path": "public/rebuild/model-live.mp4",
+    "bytes": 335122,
+    "sha256": "299380c25582d70ab852dcf946aabf15898acff9bb902b20ad98ccfde5cfcff9",
+    "provenance": "Owner original recording / supplied SENTINEL app / original procedural media, see FEATURE-EVIDENCE-MATRIX.md"
+  },
+  {
+    "path": "public/rebuild/network.mp4",
+    "bytes": 321366,
+    "sha256": "dba3a22b422a01b484d89d5b6c0f3390c61e58b889fe1684973329f0177d73e4",
+    "provenance": "Owner original recording / supplied SENTINEL app / original procedural media, see FEATURE-EVIDENCE-MATRIX.md"
+  },
+  {
+    "path": "public/rebuild/curves.png",
+    "bytes": 740188,
+    "sha256": "a9656276ccdfd08b1cd39b31ca72daeb624fd1efb354a077617eb1c87a76d90a",
+    "provenance": "Owner original recording / supplied SENTINEL app / original procedural media, see FEATURE-EVIDENCE-MATRIX.md"
+  },
+  {
+    "path": "public/rebuild/transactions-detail.png",
+    "bytes": 525280,
+    "sha256": "d98fef2d638e995f0243e9e519161652bb7717d3d3463dc392dd6f267a12ec30",
+    "provenance": "Owner original recording / supplied SENTINEL app / original procedural media, see FEATURE-EVIDENCE-MATRIX.md"
+  },
+  {
+    "path": "public/rebuild/dispute.mp4",
+    "bytes": 594808,
+    "sha256": "595e7c7a130e58975bb55108e39acd7d15a0bed7d1261156de03868592012650",
+    "provenance": "Owner original recording / supplied SENTINEL app / original procedural media, see FEATURE-EVIDENCE-MATRIX.md"
+  },
+  {
+    "path": "public/rebuild/model.mp4",
+    "bytes": 261001,
+    "sha256": "d6f32aa28fcbb416f0be7480cd1d965786f1b325e6bb7a7ecb859f5f5ce0db82",
+    "provenance": "Owner original recording / supplied SENTINEL app / original procedural media, see FEATURE-EVIDENCE-MATRIX.md"
+  },
+  {
+    "path": "public/rebuild/evidence-live.mp4",
+    "bytes": 276276,
+    "sha256": "5a7249c9079230d737e1a7fddf8a944962fc41282c036af2556c12147f16891e",
+    "provenance": "Owner original recording / supplied SENTINEL app / original procedural media, see FEATURE-EVIDENCE-MATRIX.md"
+  },
+  {
+    "path": "public/rebuild/risk-live.mp4",
+    "bytes": 380284,
+    "sha256": "a2faf68c929f1cc98bf5ae3711746deaec2b574c3b1c1cd348ad8c4141dd9ba4",
+    "provenance": "Owner original recording / supplied SENTINEL app / original procedural media, see FEATURE-EVIDENCE-MATRIX.md"
+  },
+  {
+    "path": "public/rebuild/approved-mark.png",
+    "bytes": 10771,
+    "sha256": "528d96600a639f073a9c6afdcc43de05c3826c4aa6fdf3aab7501e6977c1040c",
+    "provenance": "Owner original recording / supplied SENTINEL app / original procedural media, see FEATURE-EVIDENCE-MATRIX.md"
+  },
+  {
+    "path": "public/rebuild/policy-detail.png",
+    "bytes": 724748,
+    "sha256": "0ad33ff27d4cf072cf46eb0fcbfaf0b7296282e0fd3769c6561971dada65c031",
+    "provenance": "Owner original recording / supplied SENTINEL app / original procedural media, see FEATURE-EVIDENCE-MATRIX.md"
+  },
+  {
+    "path": "public/rebuild/evidence-detail.png",
+    "bytes": 872613,
+    "sha256": "209542c0915c1d16f8eafcaa0b388dbdbc2dd1f07fa5113cec365efd563e96c2",
+    "provenance": "Owner original recording / supplied SENTINEL app / original procedural media, see FEATURE-EVIDENCE-MATRIX.md"
+  },
+  {
+    "path": "public/rebuild/approval.png",
+    "bytes": 819925,
+    "sha256": "5ecfdcb3c98b781a44300b29223efde5f83a47e12d21599c5033ca222cba2fc1",
+    "provenance": "Owner original recording / supplied SENTINEL app / original procedural media, see FEATURE-EVIDENCE-MATRIX.md"
+  },
+  {
+    "path": "public/rebuild/monitor.png",
+    "bytes": 723492,
+    "sha256": "2dff8bce99d3ca0d02bb8b36317db0a42b7f44f7b3272d1352615305edff6ef5",
+    "provenance": "Owner original recording / supplied SENTINEL app / original procedural media, see FEATURE-EVIDENCE-MATRIX.md"
+  },
+  {
+    "path": "public/rebuild/network-detail.png",
+    "bytes": 713044,
+    "sha256": "384f1ed07575121e14ec4395b16ee3cb2f2a6956a8946037c65d9082b9c21dac",
+    "provenance": "Owner original recording / supplied SENTINEL app / original procedural media, see FEATURE-EVIDENCE-MATRIX.md"
+  },
+  {
+    "path": "public/rebuild/storyboard.json",
+    "bytes": 4274,
+    "sha256": "803a42d718312f5c4a3a59996b019b2bf705e8935193f4d12c78b8344efcc461",
+    "provenance": "Owner original recording / supplied SENTINEL app / original procedural media, see FEATURE-EVIDENCE-MATRIX.md"
+  },
+  {
+    "path": "public/rebuild/risk.mp4",
+    "bytes": 344121,
+    "sha256": "780a306fdcaf7167de9a9f2b4e34a16de36cb21b2bdf416266518f85d2a92a12",
+    "provenance": "Owner original recording / supplied SENTINEL app / original procedural media, see FEATURE-EVIDENCE-MATRIX.md"
+  },
+  {
+    "path": "public/rebuild/brand-particles.json",
+    "bytes": 86863,
+    "sha256": "20bd5bd9e2725a2bf6914a82df53ec7a7e584a4a9e88f04d68c8db70de4791e6",
+    "provenance": "Owner original recording / supplied SENTINEL app / original procedural media, see FEATURE-EVIDENCE-MATRIX.md"
+  },
+  {
+    "path": "public/rebuild/gemini-authentic.mp4",
+    "bytes": 5820328,
+    "sha256": "54b6ab49bcc1f8105da80b9781d9c06c78d5e3eb196e329a33ce15a0e39ea51e",
+    "provenance": "Owner original recording / supplied SENTINEL app / original procedural media, see FEATURE-EVIDENCE-MATRIX.md"
+  },
+  {
+    "path": "public/rebuild/model.png",
+    "bytes": 738387,
+    "sha256": "760147539b0f6e7dd40b562aa26c1bd485dc6759b665622b134f807d433bc84a",
+    "provenance": "Owner original recording / supplied SENTINEL app / original procedural media, see FEATURE-EVIDENCE-MATRIX.md"
+  },
+  {
+    "path": "public/rebuild/operations-old.png",
+    "bytes": 729194,
+    "sha256": "a4a204e26d2977e549245168f17b6423b4aeead6b05d5672f84fb08fa02d5d23",
+    "provenance": "Owner original recording / supplied SENTINEL app / original procedural media, see FEATURE-EVIDENCE-MATRIX.md"
+  },
+  {
+    "path": "public/rebuild/hosted-paypal-old.png",
+    "bytes": 899385,
+    "sha256": "7c3db550df8aa3bfdcc48633b0002ad5dbad968a0c166d2f71ec59c446489716",
+    "provenance": "Owner original recording / supplied SENTINEL app / original procedural media, see FEATURE-EVIDENCE-MATRIX.md"
+  },
+  {
+    "path": "public/rebuild/policy.mp4",
+    "bytes": 191309,
+    "sha256": "102d0890792857b576cd3f129f049edca2ab3fa363e104bfee697a4327ed57b0",
+    "provenance": "Owner original recording / supplied SENTINEL app / original procedural media, see FEATURE-EVIDENCE-MATRIX.md"
+  },
+  {
+    "path": "public/rebuild/dispute.png",
+    "bytes": 882590,
+    "sha256": "5914f458d2f355e22b4fff43379ad74eefa9292fe223a7f191ab86a8c850a519",
+    "provenance": "Owner original recording / supplied SENTINEL app / original procedural media, see FEATURE-EVIDENCE-MATRIX.md"
+  },
+  {
+    "path": "public/rebuild/approved-wordmark.png",
+    "bytes": 25296,
+    "sha256": "c0bc521707720a6f10661f7bfa4e4a7e47438b82d368b47b7a2bba8771d812e8",
+    "provenance": "Owner original recording / supplied SENTINEL app / original procedural media, see FEATURE-EVIDENCE-MATRIX.md"
+  },
+  {
+    "path": "public/rebuild/transactions.mp4",
+    "bytes": 286090,
+    "sha256": "e32249d19b7072ccc60932e04b8df4945d45b018b338b45c09d34e756f44e9dd",
+    "provenance": "Owner original recording / supplied SENTINEL app / original procedural media, see FEATURE-EVIDENCE-MATRIX.md"
+  },
+  {
+    "path": "public/rebuild/dashboard.png",
+    "bytes": 897836,
+    "sha256": "edcce47cf73499f6c85c3d675130cca6d74a6461f9f0d62ae4c57efd3f27ac04",
+    "provenance": "Owner original recording / supplied SENTINEL app / original procedural media, see FEATURE-EVIDENCE-MATRIX.md"
+  },
+  {
+    "path": "public/rebuild/monitoring-live.mp4",
+    "bytes": 441617,
+    "sha256": "406c67682e2965a4c4e02a16836c57127de9d7be9f9aaf26e538da386053dc47",
+    "provenance": "Owner original recording / supplied SENTINEL app / original procedural media, see FEATURE-EVIDENCE-MATRIX.md"
+  },
+  {
+    "path": "public/rebuild/monitor.mp4",
+    "bytes": 385748,
+    "sha256": "ee8a0a42b0fd94a32af0ba96958f265304e4e00adf6f40542d0b7a774d2e44dc",
+    "provenance": "Owner original recording / supplied SENTINEL app / original procedural media, see FEATURE-EVIDENCE-MATRIX.md"
+  },
+  {
+    "path": "public/rebuild/evidence.png",
+    "bytes": 846145,
+    "sha256": "7bcb5404745bbf9c1a0e952aed477f44623e21da46f5b0ac249c429acd058fdb",
+    "provenance": "Owner original recording / supplied SENTINEL app / original procedural media, see FEATURE-EVIDENCE-MATRIX.md"
+  },
+  {
+    "path": "public/rebuild/monitor-detail.png",
+    "bytes": 735777,
+    "sha256": "9f8ac7155b4da700acd089f7bbc150b1532f2302046c10a0e37903c1594e351e",
+    "provenance": "Owner original recording / supplied SENTINEL app / original procedural media, see FEATURE-EVIDENCE-MATRIX.md"
+  },
+  {
+    "path": "public/rebuild/transactions.png",
+    "bytes": 546005,
+    "sha256": "2383a68e1633e619eadf23be801f8b3b49b135d501828fd119d405d934b605e1",
+    "provenance": "Owner original recording / supplied SENTINEL app / original procedural media, see FEATURE-EVIDENCE-MATRIX.md"
+  },
+  {
+    "path": "public/rebuild/packet.png",
+    "bytes": 188345,
+    "sha256": "e6b9ef4a6c1374c0adf1e20346eb4531175e7b021d9e0a027b11fddc62085579",
+    "provenance": "Owner original recording / supplied SENTINEL app / original procedural media, see FEATURE-EVIDENCE-MATRIX.md"
+  },
+  {
+    "path": "rebuild/audio/audition-bf_emma.wav",
+    "bytes": 593612,
+    "sha256": "aa177c5348d3283aabe8f2a5ef60c5eaf6636833c2835de4777c81beaea3946f",
+    "provenance": "Owner original recording / supplied SENTINEL app / original procedural media, see FEATURE-EVIDENCE-MATRIX.md"
+  },
+  {
+    "path": "rebuild/audio/audition-bm_george.wav",
+    "bytes": 651274,
+    "sha256": "482a308303225e837bf84757c9161f8706d5922952a47f06dcae3f14154c75cf",
+    "provenance": "Owner original recording / supplied SENTINEL app / original procedural media, see FEATURE-EVIDENCE-MATRIX.md"
+  },
+  {
+    "path": "rebuild/audio/audition-af_heart.wav",
+    "bytes": 649450,
+    "sha256": "e1fb2439e8958a7a6f42200af2e283d56d752c1811e288c1c690ea6c0bbc01d4",
+    "provenance": "Owner original recording / supplied SENTINEL app / original procedural media, see FEATURE-EVIDENCE-MATRIX.md"
+  }
+]

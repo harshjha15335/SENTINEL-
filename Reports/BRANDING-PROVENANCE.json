@@ -1,0 +1,20 @@
+{
+  "primary_url": "https://sentinel-v2-staging.onrender.com/",
+  "captured_utc": "2026-11-13",
+  "reference": "audit/website-current.png",
+  "dom_reference": "audit/website-brand.json",
+  "approved_assets": [
+    "assets/approved-wordmark.png",
+    "assets/approved-mark.png"
+  ],
+  "capture": "Actual live .v2-wordmark extracted with its computed styles and loaded site font at 12x DPR; edition label excluded as unrelated navigation copy. Transparent background only.",
+  "geometry": "Asymmetric corner radii 11px 3px 11px 3px; mark 31x34 CSS pixels. Wordmark Manrope 700, 19px, -0.05em tracking; ink #201a2b; violet #7547eb; paper #f7f4ee.",
+  "repository_comparison": {
+    "older_asset": "source-app/apps/web/public/sentinel.svg",
+    "older_identity": "Blue shield/check, not current site identity; deliberately excluded.",
+    "current_compatible_reference": "source-app/apps/web/src/components/layout/AppShell.tsx and styles/workspace.css"
+  },
+  "alterations": "No substitute glyph, shield, cube or font. Closing particles are sampled from exact approved mark; final frame uses exact extracted wordmark image.",
+  "assets/approved-wordmark.png_sha256": "c0bc521707720a6f10661f7bfa4e4a7e47438b82d368b47b7a2bba8771d812e8",
+  "assets/approved-mark.png_sha256": "528d96600a639f073a9c6afdcc43de05c3826c4aa6fdf3aab7501e6977c1040c"
+}
