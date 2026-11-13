@@ -12,7 +12,7 @@ The film is 172 seconds. It demonstrates several related synthetic workflows; it
 | SHAP explanation | 57–64 | Exact stored contribution labels and values | Log-odds before calibration |
 | Gemini investigation | 64–84 | Actual owner recording, source seconds 24–44 | Separate synthetic case, hosted model-generated output |
 | Grounded findings, citations, recommendation | 64–84 | Original source UI | Two facts/three indicators in this owner clip; older run has different counts |
-| Gemini tool trace | 84–92 | Original source seconds 36–44, diagram of tool categories | Seven calls; diagram is not a reconstructed log |
+| Gemini tool trace | 84–92 | Original source seconds 36–44, diagram of the exact seven called tool categories | Seven calls; diagram is not a reconstructed log |
 | Evidence and PDF | 92–104 | Genuine local workbench, original three-page PDF export | Local synthetic evidence |
 | Human approval | 104–112 | Original local decision workbench | No financial execution |
 | Dispute Copilot | 112–120 | Actual labelled local demo dispute and deterministic draft preparation | No external sync/submit; not Gemini-generated text |

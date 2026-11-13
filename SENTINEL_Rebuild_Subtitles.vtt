@@ -1,0 +1,193 @@
+WEBVTT
+
+00:00:00.150 --> 00:00:01.917
+A payment takes seconds.
+
+00:00:02.097 --> 00:00:04.443
+Understanding it can take much longer.
+
+00:00:04.623 --> 00:00:06.640
+A sudden burst of activity.
+
+00:00:06.820 --> 00:00:08.396
+An unusual amount.
+
+00:00:08.576 --> 00:00:11.019
+Records scattered across different systems.
+
+00:00:11.199 --> 00:00:13.831
+SENTINEL brings those signals together, so an
+
+00:00:13.831 --> 00:00:16.463
+analyst can see what happened—and decide what
+
+00:00:16.463 --> 00:00:17.106
+comes next.
+
+00:00:22.150 --> 00:00:24.148
+Follow the money, from the payment to
+
+00:00:24.148 --> 00:00:25.391
+the evidence behind it.
+
+00:00:28.150 --> 00:00:30.854
+The Command Center brings flagged payments into
+
+00:00:30.854 --> 00:00:33.156
+focus, with the context an analyst needs
+
+00:00:33.156 --> 00:00:33.673
+to begin.
+
+00:00:36.150 --> 00:00:37.766
+Open a transaction.
+
+00:00:37.946 --> 00:00:40.482
+See its payment history, risk assessment, and
+
+00:00:40.482 --> 00:00:41.779
+the case it belongs to.
+
+00:00:44.150 --> 00:00:46.261
+Here, the XGBoost model assigns
+
+00:00:46.261 --> 00:00:48.948
+a forty-six point five percent risk score.
+
+00:00:49.128 --> 00:00:50.883
+The case is synthetic.
+
+00:00:51.063 --> 00:00:53.483
+The model runs in shadow mode, supporting
+
+00:00:53.483 --> 00:00:55.371
+review rather than moving money.
+
+00:00:57.150 --> 00:01:00.112
+SHAP contributions explain which signals pushed this
+
+00:01:00.112 --> 00:01:01.137
+result up or down.
+
+00:01:04.150 --> 00:01:07.102
+In this separate hosted run, Gemini completes
+
+00:01:07.102 --> 00:01:08.480
+a real investigation.
+
+00:01:08.660 --> 00:01:11.380
+Seven tools read the available records and
+
+00:01:11.380 --> 00:01:12.999
+return grounded findings.
+
+00:01:13.179 --> 00:01:15.653
+Citations make the reasoning reviewable.
+
+00:01:15.833 --> 00:01:18.509
+The recommendation: request more evidence.
+
+00:01:18.689 --> 00:01:21.355
+A person still decides what happens next.
+
+00:01:24.150 --> 00:01:25.767
+Open the tool trace.
+
+00:01:25.947 --> 00:01:27.968
+See which records the agent read, and
+
+00:01:27.968 --> 00:01:29.935
+follow a finding back to its source.
+
+00:01:32.150 --> 00:01:34.543
+Bring documents into the case, keep their
+
+00:01:34.543 --> 00:01:36.936
+provenance, and generate a reviewable P D
+
+00:01:36.936 --> 00:01:37.461
+F packet.
+
+00:01:37.641 --> 00:01:40.542
+The evidence stays connected to the investigation.
+
+00:01:44.150 --> 00:01:47.162
+Decision requests and independent approvals keep the
+
+00:01:47.162 --> 00:01:48.436
+next step accountable.
+
+00:01:48.616 --> 00:01:51.313
+No financial action is executed here.
+
+00:01:52.150 --> 00:01:55.029
+Dispute Copilot prepares a grounded response.
+
+00:01:55.209 --> 00:01:56.711
+Review the evidence.
+
+00:01:56.891 --> 00:01:59.280
+External submission stays disabled.
+
+00:02:00.150 --> 00:02:02.410
+In Policy Lab, adjust a threshold and
+
+00:02:02.410 --> 00:02:03.753
+inspect the trade-off.
+
+00:02:03.933 --> 00:02:05.867
+Review the ROC and precision
+
+00:02:05.867 --> 00:02:09.412
+recall analysis against held-out synthetic data, before
+
+00:02:09.412 --> 00:02:11.217
+considering a policy change.
+
+00:02:12.150 --> 00:02:15.507
+Risk Monitoring compares activity and score distributions
+
+00:02:15.507 --> 00:02:16.096
+over time.
+
+00:02:16.276 --> 00:02:18.582
+A shift is a reason to investigate,
+
+00:02:18.582 --> 00:02:19.504
+not a verdict.
+
+00:02:21.150 --> 00:02:24.167
+Relationship Explorer connects payers and payments.
+
+00:02:24.347 --> 00:02:27.262
+Select a relationship, inspect the recorded history,
+
+00:02:27.262 --> 00:02:29.111
+and bring the context back to the
+
+00:02:29.111 --> 00:02:29.391
+case.
+
+00:02:30.150 --> 00:02:33.250
+Earlier audits verified a genuine PayPal sandbox
+
+00:02:33.250 --> 00:02:35.769
+capture and processed Supabase events.
+
+00:02:35.949 --> 00:02:38.226
+These recorded results are separate from this
+
+00:02:38.226 --> 00:02:39.339
+synthetic walkthrough.
+
+00:02:42.150 --> 00:02:43.215
+SENTINEL.
+
+00:02:43.395 --> 00:02:46.455
+Detection, explanation, and investigation.
+
+00:02:46.635 --> 00:02:48.164
+One connected view.
+
+00:02:48.344 --> 00:02:50.350
+Human judgment at the center.

@@ -33,6 +33,12 @@ All new visuals are in `src/Rebuild.tsx`, registered by `src/rebuild-entry.tsx`.
 15. Relationship node fly-in
 16. Integration pipeline and logo convergence
 
-`BaseBoundary` applies 16 indexed spatial entrance designs. The 15 post-opening cuts use CameraMotionBlur with three temporal samples at a 180-degree shutter during their first 18 frames. These manipulate the actual incoming scene, rather than using a flat color wipe. Additional feature-specific transitions occur inside the intro, evidence, policy and closing sequences. Product text holds settle without blur.
+`BaseBoundary` defines 16 indexed spatial entrance designs; the opening omits a boundary entrance, and 15 distinct designs are used for the subsequent cuts. The 15 post-opening cuts use CameraMotionBlur with three temporal samples at a 180-degree shutter during their first 18 frames. These manipulate the actual incoming scene, rather than using a flat color wipe. Additional feature-specific transitions occur inside the intro, evidence, policy and closing sequences. Product text holds settle without blur.
 
 The motion designs are deterministically driven by frame coordinates. The procedural chart/particle/3D internals are edited in source; they are not falsely claimed to have full Studio layer controls. GSAP and Blender are not used in this new film: Three.js/R3F, Remotion transforms and official temporal blur implement the required effects directly. Installing unused libraries is not counted as use.
+
+## Pre-export correction
+
+The integration diagram was corrected during review to show PayPal → Supabase → SENTINEL. The 12-second scene is rerendered with Remotion and replaces the earlier diagram in the final assembly. This is an actual corrected scene render, not a fabricated provider response or a still-slide substitution.
+
+The closing particle cloud is batched into two SVG paths (violet/white), preserving the sampled website mark geometry while avoiding thousands of separately composited layers. The seven tool categories were aligned with the original trace: case information, transaction details, latest risk assessment, payer history, capture information, case notes, and case evidence. The tool scene was rerendered after that verification.

@@ -1,0 +1,20 @@
+{
+  "file": "/workspace/sentinel-video-studio/rebuild/exports/SENTINEL_Cinematic_Rebuild_1080p.mp4",
+  "duration_seconds": 172,
+  "resolution": "1920x1080",
+  "fps": 30,
+  "codec": "H264 yuv420p BT709 / AAC stereo48k",
+  "bytes": 42001674,
+  "sha256": "386abb21a52480e558337173904f6df2d5e70439d73a0a4d0e69f98dcc46d5da",
+  "full_decode": "PASS",
+  "sampled_full_duration": "2-second intervals, plus scene ends and Gemini/closing detail checks",
+  "visual_review": "PASS: full-duration 2-second interval review, scene/detail review, sharp final brand hold verified",
+  "voice": "bf_emma, distinct from rejected narrator; three auditions retained",
+  "no_atempo": true,
+  "no_new_paid_calls": true,
+  "original_assets_preserved": true,
+  "gemini_alignment": "PASS: actual owner-recorded model-generated output at 64s introduction, then real trace at 84\u201392s",
+  "logo": "PASS: extracted current website wordmark, sharp final hold, explicit RGB-to-BT709 color conversion",
+  "motion": "15 distinct post-opening spatial transitions with temporal blur; nine designed motion sequences",
+  "source_app_git_status": "CLEAN"
+}

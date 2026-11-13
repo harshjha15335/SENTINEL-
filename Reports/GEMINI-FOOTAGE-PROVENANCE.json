@@ -1,0 +1,27 @@
+{
+  "original_filename": "Recording 2026-11-13 010255.mp4",
+  "original_bytes": 28162577,
+  "original_sha256": "23deeb47c2c8ffe649d7507d07973c3154740e3d2d49d9ca73f8eb948548fd2b",
+  "source_ranges_seconds": {
+    "investigation": [
+      24,
+      44
+    ],
+    "trace": [
+      36,
+      44
+    ]
+  },
+  "film_ranges_seconds": {
+    "investigation": [
+      64,
+      84
+    ],
+    "trace": [
+      84,
+      92
+    ]
+  },
+  "observed": "Completed google/gemini-3.1-flash-lite model-generated run, 7 tools / 4 records / 2 facts / 3 risk indicators on a synthetic case. Deterministic footage after second45 excluded.",
+  "provider_requests_repeated": false
+}
